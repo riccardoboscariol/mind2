@@ -20,7 +20,7 @@ def get_random_bits_from_anu(num_bits, max_retries=5):
 
     while bits_needed > 0:
         params = {
-            "length": min(bits_needed, 1000),  # Richiedi al massimo 500 bit per volta
+            "length": min(bits_needed, 500),  # Richiedi al massimo 500 bit per volta
             "type": "uint8"
         }
         retries = 0
@@ -44,7 +44,7 @@ def get_random_bits_from_anu(num_bits, max_retries=5):
                     if not st.session_state.get('anu_warning_shown', False):
                         st.session_state['anu_warning_shown'] = True
                         st.warning(f"Errore durante l'accesso a ANU QRNG: {e}. Passando a random.org.")
-                    return get_random_bits_from_random_org(num_bits)
+                    return None
                 time.sleep(2 ** retries + random.uniform(0, 1))  # Backoff esponenziale con jitter
     return random_bits[:num_bits]
 
@@ -69,7 +69,7 @@ def get_random_bits_from_random_org(num_bits):
         if not st.session_state.get('random_org_warning_shown', False):
             st.session_state['random_org_warning_shown'] = True
             st.warning(f"Errore durante l'accesso a random.org: {e}. Passando a ID Quantique QRNG.")
-        return get_random_bits_from_idquantique(num_bits)
+        return None
 
 # Funzione per ottenere bit casuali da ID Quantique QRNG
 def get_random_bits_from_idquantique(num_bits):
@@ -90,7 +90,7 @@ def get_random_bits_from_idquantique(num_bits):
         if not st.session_state.get('idquantique_warning_shown', False):
             st.session_state['idquantique_warning_shown'] = True
             st.warning(f"Errore durante l'accesso a ID Quantique QRNG: {e}. Passando a HotBits.")
-        return get_random_bits_from_hotbits(num_bits)
+        return None
 
 # Funzione per ottenere bit casuali da HotBits
 def get_random_bits_from_hotbits(num_bits):
@@ -110,7 +110,7 @@ def get_random_bits_from_hotbits(num_bits):
         if not st.session_state.get('hotbits_warning_shown', False):
             st.session_state['hotbits_warning_shown'] = True
             st.warning(f"Errore durante l'accesso a HotBits: {e}. Utilizzando la generazione locale.")
-        return get_random_bits_from_truerng(num_bits)
+        return None
 
 # Funzione per ottenere bit casuali dalla chiavetta TrueRNG
 def get_random_bits_from_truerng(num_bits):
@@ -126,8 +126,8 @@ def get_random_bits_from_truerng(num_bits):
                 return random_bits[:num_bits]
             except Exception as e:
                 st.warning(f"Errore durante la lettura dalla chiavetta TrueRNG: {e}. Utilizzando la generazione locale.")
-                return get_random_bits(num_bits)
-    return get_random_bits(num_bits)
+                return None
+    return None
 
 # Funzione per ottenere bit casuali localmente
 def get_random_bits(num_bits):
@@ -271,7 +271,11 @@ def main():
             random_bits_1 = get_random_bits(500)
         if random_bits_2 is None:
             random_bits_2 = get_random_bits(500)
-        
+
+        # Aggiungi debug per vedere i bit generati
+        st.write(f"Random Bits 1: {random_bits_1[:10]}...")  # Mostra i primi 10 bit
+        st.write(f"Random Bits 2: {random_bits_2[:10]}...")
+
         st.session_state.random_numbers_1.extend(random_bits_1)
         st.session_state.random_numbers_2.extend(random_bits_2)
         
