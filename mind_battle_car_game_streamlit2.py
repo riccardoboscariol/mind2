@@ -18,7 +18,7 @@ def get_random_bits_from_anu(num_bits, max_retries=5):
 
     while bits_needed > 0:
         params = {
-            "length": min(bits_needed, 1024),  # Richiedi al massimo 1024 bit per volta
+            "length": min(bits_needed, 500),  # Richiedi al massimo 500 bit per volta
             "type": "uint8"
         }
         retries = 0
@@ -34,7 +34,7 @@ def get_random_bits_from_anu(num_bits, max_retries=5):
                     raise ValueError("La risposta JSON non contiene il campo 'data' o il campo non è una lista.")
                 for number in data['data']:
                     random_bits.extend([int(bit) for bit in bin(number)[2:].zfill(8)])  # Converte in binario e zfill per ottenere 8 bit
-                bits_needed -= min(bits_needed, 1024)
+                bits_needed -= min(bits_needed, 500)
                 break
             except (requests.RequestException, ValueError) as e:
                 retries += 1
@@ -161,13 +161,13 @@ def main():
 
     while st.session_state.running:
         # Priorità: ANU QRNG > Generazione locale
-        random_bits_1 = get_random_bits_from_anu(5000)
-        random_bits_2 = get_random_bits_from_anu(5000)
+        random_bits_1 = get_random_bits_from_anu(500)
+        random_bits_2 = get_random_bits_from_anu(500)
 
         if random_bits_1 is None:
-            random_bits_1 = get_random_bits(5000)
+            random_bits_1 = get_random_bits(500)
         if random_bits_2 is None:
-            random_bits_2 = get_random_bits(5000)
+            random_bits_2 = get_random_bits(500)
         
         st.session_state.random_numbers_1.extend(random_bits_1)
         st.session_state.random_numbers_2.extend(random_bits_2)
