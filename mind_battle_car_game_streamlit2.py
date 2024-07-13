@@ -9,6 +9,8 @@ import io
 import requests
 import base64
 import random
+import serial
+import serial.tools.list_ports
 
 # Funzione per ottenere bit casuali da ANU Quantum Random Numbers
 def get_random_bits_from_anu(num_bits, max_retries=5):
@@ -41,10 +43,50 @@ def get_random_bits_from_anu(num_bits, max_retries=5):
                 if retries == max_retries:
                     if not st.session_state.get('anu_warning_shown', False):
                         st.session_state['anu_warning_shown'] = True
-                        st.warning(f"Errore durante l'accesso a ANU QRNG: {e}. Utilizzando la generazione locale.")
-                    return get_random_bits(num_bits)
+                        st.warning(f"Errore durante l'accesso a ANU QRNG: {e}. Passando a random.org.")
+                    return get_random_bits_from_random_org(num_bits)
                 time.sleep(2 ** retries + random.uniform(0, 1))  # Backoff esponenziale con jitter
     return random_bits[:num_bits]
+
+# Funzione per ottenere bit casuali da random.org
+def get_random_bits_from_random_org(num_bits):
+    url = "https://www.random.org/integers/"
+    params = {
+        "num": num_bits,
+        "min": 0,
+        "max": 1,
+        "col": 1,
+        "base": 10,
+        "format": "plain",
+        "rnd": "new"
+    }
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        random_bits = list(map(int, response.text.strip().split()))
+        return random_bits
+    except requests.RequestException as e:
+        if not st.session_state.get('random_org_warning_shown', False):
+            st.session_state['random_org_warning_shown'] = True
+            st.warning(f"Errore durante l'accesso a random.org: {e}. Utilizzando la generazione locale.")
+        return get_random_bits_from_truerng(num_bits)
+
+# Funzione per ottenere bit casuali dalla chiavetta TrueRNG
+def get_random_bits_from_truerng(num_bits):
+    ports = list(serial.tools.list_ports.comports())
+    for port in ports:
+        if 'TrueRNG' in port.description:
+            try:
+                ser = serial.Serial(port.device, 115200, timeout=1)
+                random_bits = []
+                while len(random_bits) < num_bits:
+                    random_bits.extend([int(bit) for bit in bin(int.from_bytes(ser.read(1), 'big'))[2:].zfill(8)])
+                ser.close()
+                return random_bits[:num_bits]
+            except Exception as e:
+                st.warning(f"Errore durante la lettura dalla chiavetta TrueRNG: {e}. Utilizzando la generazione locale.")
+                return get_random_bits(num_bits)
+    return get_random_bits(num_bits)
 
 # Funzione per ottenere bit casuali localmente
 def get_random_bits(num_bits):
@@ -160,12 +202,24 @@ def main():
     car2_placeholder = st.empty()
 
     while st.session_state.running:
-        # Priorità: ANU QRNG > Generazione locale
+        # Priorità: ANU QRNG > random.org > TrueRNG > Generazione locale
         random_bits_1 = get_random_bits_from_anu(500)
-        random_bits_2 = get_random_bits(500)
+        random_bits_2 = get_random_bits_from_anu(500)
+
+        if random_bits_1 is None:
+            random_bits_1 = get_random_bits_from_random_org(500)
+        if random_bits_2 is None:
+            random_bits_2 = get_random_bits_from_random_org(500)
+
+        if random_bits_1 is None:
+            random_bits_1 = get_random_bits_from_truerng(500)
+        if random_bits_2 is None:
+            random_bits_2 = get_random_bits_from_truerng(500)
 
         if random_bits_1 is None:
             random_bits_1 = get_random_bits(500)
+        if random_bits_2 is None:
+            random_bits_2 = get_random_bits(500)
         
         st.session_state.random_numbers_1.extend(random_bits_1)
         st.session_state.random_numbers_2.extend(random_bits_2)
