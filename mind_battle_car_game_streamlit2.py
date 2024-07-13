@@ -20,11 +20,13 @@ def get_random_bits_from_anu(num_bits):
         response = requests.get(url, params=params)
         response.raise_for_status()
         data = response.json()
+        if 'data' not in data:
+            raise ValueError("La risposta JSON non contiene il campo 'data'")
         random_bits = []
         for number in data['data']:
             random_bits.extend([int(bit) for bit in bin(number)[2:].zfill(8)])  # Converte in binario e zfill per ottenere 8 bit
         return random_bits[:num_bits]
-    except requests.RequestException as e:
+    except (requests.RequestException, ValueError) as e:
         if not st.session_state.get('anu_warning_shown', False):
             st.session_state['anu_warning_shown'] = True
             st.warning(f"Errore durante l'accesso a ANU QRNG: {e}. Utilizzando la generazione locale.")
