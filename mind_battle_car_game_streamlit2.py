@@ -8,32 +8,38 @@ import matplotlib.pyplot as plt
 import io
 import requests
 import base64
+import random
 
 # Funzione per ottenere bit casuali da ANU Quantum Random Numbers
-def get_random_bits_from_anu(num_bits):
+def get_random_bits_from_anu(num_bits, max_retries=5):
     url = "https://qrng.anu.edu.au/API/jsonI.php"
     params = {
         "length": min(num_bits, 1024),  # Richiedi al massimo 1024 bit per volta
         "type": "uint8"
     }
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-        data = response.json()
-        if not data.get('success', False):
-            st.warning(f"Risposta JSON di ANU: {data}")
-            raise ValueError("La risposta JSON non indica successo.")
-        if 'data' not in data or not isinstance(data['data'], list):
-            raise ValueError("La risposta JSON non contiene il campo 'data' o il campo non è una lista.")
-        random_bits = []
-        for number in data['data']:
-            random_bits.extend([int(bit) for bit in bin(number)[2:].zfill(8)])  # Converte in binario e zfill per ottenere 8 bit
-        return random_bits[:num_bits]
-    except (requests.RequestException, ValueError) as e:
-        if not st.session_state.get('anu_warning_shown', False):
-            st.session_state['anu_warning_shown'] = True
-            st.warning(f"Errore durante l'accesso a ANU QRNG: {e}. Utilizzando la generazione locale.")
-        return get_random_bits(num_bits)
+    retries = 0
+    while retries < max_retries:
+        try:
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            data = response.json()
+            if not data.get('success', False):
+                st.warning(f"Risposta JSON di ANU: {data}")
+                raise ValueError("La risposta JSON non indica successo.")
+            if 'data' not in data or not isinstance(data['data'], list):
+                raise ValueError("La risposta JSON non contiene il campo 'data' o il campo non è una lista.")
+            random_bits = []
+            for number in data['data']:
+                random_bits.extend([int(bit) for bit in bin(number)[2:].zfill(8)])  # Converte in binario e zfill per ottenere 8 bit
+            return random_bits[:num_bits]
+        except (requests.RequestException, ValueError) as e:
+            retries += 1
+            if retries == max_retries:
+                if not st.session_state.get('anu_warning_shown', False):
+                    st.session_state['anu_warning_shown'] = True
+                    st.warning(f"Errore durante l'accesso a ANU QRNG: {e}. Utilizzando la generazione locale.")
+                return get_random_bits(num_bits)
+            time.sleep(2 ** retries + random.uniform(0, 1))  # Backoff esponenziale con jitter
 
 # Funzione per ottenere bit casuali localmente
 def get_random_bits(num_bits):
@@ -278,4 +284,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
