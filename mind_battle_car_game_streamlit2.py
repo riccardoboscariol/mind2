@@ -20,7 +20,7 @@ def get_random_bits_from_anu(num_bits, max_retries=5):
 
     while bits_needed > 0:
         params = {
-            "length": min(bits_needed, 500),  # Richiedi al massimo 500 bit per volta
+            "length": min(bits_needed, 1000),  # Richiedi al massimo 500 bit per volta
             "type": "uint8"
         }
         retries = 0
@@ -68,7 +68,48 @@ def get_random_bits_from_random_org(num_bits):
     except requests.RequestException as e:
         if not st.session_state.get('random_org_warning_shown', False):
             st.session_state['random_org_warning_shown'] = True
-            st.warning(f"Errore durante l'accesso a random.org: {e}. Utilizzando la generazione locale.")
+            st.warning(f"Errore durante l'accesso a random.org: {e}. Passando a ID Quantique QRNG.")
+        return get_random_bits_from_idquantique(num_bits)
+
+# Funzione per ottenere bit casuali da ID Quantique QRNG
+def get_random_bits_from_idquantique(num_bits):
+    url = "https://qrng.idquantique.com/api/v1/bitstrings"
+    params = {
+        "length": num_bits
+    }
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
+        if 'data' in data and isinstance(data['data'], str):
+            random_bits = [int(bit) for bit in data['data']]
+            return random_bits
+        else:
+            raise ValueError("La risposta JSON non contiene il campo 'data' o il campo non è una stringa.")
+    except requests.RequestException as e:
+        if not st.session_state.get('idquantique_warning_shown', False):
+            st.session_state['idquantique_warning_shown'] = True
+            st.warning(f"Errore durante l'accesso a ID Quantique QRNG: {e}. Passando a HotBits.")
+        return get_random_bits_from_hotbits(num_bits)
+
+# Funzione per ottenere bit casuali da HotBits
+def get_random_bits_from_hotbits(num_bits):
+    url = "https://www.fourmilab.ch/cgi-bin/Hotbits"
+    params = {
+        "nbytes": (num_bits + 7) // 8,  # Converti il numero di bit in numero di byte
+        "fmt": "bin"
+    }
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        random_bits = []
+        for byte in response.content:
+            random_bits.extend([int(bit) for bit in bin(byte)[2:].zfill(8)])
+        return random_bits[:num_bits]
+    except requests.RequestException as e:
+        if not st.session_state.get('hotbits_warning_shown', False):
+            st.session_state['hotbits_warning_shown'] = True
+            st.warning(f"Errore durante l'accesso a HotBits: {e}. Utilizzando la generazione locale.")
         return get_random_bits_from_truerng(num_bits)
 
 # Funzione per ottenere bit casuali dalla chiavetta TrueRNG
@@ -202,7 +243,7 @@ def main():
     car2_placeholder = st.empty()
 
     while st.session_state.running:
-        # Priorità: ANU QRNG > random.org > TrueRNG > Generazione locale
+        # Priorità: ANU QRNG > random.org > ID Quantique > HotBits > TrueRNG > Generazione locale
         random_bits_1 = get_random_bits_from_anu(500)
         random_bits_2 = get_random_bits_from_anu(500)
 
@@ -210,6 +251,16 @@ def main():
             random_bits_1 = get_random_bits_from_random_org(500)
         if random_bits_2 is None:
             random_bits_2 = get_random_bits_from_random_org(500)
+
+        if random_bits_1 is None:
+            random_bits_1 = get_random_bits_from_idquantique(500)
+        if random_bits_2 is None:
+            random_bits_2 = get_random_bits_from_idquantique(500)
+
+        if random_bits_1 is None:
+            random_bits_1 = get_random_bits_from_hotbits(500)
+        if random_bits_2 is None:
+            random_bits_2 = get_random_bits_from_hotbits(500)
 
         if random_bits_1 is None:
             random_bits_1 = get_random_bits_from_truerng(500)
@@ -338,6 +389,9 @@ def main():
         st.session_state.widget_key_counter = 0  # Reset del contatore di chiavi
         st.write("Gioco resettato!")
         st.session_state['anu_warning_shown'] = False  # Reset dell'avviso di errore per ANU QRNG
+        st.session_state['random_org_warning_shown'] = False  # Reset dell'avviso di errore per random.org
+        st.session_state['idquantique_warning_shown'] = False  # Reset dell'avviso di errore per ID Quantique
+        st.session_state['hotbits_warning_shown'] = False  # Reset dell'avviso di errore per HotBits
 
 if __name__ == "__main__":
     main()
