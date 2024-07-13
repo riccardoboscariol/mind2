@@ -7,8 +7,6 @@ from scipy.stats import mannwhitneyu, binomtest
 import matplotlib.pyplot as plt
 import io
 import requests
-import serial
-import serial.tools.list_ports
 import base64
 
 # Funzione per ottenere bit casuali da ANU Quantum Random Numbers
@@ -35,23 +33,6 @@ def get_random_bits_from_anu(num_bits):
 # Funzione per ottenere bit casuali localmente
 def get_random_bits(num_bits):
     return np.random.randint(0, 2, num_bits).tolist()
-
-# Funzione per rilevare la chiavetta TrueRNG e leggere i numeri casuali
-def get_random_bits_from_truerng(num_bits):
-    ports = list(serial.tools.list_ports.comports())
-    for port in ports:
-        if 'TrueRNG' in port.description:
-            try:
-                ser = serial.Serial(port.device, 115200, timeout=1)
-                random_bits = []
-                while len(random_bits) < num_bits:
-                    random_bits.extend([int(bit) for bit in bin(int.from_bytes(ser.read(1), 'big'))[2:].zfill(8)])
-                ser.close()
-                return random_bits[:num_bits]
-            except Exception as e:
-                st.warning("Errore durante la lettura dalla chiavetta TrueRNG: {}. Utilizzando la generazione locale.".format(e))
-                return get_random_bits(num_bits)
-    return None
 
 # Funzione per calcolare l'entropia
 def calculate_entropy(bits):
@@ -163,14 +144,9 @@ def main():
     car2_placeholder = st.empty()
 
     while st.session_state.running:
-        # Priorità: TrueRNG > ANU QRNG > Generazione locale
-        random_bits_1 = get_random_bits_from_truerng(5000)
-        random_bits_2 = get_random_bits_from_truerng(5000)
-        
-        if random_bits_1 is None:
-            random_bits_1 = get_random_bits_from_anu(5000)
-        if random_bits_2 is None:
-            random_bits_2 = get_random_bits_from_anu(5000)
+        # Priorità: ANU QRNG > Generazione locale
+        random_bits_1 = get_random_bits_from_anu(5000)
+        random_bits_2 = get_random_bits_from_anu(5000)
 
         if random_bits_1 is None:
             random_bits_1 = get_random_bits(5000)
