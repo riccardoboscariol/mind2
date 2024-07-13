@@ -13,7 +13,7 @@ import base64
 def get_random_bits_from_anu(num_bits):
     url = "https://qrng.anu.edu.au/API/jsonI.php"
     params = {
-        "length": num_bits,
+        "length": min(num_bits, 1024),  # Richiedi al massimo 1024 bit per volta
         "type": "uint8"
     }
     try:
@@ -21,6 +21,7 @@ def get_random_bits_from_anu(num_bits):
         response.raise_for_status()
         data = response.json()
         if not data.get('success', False):
+            st.warning(f"Risposta JSON di ANU: {data}")
             raise ValueError("La risposta JSON non indica successo.")
         if 'data' not in data:
             raise ValueError("La risposta JSON non contiene il campo 'data'")
