@@ -23,8 +23,8 @@ def get_random_bits_from_anu(num_bits):
         if not data.get('success', False):
             st.warning(f"Risposta JSON di ANU: {data}")
             raise ValueError("La risposta JSON non indica successo.")
-        if 'data' not in data:
-            raise ValueError("La risposta JSON non contiene il campo 'data'")
+        if 'data' not in data or not isinstance(data['data'], list):
+            raise ValueError("La risposta JSON non contiene il campo 'data' o il campo non è una lista.")
         random_bits = []
         for number in data['data']:
             random_bits.extend([int(bit) for bit in bin(number)[2:].zfill(8)])  # Converte in binario e zfill per ottenere 8 bit
@@ -278,3 +278,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
