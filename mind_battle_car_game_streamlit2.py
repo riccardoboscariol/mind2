@@ -20,6 +20,8 @@ def get_random_bits_from_anu(num_bits):
         response = requests.get(url, params=params)
         response.raise_for_status()
         data = response.json()
+        if not data.get('success', False):
+            raise ValueError("La risposta JSON non indica successo.")
         if 'data' not in data:
             raise ValueError("La risposta JSON non contiene il campo 'data'")
         random_bits = []
