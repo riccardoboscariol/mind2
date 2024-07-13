@@ -162,12 +162,10 @@ def main():
     while st.session_state.running:
         # Priorità: ANU QRNG > Generazione locale
         random_bits_1 = get_random_bits_from_anu(500)
-        random_bits_2 = get_random_bits_from_anu(500)
+        random_bits_2 = get_random_bits(500)
 
         if random_bits_1 is None:
             random_bits_1 = get_random_bits(500)
-        if random_bits_2 is None:
-            random_bits_2 = get_random_bits(500)
         
         st.session_state.random_numbers_1.extend(random_bits_1)
         st.session_state.random_numbers_2.extend(random_bits_2)
@@ -210,7 +208,7 @@ def main():
             </div>
         """, unsafe_allow_html=True)
 
-        time.sleep(0.1)
+        time.sleep(0.5)  # Pausa di 0.5 secondi tra le generazioni
 
     if download_button:
         df = pd.DataFrame({
@@ -285,7 +283,7 @@ def main():
         st.session_state.random_numbers_2 = []
         st.session_state.widget_key_counter = 0  # Reset del contatore di chiavi
         st.write("Gioco resettato!")
-        st.session_state['random_org_warning_shown'] = False  # Reset dell'avviso di errore per random.org
+        st.session_state['anu_warning_shown'] = False  # Reset dell'avviso di errore per ANU QRNG
 
 if __name__ == "__main__":
     main()
