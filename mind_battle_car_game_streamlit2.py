@@ -18,53 +18,7 @@ try:
 except ImportError:
     st.error("openpyxl non è installato. Esegui `pip install openpyxl` per installarlo.")
 
-# Funzioni per ottenere bit casuali da diverse fonti
-def get_random_bits_from_anu(num_bits):
-    url = "https://qrng.anu.edu.au/API/jsonI.php"
-    params = {"length": num_bits // 8, "type": "uint8"}
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-        data = response.json()
-        if 'success' in data and data['success'] and 'data' in data:
-            bits = []
-            for number in data['data']:
-                bits.extend([int(bit) for bit in bin(number)[2:].zfill(8)])
-            return bits[:num_bits]
-        else:
-            st.warning("ANU QRNG response did not indicate success.")
-            return None
-    except requests.RequestException as e:
-        st.warning(f"Errore durante l'accesso a ANU QRNG: {e}.")
-        return None
-
-def get_random_bits_from_random_org(num_bits):
-    url = "https://www.random.org/integers/"
-    params = {"num": num_bits, "min": 0, "max": 1, "col": 1, "base": 10, "format": "plain", "rnd": "new"}
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-        return list(map(int, response.text.strip().split()))
-    except requests.RequestException as e:
-        st.warning(f"Errore durante l'accesso a random.org: {e}.")
-        return None
-
-def get_random_bits_from_idquantique(num_bits):
-    url = "https://qrng.idquantique.com/api/v1/bitstrings"
-    params = {"length": num_bits}
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-        data = response.json()
-        if 'data' in data:
-            return [int(bit) for bit in data['data']]
-        else:
-            st.warning("ID Quantique QRNG response did not contain data.")
-            return None
-    except requests.RequestException as e:
-        st.warning(f"Errore durante l'accesso a ID Quantique QRNG: {e}.")
-        return None
-
+# Funzione per ottenere bit casuali da HotBits
 def get_random_bits_from_hotbits(num_bits):
     url = "https://www.fourmilab.ch/cgi-bin/Hotbits"
     params = {"nbytes": (num_bits + 7) // 8, "fmt": "bin"}
@@ -76,28 +30,14 @@ def get_random_bits_from_hotbits(num_bits):
             bits.extend([int(bit) for bit in bin(byte)[2:].zfill(8)])
         return bits[:num_bits]
     except requests.RequestException as e:
-        st.warning(f"Errore durante l'accesso a HotBits: {e}.")
+        st.warning(f"Errore durante l'accesso a HotBits: {e}. Utilizzando la generazione locale.")
         return None
 
-def get_random_bits_from_truerng(num_bits):
-    ports = list(serial.tools.list_ports.comports())
-    for port in ports:
-        if 'TrueRNG' in port.description:
-            try:
-                ser = serial.Serial(port.device, 115200, timeout=1)
-                bits = []
-                while len(bits) < num_bits:
-                    bits.extend([int(bit) for bit in bin(int.from_bytes(ser.read(1), 'big'))[2:].zfill(8)])
-                ser.close()
-                return bits[:num_bits]
-            except Exception as e:
-                st.warning(f"Errore durante la lettura dalla chiavetta TrueRNG: {e}.")
-                return None
-    return None
-
+# Funzione per ottenere bit casuali localmente
 def get_random_bits(num_bits):
     return np.random.randint(0, 2, num_bits).tolist()
 
+# Funzione per calcolare l'entropia
 def calculate_entropy(bits):
     n = len(bits)
     counts = np.bincount(bits, minlength=2)
@@ -106,20 +46,24 @@ def calculate_entropy(bits):
     entropy = -np.sum(p * np.log2(p))
     return entropy
 
+# Funzione per spostare l'auto
 def move_car(car_pos, distance):
     car_pos += distance
     if car_pos > 1000:
         car_pos = 1000
     return car_pos
 
+# Funzione per convertire l'immagine in base64
 def image_to_base64(image):
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
 
+# Funzione principale
 def main(get_random_bits_function):
     st.title("Mind Battle Car Game")
 
+    # CSS per personalizzare i colori degli slider e nascondere i numeri
     st.markdown("""
         <style>
         .stSlider > div > div > div > div {
@@ -207,11 +151,9 @@ def main(get_random_bits_function):
         random_bits_2 = get_random_bits_function(2500)
 
         if random_bits_1 is None:
-            st.session_state.running = False
-            break
+            random_bits_1 = get_random_bits(2500)
         if random_bits_2 is None:
-            st.session_state.running = False
-            break
+            random_bits_2 = get_random_bits(2500)
 
         st.session_state.random_numbers_1.extend(random_bits_1)
         st.session_state.random_numbers_2.extend(random_bits_2)
@@ -332,6 +274,5 @@ def main(get_random_bits_function):
         st.session_state['hotbits_warning_shown'] = False  # Reset dell'avviso di errore per HotBits
 
 if __name__ == "__main__":
+    # Sostituire `get_random_bits_from_hotbits` con la funzione appropriata per ogni versione dell'applicazione.
     main(get_random_bits_from_hotbits)
-
-
