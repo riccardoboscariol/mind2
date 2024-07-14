@@ -8,15 +8,8 @@ import matplotlib.pyplot as plt
 import io
 import requests
 import base64
-import random
 import serial
 import serial.tools.list_ports
-
-# Assicurati che openpyxl sia installato
-try:
-    import openpyxl
-except ImportError:
-    st.error("openpyxl non è installato. Esegui `pip install openpyxl` per installarlo.")
 
 # Funzione per ottenere bit casuali da HotBits
 def get_random_bits_from_hotbits(num_bits):
@@ -170,6 +163,8 @@ def main(get_random_bits_function):
         percentile_5_1 = np.percentile(st.session_state.data_for_condition_1, 5)
         percentile_5_2 = np.percentile(st.session_state.data_for_condition_2, 5)
         
+        st.write(f"Random Bits 1: {random_bits_1[:10]}...")
+        st.write(f"Random Bits 2: {random_bits_2[:10]}...")
         st.write(f"Entropy Score 1: {entropy_score_1}")
         st.write(f"Entropy Score 2: {entropy_score_2}")
         st.write(f"Percentile 5_1: {percentile_5_1}")
@@ -279,6 +274,4 @@ def main(get_random_bits_function):
         st.session_state['hotbits_warning_shown'] = False  # Reset dell'avviso di errore per HotBits
 
 if __name__ == "__main__":
-    # Sostituire `get_random_bits_from_hotbits` con la funzione appropriata per ogni versione dell'applicazione.
     main(get_random_bits_from_hotbits)
-
