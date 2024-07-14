@@ -7,28 +7,25 @@ from scipy.stats import mannwhitneyu, binomtest
 import matplotlib.pyplot as plt
 import io
 import requests
-import base64
-import serial
-import serial.tools.list_ports
 
-# Funzione per ottenere bit casuali da HotBits
-def get_random_bits_from_hotbits(num_bits):
-    url = "https://www.fourmilab.ch/cgi-bin/Hotbits"
-    params = {"nbytes": (num_bits + 7) // 8, "fmt": "bin"}
+# Funzione per ottenere bit casuali da ANU QRNG
+def get_random_bits_from_anu(num_bits):
+    url = "https://qrng.anu.edu.au/API/jsonI.php"
+    params = {"length": num_bits, "type": "uint8"}
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
-        bits = []
-        for byte in response.content:
-            bits.extend([int(bit) for bit in bin(byte)[2:].zfill(8)])
-        return bits[:num_bits]
-    except requests.RequestException as e:
-        st.warning(f"Errore durante l'accesso a HotBits: {e}. Utilizzando la generazione locale.")
+        data = response.json()
+        if data["success"]:
+            bits = []
+            for number in data["data"]:
+                bits.extend([int(bit) for bit in bin(number)[2:].zfill(8)])
+            return bits[:num_bits]
+        else:
+            raise ValueError("La risposta JSON non indica successo.")
+    except (requests.RequestException, ValueError) as e:
+        st.warning(f"Errore durante l'accesso a ANU QRNG: {e}.")
         return None
-
-# Funzione per ottenere bit casuali localmente
-def get_random_bits(num_bits):
-    return np.random.randint(0, 2, num_bits).tolist()
 
 # Funzione per calcolare l'entropia
 def calculate_entropy(bits):
@@ -53,7 +50,7 @@ def image_to_base64(image):
     return base64.b64encode(buffered.getvalue()).decode()
 
 # Funzione principale
-def main(get_random_bits_function):
+def main():
     st.title("Mind Battle Car Game")
 
     # CSS per personalizzare i colori degli slider e nascondere i numeri
@@ -140,13 +137,13 @@ def main(get_random_bits_function):
     car2_placeholder = st.empty()
 
     while st.session_state.running:
-        random_bits_1 = get_random_bits_function(2500)
-        random_bits_2 = get_random_bits_function(2500)
+        random_bits_1 = get_random_bits_from_anu(2500)
+        random_bits_2 = get_random_bits_from_anu(2500)
 
-        if random_bits_1 is None:
-            random_bits_1 = get_random_bits(2500)
-        if random_bits_2 is None:
-            random_bits_2 = get_random_bits(2500)
+        if random_bits_1 is None or random_bits_2 is None:
+            st.session_state.running = False
+            st.write("Errore nella generazione dei bit casuali. Fermato il gioco.")
+            break
 
         st.session_state.random_numbers_1.extend(random_bits_1)
         st.session_state.random_numbers_2.extend(random_bits_2)
@@ -183,7 +180,7 @@ def main(get_random_bits_function):
         st.session_state.widget_key_counter += 1  # Incrementa il contatore per ogni iterazione
         
         car_placeholder.markdown(f"""
-            <div class="slider-container first" style="margin-bottom: 40px;">
+            <div class="slider-container first">
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
             </div>
@@ -196,7 +193,7 @@ def main(get_random_bits_function):
             </div>
         """, unsafe_allow_html=True)
 
-        time.sleep(0.2)  # Pausa di 0.2 secondi tra le generazioni
+        time.sleep(0.2)
 
     if download_button:
         df = pd.DataFrame({
@@ -269,9 +266,7 @@ def main(get_random_bits_function):
         st.session_state.widget_key_counter = 0  # Reset del contatore di chiavi
         st.write("Gioco resettato!")
         st.session_state['anu_warning_shown'] = False  # Reset dell'avviso di errore per ANU QRNG
-        st.session_state['random_org_warning_shown'] = False  # Reset dell'avviso di errore per random.org
-        st.session_state['idquantique_warning_shown'] = False  # Reset dell'avviso di errore per ID Quantique
-        st.session_state['hotbits_warning_shown'] = False  # Reset dell'avviso di errore per HotBits
 
 if __name__ == "__main__":
-    main(get_random_bits_from_hotbits)
+    main()
+
