@@ -12,128 +12,92 @@ import random
 import serial
 import serial.tools.list_ports
 
-# Funzione per ottenere bit casuali da ANU Quantum Random Numbers
-def get_random_bits_from_anu(num_bits, max_retries=5):
+# Assicurati che openpyxl sia installato
+try:
+    import openpyxl
+except ImportError:
+    st.error("openpyxl non è installato. Esegui `pip install openpyxl` per installarlo.")
+
+# Funzioni per ottenere bit casuali da diverse fonti
+def get_random_bits_from_anu(num_bits):
     url = "https://qrng.anu.edu.au/API/jsonI.php"
-    bits_needed = num_bits
-    random_bits = []
-
-    while bits_needed > 0:
-        params = {
-            "length": min(bits_needed, 500),  # Richiedi al massimo 500 bit per volta
-            "type": "uint8"
-        }
-        retries = 0
-        while retries < max_retries:
-            try:
-                response = requests.get(url, params=params)
-                response.raise_for_status()
-                data = response.json()
-                if not data.get('success', False):
-                    st.warning(f"Risposta JSON di ANU: {data}")
-                    raise ValueError("La risposta JSON non indica successo.")
-                if 'data' not in data or not isinstance(data['data'], list):
-                    raise ValueError("La risposta JSON non contiene il campo 'data' o il campo non è una lista.")
-                for number in data['data']:
-                    random_bits.extend([int(bit) for bit in bin(number)[2:].zfill(8)])  # Converte in binario e zfill per ottenere 8 bit
-                bits_needed -= min(bits_needed, 500)
-                break
-            except (requests.RequestException, ValueError) as e:
-                retries += 1
-                if retries == max_retries:
-                    if not st.session_state.get('anu_warning_shown', False):
-                        st.session_state['anu_warning_shown'] = True
-                        st.warning(f"Errore durante l'accesso a ANU QRNG: {e}. Passando a random.org.")
-                    return None
-                time.sleep(2 ** retries + random.uniform(0, 1))  # Backoff esponenziale con jitter
-    return random_bits[:num_bits]
-
-# Funzione per ottenere bit casuali da random.org
-def get_random_bits_from_random_org(num_bits):
-    url = "https://www.random.org/integers/"
-    params = {
-        "num": num_bits,
-        "min": 0,
-        "max": 1,
-        "col": 1,
-        "base": 10,
-        "format": "plain",
-        "rnd": "new"
-    }
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-        random_bits = list(map(int, response.text.strip().split()))
-        return random_bits
-    except requests.RequestException as e:
-        if not st.session_state.get('random_org_warning_shown', False):
-            st.session_state['random_org_warning_shown'] = True
-            st.warning(f"Errore durante l'accesso a random.org: {e}. Passando a ID Quantique QRNG.")
-        return None
-
-# Funzione per ottenere bit casuali da ID Quantique QRNG
-def get_random_bits_from_idquantique(num_bits):
-    url = "https://qrng.idquantique.com/api/v1/bitstrings"
-    params = {
-        "length": num_bits
-    }
+    params = {"length": num_bits // 8, "type": "uint8"}
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
         data = response.json()
-        if 'data' in data and isinstance(data['data'], str):
-            random_bits = [int(bit) for bit in data['data']]
-            return random_bits
+        if 'success' in data and data['success'] and 'data' in data:
+            bits = []
+            for number in data['data']:
+                bits.extend([int(bit) for bit in bin(number)[2:].zfill(8)])
+            return bits[:num_bits]
         else:
-            raise ValueError("La risposta JSON non contiene il campo 'data' o il campo non è una stringa.")
+            st.warning("ANU QRNG response did not indicate success.")
+            return None
     except requests.RequestException as e:
-        if not st.session_state.get('idquantique_warning_shown', False):
-            st.session_state['idquantique_warning_shown'] = True
-            st.warning(f"Errore durante l'accesso a ID Quantique QRNG: {e}. Passando a HotBits.")
+        st.warning(f"Errore durante l'accesso a ANU QRNG: {e}.")
         return None
 
-# Funzione per ottenere bit casuali da HotBits
-def get_random_bits_from_hotbits(num_bits):
-    url = "https://www.fourmilab.ch/cgi-bin/Hotbits"
-    params = {
-        "nbytes": (num_bits + 7) // 8,  # Converti il numero di bit in numero di byte
-        "fmt": "bin"
-    }
+def get_random_bits_from_random_org(num_bits):
+    url = "https://www.random.org/integers/"
+    params = {"num": num_bits, "min": 0, "max": 1, "col": 1, "base": 10, "format": "plain", "rnd": "new"}
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
-        random_bits = []
-        for byte in response.content:
-            random_bits.extend([int(bit) for bit in bin(byte)[2:].zfill(8)])
-        return random_bits[:num_bits]
+        return list(map(int, response.text.strip().split()))
     except requests.RequestException as e:
-        if not st.session_state.get('hotbits_warning_shown', False):
-            st.session_state['hotbits_warning_shown'] = True
-            st.warning(f"Errore durante l'accesso a HotBits: {e}. Utilizzando la generazione locale.")
+        st.warning(f"Errore durante l'accesso a random.org: {e}.")
         return None
 
-# Funzione per ottenere bit casuali dalla chiavetta TrueRNG
+def get_random_bits_from_idquantique(num_bits):
+    url = "https://qrng.idquantique.com/api/v1/bitstrings"
+    params = {"length": num_bits}
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
+        if 'data' in data:
+            return [int(bit) for bit in data['data']]
+        else:
+            st.warning("ID Quantique QRNG response did not contain data.")
+            return None
+    except requests.RequestException as e:
+        st.warning(f"Errore durante l'accesso a ID Quantique QRNG: {e}.")
+        return None
+
+def get_random_bits_from_hotbits(num_bits):
+    url = "https://www.fourmilab.ch/cgi-bin/Hotbits"
+    params = {"nbytes": (num_bits + 7) // 8, "fmt": "bin"}
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        bits = []
+        for byte in response.content:
+            bits.extend([int(bit) for bit in bin(byte)[2:].zfill(8)])
+        return bits[:num_bits]
+    except requests.RequestException as e:
+        st.warning(f"Errore durante l'accesso a HotBits: {e}.")
+        return None
+
 def get_random_bits_from_truerng(num_bits):
     ports = list(serial.tools.list_ports.comports())
     for port in ports:
         if 'TrueRNG' in port.description:
             try:
                 ser = serial.Serial(port.device, 115200, timeout=1)
-                random_bits = []
-                while len(random_bits) < num_bits:
-                    random_bits.extend([int(bit) for bit in bin(int.from_bytes(ser.read(1), 'big'))[2:].zfill(8)])
+                bits = []
+                while len(bits) < num_bits:
+                    bits.extend([int(bit) for bit in bin(int.from_bytes(ser.read(1), 'big'))[2:].zfill(8)])
                 ser.close()
-                return random_bits[:num_bits]
+                return bits[:num_bits]
             except Exception as e:
-                st.warning(f"Errore durante la lettura dalla chiavetta TrueRNG: {e}. Utilizzando la generazione locale.")
+                st.warning(f"Errore durante la lettura dalla chiavetta TrueRNG: {e}.")
                 return None
     return None
 
-# Funzione per ottenere bit casuali localmente
 def get_random_bits(num_bits):
     return np.random.randint(0, 2, num_bits).tolist()
 
-# Funzione per calcolare l'entropia
 def calculate_entropy(bits):
     n = len(bits)
     counts = np.bincount(bits, minlength=2)
@@ -142,24 +106,20 @@ def calculate_entropy(bits):
     entropy = -np.sum(p * np.log2(p))
     return entropy
 
-# Funzione per spostare l'auto
 def move_car(car_pos, distance):
     car_pos += distance
-    if car_pos > 1000:  # Se l'auto esce dallo schermo, riportala all'inizio
+    if car_pos > 1000:
         car_pos = 1000
     return car_pos
 
-# Funzione per convertire l'immagine in base64
 def image_to_base64(image):
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
 
-# Funzione principale
-def main():
+def main(get_random_bits_function):
     st.title("Mind Battle Car Game")
 
-    # CSS per personalizzare i colori degli slider e nascondere i numeri
     st.markdown("""
         <style>
         .stSlider > div > div > div > div {
@@ -173,17 +133,17 @@ def main():
         }
         .slider-container {
             position: relative;
-            height: 120px; /* Aumentato per dare più spazio tra slider e scritte */
-            margin-bottom: 50px; /* Aggiunto margine inferiore per slider con macchina rossa */
+            height: 120px;
+            margin-bottom: 50px;
         }
         .slider-container.first {
-            margin-top: 50px; /* Aggiunto margine superiore per distanziare dal pulsante resetta gioco */
-            margin-bottom: 40px; /* Diminuire lo spazio tra i due slider, modifica questo valore */
+            margin-top: 50px;
+            margin-bottom: 40px;
         }
         .car-image {
             position: absolute;
-            top: -80px; /* Aumentato per ingrandire le immagini e lasciare spazio tra slider e scritte */
-            width: 150px; /* Ingrandito di tre volte */
+            top: -80px;
+            width: 150px;
         }
         .slider-container input[type=range] {
             width: 100%;
@@ -243,34 +203,15 @@ def main():
     car2_placeholder = st.empty()
 
     while st.session_state.running:
-        # Priorità: ANU QRNG > random.org > ID Quantique > HotBits > TrueRNG > Generazione locale
-        random_bits_1 = get_random_bits_from_anu(500)
-        random_bits_2 = get_random_bits_from_anu(500)
+        random_bits_1 = get_random_bits_function(2500)
+        random_bits_2 = get_random_bits_function(2500)
 
         if random_bits_1 is None:
-            random_bits_1 = get_random_bits_from_random_org(500)
+            st.session_state.running = False
+            break
         if random_bits_2 is None:
-            random_bits_2 = get_random_bits_from_random_org(500)
-
-        if random_bits_1 is None:
-            random_bits_1 = get_random_bits_from_idquantique(500)
-        if random_bits_2 is None:
-            random_bits_2 = get_random_bits_from_idquantique(500)
-
-        if random_bits_1 is None:
-            random_bits_1 = get_random_bits_from_hotbits(500)
-        if random_bits_2 is None:
-            random_bits_2 = get_random_bits_from_hotbits(500)
-
-        if random_bits_1 is None:
-            random_bits_1 = get_random_bits_from_truerng(500)
-        if random_bits_2 is None:
-            random_bits_2 = get_random_bits_from_truerng(500)
-
-        if random_bits_1 is None:
-            random_bits_1 = get_random_bits(500)
-        if random_bits_2 is None:
-            random_bits_2 = get_random_bits(500)
+            st.session_state.running = False
+            break
 
         st.session_state.random_numbers_1.extend(random_bits_1)
         st.session_state.random_numbers_2.extend(random_bits_2)
@@ -313,24 +254,21 @@ def main():
             </div>
         """, unsafe_allow_html=True)
 
-        time.sleep(0.5)  # Pausa di 0.5 secondi tra le generazioni
+        time.sleep(0.2)  # Pausa di 0.2 secondi tra le generazioni
 
     if download_button:
         df = pd.DataFrame({
             "Condizione 1": [''.join(map(str, row)) for row in st.session_state.data_for_excel_1],
             "Condizione 2": [''.join(map(str, row)) for row in st.session_state.data_for_excel_2]
         })
-        try:
-            df.to_excel("random_numbers.xlsx", index=False)
-            with open("random_numbers.xlsx", "rb") as file:
-                st.download_button(
-                    label="Scarica Dati",
-                    data=file,
-                    file_name="random_numbers.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
-        except ImportError:
-            st.error("openpyxl non è installato. Installa openpyxl per scaricare i dati in formato Excel.")
+        df.to_excel("random_numbers.xlsx", index=False)
+        with open("random_numbers.xlsx", "rb") as file:
+            st.download_button(
+                label="Scarica Dati",
+                data=file,
+                file_name="random_numbers.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
 
     if download_graph_button:
         fig, ax = plt.subplots(figsize=(8, 4))
@@ -394,4 +332,5 @@ def main():
         st.session_state['hotbits_warning_shown'] = False  # Reset dell'avviso di errore per HotBits
 
 if __name__ == "__main__":
-    main()
+    main(get_random_bits_from_idquantique)
+
