@@ -272,10 +272,6 @@ def main():
         if random_bits_2 is None:
             random_bits_2 = get_random_bits(500)
 
-        # Aggiungi debug per vedere i bit generati
-        st.write(f"Random Bits 1: {random_bits_1[:10]}...")  # Mostra i primi 10 bit
-        st.write(f"Random Bits 2: {random_bits_2[:10]}...")
-
         st.session_state.random_numbers_1.extend(random_bits_1)
         st.session_state.random_numbers_2.extend(random_bits_2)
         
