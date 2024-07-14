@@ -332,5 +332,6 @@ def main(get_random_bits_function):
         st.session_state['hotbits_warning_shown'] = False  # Reset dell'avviso di errore per HotBits
 
 if __name__ == "__main__":
-    main(get_random_bits_from_idquantique)
+    main(get_random_bits_from_hotbits)
+
 
