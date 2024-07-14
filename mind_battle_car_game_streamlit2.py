@@ -170,6 +170,11 @@ def main(get_random_bits_function):
         percentile_5_1 = np.percentile(st.session_state.data_for_condition_1, 5)
         percentile_5_2 = np.percentile(st.session_state.data_for_condition_2, 5)
         
+        st.write(f"Entropy Score 1: {entropy_score_1}")
+        st.write(f"Entropy Score 2: {entropy_score_2}")
+        st.write(f"Percentile 5_1: {percentile_5_1}")
+        st.write(f"Percentile 5_2: {percentile_5_2}")
+
         if entropy_score_1 < percentile_5_1:
             rarity_percentile = 1 - (entropy_score_1 / percentile_5_1)
             st.session_state.car_pos = move_car(st.session_state.car_pos, 6 * (1 + (10 * rarity_percentile)))
@@ -276,3 +281,4 @@ def main(get_random_bits_function):
 if __name__ == "__main__":
     # Sostituire `get_random_bits_from_hotbits` con la funzione appropriata per ogni versione dell'applicazione.
     main(get_random_bits_from_hotbits)
+
