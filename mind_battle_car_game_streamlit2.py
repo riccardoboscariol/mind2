@@ -9,7 +9,13 @@ import base64
 import io
 import serial
 import serial.tools.list_ports
-import winsound  # Solo per Windows
+import platform
+
+# Importa il modulo dei suoni in modo condizionale
+if platform.system() == "Windows":
+    import winsound  # Solo per Windows
+else:
+    from playsound import playsound
 
 def get_random_bits_from_trng(num_bits):
     ports = list(serial.tools.list_ports.comports())
@@ -67,6 +73,12 @@ def image_to_base64(image):
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
+
+def play_sound(sound_file):
+    if platform.system() == "Windows":
+        winsound.PlaySound(sound_file, winsound.SND_FILENAME)
+    else:
+        playsound(sound_file)
 
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
@@ -195,13 +207,13 @@ def main():
             rarity_percentile = 1 - (entropy_score_1 / percentile_5_1)
             st.session_state.car_pos = move_car(st.session_state.car_pos, 6 * (1 + (10 * rarity_percentile)))
             st.session_state.car1_moves += 1
-            winsound.PlaySound("move_car.wav", winsound.SND_FILENAME)
+            play_sound("move_car.wav")
         
         if entropy_score_2 < percentile_5_2:
             rarity_percentile = 1 - (entropy_score_2 / percentile_5_2)
             st.session_state.car2_pos = move_car(st.session_state.car2_pos, 6 * (1 + (10 * rarity_percentile)))
             st.session_state.car2_moves += 1
-            winsound.PlaySound("move_car2.wav", winsound.SND_FILENAME)
+            play_sound("move_car2.wav")
         
         st.session_state.widget_key_counter += 1
         
