@@ -1,7 +1,7 @@
 streamlit
-pandas
 numpy
-scipy
+pandas
 requests
-matplotlib
+scipy
+Pillow
 pyserial
