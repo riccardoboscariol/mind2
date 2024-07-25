@@ -9,8 +9,8 @@ import base64
 import io
 import serial
 import serial.tools.list_ports
+import winsound  # Solo per Windows
 
-# Funzione per ottenere bit casuali da TrueRNG3
 def get_random_bits_from_trng(num_bits):
     ports = list(serial.tools.list_ports.comports())
     for port in ports:
@@ -29,7 +29,6 @@ def get_random_bits_from_trng(num_bits):
                 return None
     return None
 
-# Funzione per ottenere bit casuali da random.org
 def get_random_bits_from_random_org(num_bits):
     url = "https://www.random.org/integers/"
     params = {
@@ -50,7 +49,6 @@ def get_random_bits_from_random_org(num_bits):
         st.warning(f"Errore durante l'accesso a random.org: {e}")
         return None
 
-# Funzione per calcolare l'entropia
 def calculate_entropy(bits):
     n = len(bits)
     counts = np.bincount(bits, minlength=2)
@@ -59,24 +57,21 @@ def calculate_entropy(bits):
     entropy = -np.sum(p * np.log2(p))
     return entropy
 
-# Funzione per spostare l'auto
 def move_car(car_pos, distance):
     car_pos += distance
     if car_pos > 1000:
         car_pos = 1000
     return car_pos
 
-# Funzione per convertire l'immagine in base64
 def image_to_base64(image):
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
 
-# Funzione principale
 def main():
-    st.title("Mind Battle Car Game")
+    st.set_page_config(page_title="Car Mind Race", layout="wide")
+    st.title("Car Mind Race")
 
-    # CSS per personalizzare i colori degli slider e nascondere i numeri
     st.markdown("""
         <style>
         .stSlider > div > div > div > div {
@@ -108,13 +103,14 @@ def main():
         </style>
         """, unsafe_allow_html=True)
 
-    start_button = st.button("Avvia Generazione")
-    stop_button = st.button("Blocca Generazione")
-    download_button = st.button("Scarica Dati")
-    download_graph_button = st.button("Scarica Grafico")
-    stats_button = st.button("Mostra Analisi Statistiche")
-    reset_button = st.button("Resetta Gioco")
-    
+    st.sidebar.title("Menu")
+    start_button = st.sidebar.button("Avvia Gara")
+    stop_button = st.sidebar.button("Blocca Gara")
+    download_button = st.sidebar.button("Scarica Dati")
+    download_graph_button = st.sidebar.button("Scarica Grafico")
+    stats_button = st.sidebar.button("Mostra Analisi Statistiche")
+    reset_button = st.sidebar.button("Resetta Gioco")
+
     if "car_pos" not in st.session_state:
         st.session_state.car_pos = 50
     if "car2_pos" not in st.session_state:
@@ -199,13 +195,15 @@ def main():
             rarity_percentile = 1 - (entropy_score_1 / percentile_5_1)
             st.session_state.car_pos = move_car(st.session_state.car_pos, 6 * (1 + (10 * rarity_percentile)))
             st.session_state.car1_moves += 1
+            winsound.PlaySound("move_car.wav", winsound.SND_FILENAME)
         
         if entropy_score_2 < percentile_5_2:
             rarity_percentile = 1 - (entropy_score_2 / percentile_5_2)
             st.session_state.car2_pos = move_car(st.session_state.car2_pos, 6 * (1 + (10 * rarity_percentile)))
             st.session_state.car2_moves += 1
+            winsound.PlaySound("move_car2.wav", winsound.SND_FILENAME)
         
-        st.session_state.widget_key_counter += 1  # Incrementa il contatore per ogni iterazione
+        st.session_state.widget_key_counter += 1
         
         car_placeholder.markdown(f"""
             <div class="slider-container first">
@@ -291,10 +289,10 @@ def main():
         st.session_state.data_for_condition_2 = []
         st.session_state.random_numbers_1 = []
         st.session_state.random_numbers_2 = []
-        st.session_state.widget_key_counter = 0  # Reset del contatore di chiavi
+        st.session_state.widget_key_counter = 0
         st.write("Gioco resettato!")
-        st.session_state['anu_warning_shown'] = False  # Reset dell'avviso di errore per ANU QRNG
 
 if __name__ == "__main__":
     main()
+
 
