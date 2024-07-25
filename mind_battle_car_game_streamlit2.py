@@ -4,27 +4,50 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 from scipy.stats import mannwhitneyu, binomtest
-import matplotlib.pyplot as plt
-import io
 import requests
+import base64
+import io
+import serial
+import serial.tools.list_ports
 
-# Funzione per ottenere bit casuali da ANU QRNG
-def get_random_bits_from_anu(num_bits):
-    url = "https://qrng.anu.edu.au/API/jsonI.php"
-    params = {"length": num_bits, "type": "uint8"}
+# Funzione per ottenere bit casuali da TrueRNG3
+def get_random_bits_from_trng(num_bits):
+    ports = list(serial.tools.list_ports.comports())
+    for port in ports:
+        if "TrueRNG" in port.description:
+            try:
+                ser = serial.Serial(port.device, 9600, timeout=1)
+                random_bits = []
+                while len(random_bits) < num_bits:
+                    byte = ser.read()
+                    if byte:
+                        random_bits.extend([int(bit) for bit in bin(ord(byte))[2:].zfill(8)])
+                ser.close()
+                return random_bits[:num_bits]
+            except serial.SerialException as e:
+                st.warning(f"Errore nella comunicazione con TrueRNG3: {e}")
+                return None
+    return None
+
+# Funzione per ottenere bit casuali da random.org
+def get_random_bits_from_random_org(num_bits):
+    url = "https://www.random.org/integers/"
+    params = {
+        "num": num_bits,
+        "min": 0,
+        "max": 1,
+        "col": 1,
+        "base": 10,
+        "format": "plain",
+        "rnd": "new"
+    }
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
-        data = response.json()
-        if data["success"]:
-            bits = []
-            for number in data["data"]:
-                bits.extend([int(bit) for bit in bin(number)[2:].zfill(8)])
-            return bits[:num_bits]
-        else:
-            raise ValueError("La risposta JSON non indica successo.")
+        random_bits = list(map(int, response.text.strip().split()))
+        return random_bits
     except (requests.RequestException, ValueError) as e:
-        st.warning(f"Errore durante l'accesso a ANU QRNG: {e}.")
+        st.warning(f"Errore durante l'accesso a random.org: {e}")
         return None
 
 # Funzione per calcolare l'entropia
@@ -85,12 +108,12 @@ def main():
         </style>
         """, unsafe_allow_html=True)
 
-    start_button = st.button("Avvia Generazione", key="start")
-    stop_button = st.button("Blocca Generazione", key="stop")
-    download_button = st.button("Scarica Dati", key="download_data")
-    download_graph_button = st.button("Scarica Grafico", key="download_graph")
-    stats_button = st.button("Mostra Analisi Statistiche", key="stats")
-    reset_button = st.button("Resetta Gioco", key="reset")
+    start_button = st.button("Avvia Generazione")
+    stop_button = st.button("Blocca Generazione")
+    download_button = st.button("Scarica Dati")
+    download_graph_button = st.button("Scarica Grafico")
+    stats_button = st.button("Mostra Analisi Statistiche")
+    reset_button = st.button("Resetta Gioco")
     
     if "car_pos" not in st.session_state:
         st.session_state.car_pos = 50
@@ -137,8 +160,13 @@ def main():
     car2_placeholder = st.empty()
 
     while st.session_state.running:
-        random_bits_1 = get_random_bits_from_anu(2500)
-        random_bits_2 = get_random_bits_from_anu(2500)
+        random_bits_1 = get_random_bits_from_trng(2500)
+        if random_bits_1 is None:
+            random_bits_1 = get_random_bits_from_random_org(2500)
+        
+        random_bits_2 = get_random_bits_from_trng(2500)
+        if random_bits_2 is None:
+            random_bits_2 = get_random_bits_from_random_org(2500)
 
         if random_bits_1 is None or random_bits_2 is None:
             st.session_state.running = False
