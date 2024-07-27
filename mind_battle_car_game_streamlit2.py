@@ -7,9 +7,6 @@ from scipy.stats import mannwhitneyu, binomtest
 import requests
 import base64
 import io
-import serial
-import serial.tools.list_ports
-import platform
 
 def get_random_bits_from_random_org(num_bits):
     url = "https://www.random.org/integers/"
@@ -86,10 +83,14 @@ def main():
         """, unsafe_allow_html=True)
 
     st.markdown("""
-        In questa applicazione, due macchine da corsa competono tra loro basandosi su numeri casuali. 
-        Ogni macchina si muove in base alla rarità dei numeri casuali generati. Più rara è la sequenza, 
-        più lontano si muove la macchina. Puoi avviare la gara, fermarla, scaricare i dati generati e 
-        visualizzare le statistiche.
+        Il primo giocatore sceglie la macchina verde e la cifra che vuole influenzare.
+        L'altro giocatore (o il PC) avrà la macchina rossa e l'altra cifra.
+        La macchina verde si muove quando l'entropia è a favore del suo bit scelto e inferiore al 5%.
+        La macchina rossa si muove quando l'entropia è a favore dell'altro bit e inferiore al 5%.
+        Ogni 0.1 secondi vengono generati 5000 bit casuali per ciascuno slot.
+        Se TrueRNG3 non è disponibile, il programma utilizza random.org.
+        L'entropia è calcolata usando la formula di Shannon. La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
+        La distanza di movimento è calcolata con la formula: Distanza = 6 × (1 + ((percentile - entropia) / percentile)).
         """)
 
     st.sidebar.title("Menu")
