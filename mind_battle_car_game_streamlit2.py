@@ -93,7 +93,7 @@ def main():
         Ogni 0.1 secondi vengono generati 5000 bit casuali per ciascuno slot.
         Il programma utilizza random.org.
         L'entropia è calcolata usando la formula di Shannon. La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
-        La distanza di movimento è calcolata con la formula: Distanza = 6 × (1 + ((percentile - entropia) / percentile)).
+        La distanza di movimento è calcolata con la formula: Distanza = 15 × (1 + ((percentile - entropia) / percentile)).
         """)
 
     st.sidebar.title("Menu")
@@ -174,12 +174,12 @@ def main():
 
         if entropy_score_1 < percentile_5_1:
             rarity_percentile = 1 - (entropy_score_1 / percentile_5_1)
-            st.session_state.car_pos = move_car(st.session_state.car_pos, 6 * (1 + (10 * rarity_percentile)))
+            st.session_state.car_pos = move_car(st.session_state.car_pos, 15 * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
             st.session_state.car1_moves += 1
         
         if entropy_score_2 < percentile_5_2:
             rarity_percentile = 1 - (entropy_score_2 / percentile_5_2)
-            st.session_state.car2_pos = move_car(st.session_state.car2_pos, 6 * (1 + (10 * rarity_percentile)))
+            st.session_state.car2_pos = move_car(st.session_state.car2_pos, 15 * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
             st.session_state.car2_moves += 1
         
         st.session_state.widget_key_counter += 1
