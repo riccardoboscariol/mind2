@@ -10,11 +10,8 @@ import io
 import serial
 import serial.tools.list_ports
 import platform
-import pygame
-
-# Inizializza pygame e il mixer
-pygame.init()
-pygame.mixer.init()
+from pydub import AudioSegment
+from pydub.playback import play
 
 def get_random_bits_from_trng(num_bits):
     ports = list(serial.tools.list_ports.comports())
@@ -75,8 +72,8 @@ def image_to_base64(image):
 
 def play_sound(sound_file):
     try:
-        pygame.mixer.music.load(sound_file)
-        pygame.mixer.music.play()
+        sound = AudioSegment.from_file(sound_file)
+        play(sound)
     except Exception as e:
         st.warning(f"Errore durante la riproduzione del suono: {e}")
 
@@ -102,7 +99,7 @@ def main():
         }
         .slider-container.first {
             margin-top: 50px;
-            margin-bottom: 40px;
+            margin-bottom: 40px.
         }
         .car-image {
             position: absolute;
