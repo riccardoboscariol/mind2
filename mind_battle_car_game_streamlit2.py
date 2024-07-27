@@ -101,7 +101,7 @@ def main():
         }
         .slider-container.first {
             margin-top: 50px;
-            margin-bottom: 40px.
+            margin-bottom: 40px;
         }
         .car-image {
             position: absolute;
@@ -113,6 +113,13 @@ def main():
         }
         </style>
         """, unsafe_allow_html=True)
+
+    st.markdown("""
+        In questa applicazione, due macchine da corsa competono tra loro basandosi su numeri casuali. 
+        Ogni macchina si muove in base alla rarità dei numeri casuali generati. Più rara è la sequenza, 
+        più lontano si muove la macchina. Puoi avviare la gara, fermarla, scaricare i dati generati e 
+        visualizzare le statistiche.
+        """)
 
     st.sidebar.title("Menu")
     start_button = st.sidebar.button("Avvia Gara")
