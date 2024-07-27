@@ -10,31 +10,6 @@ import io
 import serial
 import serial.tools.list_ports
 import platform
-from pydub import AudioSegment
-from pydub.playback import play
-
-# Imposta il percorso completo di ffmpeg/ffplay
-AudioSegment.converter = "C:\\Users\\Riccardo\\Desktop\\persuoni\\ffmpeg-7.0.1\\ffmpeg-tools-2022-01-01-git-d6b2357edd\\bin\\ffmpeg.exe"
-AudioSegment.ffmpeg = "C:\\Users\\Riccardo\\Desktop\\persuoni\\ffmpeg-7.0.1\\ffmpeg-tools-2022-01-01-git-d6b2357edd\\bin\\ffmpeg.exe"
-AudioSegment.ffprobe = "C:\\Users\\Riccardo\\Desktop\\persuoni\\ffmpeg-7.0.1\\ffmpeg-tools-2022-01-01-git-d6b2357edd\\bin\\ffprobe.exe"
-
-def get_random_bits_from_trng(num_bits):
-    ports = list(serial.tools.list_ports.comports())
-    for port in ports:
-        if "TrueRNG" in port.description:
-            try:
-                ser = serial.Serial(port.device, 9600, timeout=1)
-                random_bits = []
-                while len(random_bits) < num_bits:
-                    byte = ser.read()
-                    if byte:
-                        random_bits.extend([int(bit) for bit in bin(ord(byte))[2:].zfill(8)])
-                ser.close()
-                return random_bits[:num_bits]
-            except serial.SerialException as e:
-                st.warning(f"Errore nella comunicazione con TrueRNG3: {e}")
-                return None
-    return None
 
 def get_random_bits_from_random_org(num_bits):
     url = "https://www.random.org/integers/"
@@ -74,13 +49,6 @@ def image_to_base64(image):
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
-
-def play_sound(sound_file):
-    try:
-        sound = AudioSegment.from_file(sound_file)
-        play(sound)
-    except Exception as e:
-        st.warning(f"Errore durante la riproduzione del suono: {e}")
 
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
@@ -130,7 +98,6 @@ def main():
     download_menu = st.sidebar.expander("Download")
     with download_menu:
         download_button = st.button("Scarica Dati")
-    stats_button = st.sidebar.button("Mostra Analisi Statistiche")
     reset_button = st.sidebar.button("Resetta Gioco")
 
     if "car_pos" not in st.session_state:
@@ -178,13 +145,8 @@ def main():
     car2_placeholder = st.empty()
 
     while st.session_state.running:
-        random_bits_1 = get_random_bits_from_trng(2500)
-        if random_bits_1 is None:
-            random_bits_1 = get_random_bits_from_random_org(2500)
-        
-        random_bits_2 = get_random_bits_from_trng(2500)
-        if random_bits_2 is None:
-            random_bits_2 = get_random_bits_from_random_org(2500)
+        random_bits_1 = get_random_bits_from_random_org(2500)
+        random_bits_2 = get_random_bits_from_random_org(2500)
 
         if random_bits_1 is None or random_bits_2 is None:
             st.session_state.running = False
@@ -205,25 +167,16 @@ def main():
         
         percentile_5_1 = np.percentile(st.session_state.data_for_condition_1, 5)
         percentile_5_2 = np.percentile(st.session_state.data_for_condition_2, 5)
-        
-        st.write(f"Random Bits 1: {random_bits_1[:10]}...")
-        st.write(f"Random Bits 2: {random_bits_2[:10]}...")
-        st.write(f"Entropy Score 1: {entropy_score_1}")
-        st.write(f"Entropy Score 2: {entropy_score_2}")
-        st.write(f"Percentile 5_1: {percentile_5_1}")
-        st.write(f"Percentile 5_2: {percentile_5_2}")
 
         if entropy_score_1 < percentile_5_1:
             rarity_percentile = 1 - (entropy_score_1 / percentile_5_1)
             st.session_state.car_pos = move_car(st.session_state.car_pos, 6 * (1 + (10 * rarity_percentile)))
             st.session_state.car1_moves += 1
-            play_sound("move_car.wav")
         
         if entropy_score_2 < percentile_5_2:
             rarity_percentile = 1 - (entropy_score_2 / percentile_5_2)
             st.session_state.car2_pos = move_car(st.session_state.car2_pos, 6 * (1 + (10 * rarity_percentile)))
             st.session_state.car2_moves += 1
-            play_sound("move_car2.wav")
         
         st.session_state.widget_key_counter += 1
         
@@ -257,35 +210,6 @@ def main():
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
-    if stats_button:
-        if st.session_state.data_for_condition_1 and st.session_state.data_for_condition_2:
-            u_stat, p_value = mannwhitneyu(st.session_state.data_for_condition_1, st.session_state.data_for_condition_2, alternative='two-sided')
-            mann_whitney_text = f"Mann-Whitney U test: U-stat = {u_stat:.4f}, p-value = {p_value:.4f}"
-        else:
-            mann_whitney_text = "Mann-Whitney U test: Dati insufficienti"
-
-        total_moves = st.session_state.car1_moves + st.session_state.car2_moves
-        if total_moves > 0:
-            binom_p_value_moves = binomtest(st.session_state.car1_moves, total_moves, alternative='two-sided').pvalue
-            binom_text_moves = f"Test Binomiale (numero di spostamenti): p-value = {binom_p_value_moves:.4f}"
-        else:
-            binom_text_moves = "Test Binomiale (numero di spostamenti): Dati insufficienti"
-
-        if st.session_state.random_numbers_1:
-            binom_p_value_1 = binomtest(np.sum(st.session_state.random_numbers_1), len(st.session_state.random_numbers_1), alternative='two-sided').pvalue
-            binom_text_1 = f"Test Binomiale (cifre auto verde): p-value = {binom_p_value_1:.4f}"
-        else:
-            binom_text_1 = "Test Binomiale (cifre auto verde): Dati insufficienti"
-
-        if st.session_state.random_numbers_2:
-            binom_p_value_2 = binomtest(np.sum(st.session_state.random_numbers_2), len(st.session_state.random_numbers_2), alternative='two-sided').pvalue
-            binom_text_2 = f"Test Binomiale (cifre auto rossa): p-value = {binom_p_value_2:.4f}"
-        else:
-            binom_text_2 = "Test Binomiale (cifre auto rossa): Dati insufficienti"
-
-        stats_text = mann_whitney_text + "\n" + binom_text_moves + "\n" + binom_text_1 + "\n" + binom_text_2
-        st.write(stats_text)
-    
     if reset_button:
         st.session_state.car_pos = 50
         st.session_state.car2_pos = 50
