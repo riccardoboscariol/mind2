@@ -13,6 +13,11 @@ import platform
 from pydub import AudioSegment
 from pydub.playback import play
 
+# Imposta il percorso completo di ffmpeg/ffplay
+AudioSegment.converter = "C:\\Users\\Riccardo\\Desktop\\persuoni\\ffmpeg-7.0.1\\ffmpeg-tools-2022-01-01-git-d6b2357edd\\bin\\ffmpeg.exe"
+AudioSegment.ffmpeg = "C:\\Users\\Riccardo\\Desktop\\persuoni\\ffmpeg-7.0.1\\ffmpeg-tools-2022-01-01-git-d6b2357edd\\bin\\ffmpeg.exe"
+AudioSegment.ffprobe = "C:\\Users\\Riccardo\\Desktop\\persuoni\\ffmpeg-7.0.1\\ffmpeg-tools-2022-01-01-git-d6b2357edd\\bin\\ffprobe.exe"
+
 def get_random_bits_from_trng(num_bits):
     ports = list(serial.tools.list_ports.comports())
     for port in ports:
@@ -297,4 +302,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
