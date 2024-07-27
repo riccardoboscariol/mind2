@@ -12,8 +12,9 @@ import serial.tools.list_ports
 import platform
 import pygame
 
-# Inizializza pygame
+# Inizializza pygame e il mixer
 pygame.init()
+pygame.mixer.init()
 
 def get_random_bits_from_trng(num_bits):
     ports = list(serial.tools.list_ports.comports())
@@ -124,8 +125,9 @@ def main():
     st.sidebar.title("Menu")
     start_button = st.sidebar.button("Avvia Gara")
     stop_button = st.sidebar.button("Blocca Gara")
-    download_button = st.sidebar.button("Scarica Dati")
-    download_graph_button = st.sidebar.button("Scarica Grafico")
+    download_menu = st.sidebar.expander("Download")
+    with download_menu:
+        download_button = st.button("Scarica Dati")
     stats_button = st.sidebar.button("Mostra Analisi Statistiche")
     reset_button = st.sidebar.button("Resetta Gioco")
 
@@ -253,20 +255,6 @@ def main():
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
-    if download_graph_button:
-        fig, ax = plt.subplots(figsize=(8, 4))
-        if st.session_state.data_for_condition_1:
-            ax.hist(st.session_state.data_for_condition_1, bins=30, alpha=0.5, color='red', edgecolor='k')
-        if st.session_state.data_for_condition_2:
-            ax.hist(st.session_state.data_for_condition_2, bins=30, alpha=0.5, color='green', edgecolor='k')
-        ax.set_title('Distribuzione della Rarità degli Slot')
-        ax.set_xlabel('Rarità')
-        ax.set_ylabel('Frequenza')
-        buf = io.BytesIO()
-        fig.savefig(buf, format='png')
-        buf.seek(0)
-        st.download_button(label="Scarica Grafico", data=buf, file_name="rarity_distribution.png", mime="image/png")
-    
     if stats_button:
         if st.session_state.data_for_condition_1 and st.session_state.data_for_condition_2:
             u_stat, p_value = mannwhitneyu(st.session_state.data_for_condition_1, st.session_state.data_for_condition_2, alternative='two-sided')
