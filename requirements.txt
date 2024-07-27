@@ -6,3 +6,4 @@ scipy
 Pillow
 pyserial
 playsound
+pygame
