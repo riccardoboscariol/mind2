@@ -7,3 +7,4 @@ Pillow
 pyserial
 playsound
 pygame
+pydub
