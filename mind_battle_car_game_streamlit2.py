@@ -56,6 +56,9 @@ def main():
         .stSlider > div > div > div > div {
             background: white;
         }
+        .stSlider > div > div > div {
+            background: white;
+        }
         .stSlider > div > div > div > div > div {
             background: white;
             border-radius: 50%;
@@ -88,7 +91,7 @@ def main():
         La macchina verde si muove quando l'entropia è a favore del suo bit scelto e inferiore al 5%.
         La macchina rossa si muove quando l'entropia è a favore dell'altro bit e inferiore al 5%.
         Ogni 0.1 secondi vengono generati 5000 bit casuali per ciascuno slot.
-        Se TrueRNG3 non è disponibile, il programma utilizza random.org.
+        Il programma utilizza random.org.
         L'entropia è calcolata usando la formula di Shannon. La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
         La distanza di movimento è calcolata con la formula: Distanza = 6 × (1 + ((percentile - entropia) / percentile)).
         """)
