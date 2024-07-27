@@ -10,7 +10,10 @@ import io
 import serial
 import serial.tools.list_ports
 import platform
-import simpleaudio as sa
+import pygame
+
+# Inizializza pygame
+pygame.init()
 
 def get_random_bits_from_trng(num_bits):
     ports = list(serial.tools.list_ports.comports())
@@ -71,9 +74,8 @@ def image_to_base64(image):
 
 def play_sound(sound_file):
     try:
-        wave_obj = sa.WaveObject.from_wave_file(sound_file)
-        play_obj = wave_obj.play()
-        play_obj.wait_done()
+        pygame.mixer.music.load(sound_file)
+        pygame.mixer.music.play()
     except Exception as e:
         st.warning(f"Errore durante la riproduzione del suono: {e}")
 
@@ -99,7 +101,7 @@ def main():
         }
         .slider-container.first {
             margin-top: 50px;
-            margin-bottom: 40px;
+            margin-bottom: 40px.
         }
         .car-image {
             position: absolute;
@@ -303,5 +305,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
