@@ -8,3 +8,4 @@ pyserial
 playsound
 pygame
 pydub
+openpyxl
