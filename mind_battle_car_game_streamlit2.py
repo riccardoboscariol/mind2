@@ -54,10 +54,10 @@ def main():
     st.markdown("""
         <style>
         .stSlider > div > div > div > div {
-            display: none;
+            background: white;
         }
         .stSlider > div > div > div > div > div {
-            background: red;
+            background: white;
             border-radius: 50%;
             height: 14px;
             width: 14px;
@@ -69,7 +69,7 @@ def main():
         }
         .slider-container.first {
             margin-top: 50px;
-            margin-bottom: 40px.
+            margin-bottom: 40px;
         }
         .car-image {
             position: absolute;
