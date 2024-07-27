@@ -10,12 +10,7 @@ import io
 import serial
 import serial.tools.list_ports
 import platform
-
-# Importa il modulo dei suoni in modo condizionale
-if platform.system() == "Windows":
-    import winsound  # Solo per Windows
-else:
-    from playsound import playsound
+import simpleaudio as sa
 
 def get_random_bits_from_trng(num_bits):
     ports = list(serial.tools.list_ports.comports())
@@ -75,10 +70,12 @@ def image_to_base64(image):
     return base64.b64encode(buffered.getvalue()).decode()
 
 def play_sound(sound_file):
-    if platform.system() == "Windows":
-        winsound.PlaySound(sound_file, winsound.SND_FILENAME)
-    else:
-        playsound(sound_file)
+    try:
+        wave_obj = sa.WaveObject.from_wave_file(sound_file)
+        play_obj = wave_obj.play()
+        play_obj.wait_done()
+    except Exception as e:
+        st.warning(f"Errore durante la riproduzione del suono: {e}")
 
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
