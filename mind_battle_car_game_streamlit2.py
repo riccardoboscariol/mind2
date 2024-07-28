@@ -8,25 +8,24 @@ import requests
 import base64
 import io
 
-def get_random_bits_from_random_org(num_bits):
-    url = "https://www.random.org/integers/"
+def get_random_bits_from_qrng_ethz(num_bits):
+    url = "https://qrng.ethz.ch/api/rand"
     params = {
-        "num": num_bits,
-        "min": 0,
-        "max": 1,
-        "col": 1,
-        "base": 10,
-        "format": "plain",
-        "rnd": "new"
+        "type": "uint8",
+        "n": num_bits
     }
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
-        random_bits = list(map(int, response.text.strip().split()))
+        random_bytes = response.content
+        random_bits = [(byte & 1) for byte in random_bytes]  # Convert bytes to bits
         return random_bits
     except (requests.RequestException, ValueError) as e:
-        st.warning(f"Errore durante l'accesso a random.org: {e}")
+        st.warning(f"Errore durante l'accesso a qrng.ethz.ch: {e}")
         return None
+
+def get_local_random_bits(num_bits):
+    return list(np.random.randint(0, 2, size=num_bits))
 
 def calculate_entropy(bits):
     n = len(bits)
@@ -91,7 +90,7 @@ def main():
         La macchina verde si muove quando l'entropia è a favore del suo bit scelto e inferiore al 5%.
         La macchina rossa si muove quando l'entropia è a favore dell'altro bit e inferiore al 5%.
         Ogni 0.1 secondi vengono generati 5000 bit casuali per ciascuno slot.
-        Il programma utilizza random.org.
+        Il programma utilizza qrng.ethz.ch.
         L'entropia è calcolata usando la formula di Shannon. La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
         La distanza di movimento è calcolata con la formula: Distanza = 15 × (1 + ((percentile - entropia) / percentile)).
         """)
@@ -160,8 +159,8 @@ def main():
     car2_placeholder = st.empty()
 
     while st.session_state.running:
-        random_bits_1 = get_random_bits_from_random_org(2500)
-        random_bits_2 = get_random_bits_from_random_org(2500)
+        random_bits_1 = get_random_bits_from_qrng_ethz(2500)
+        random_bits_2 = get_random_bits_from_qrng_ethz(2500)
 
         if random_bits_1 is None or random_bits_2 is None:
             st.session_state.running = False
