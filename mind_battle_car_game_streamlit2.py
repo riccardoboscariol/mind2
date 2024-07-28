@@ -7,21 +7,28 @@ import requests
 import base64
 import io
 
+MAX_BATCH_SIZE = 1000  # Adatta questo valore se necessario
+
 def get_random_bits_from_qrng_ethz(num_bits):
-    url = "https://qrng.ethz.ch/api/randint"
-    params = {
-        "min": 0,
-        "max": 1,
-        "size": num_bits
-    }
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-        random_bits = response.json()
-        return random_bits
-    except (requests.RequestException, ValueError) as e:
-        st.warning(f"Errore durante l'accesso a qrng.ethz.ch: {e}. Utilizzo numeri casuali locali.")
-        return get_local_random_bits(num_bits)
+    random_bits = []
+    while num_bits > 0:
+        batch_size = min(num_bits, MAX_BATCH_SIZE)
+        url = "https://qrng.ethz.ch/api/randint"
+        params = {
+            "min": 0,
+            "max": 1,
+            "size": batch_size
+        }
+        try:
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            random_bits.extend(response.json())
+            num_bits -= batch_size
+        except (requests.RequestException, ValueError) as e:
+            st.warning(f"Errore durante l'accesso a qrng.ethz.ch: {e}. Utilizzo numeri casuali locali.")
+            random_bits.extend(get_local_random_bits(num_bits))
+            break
+    return random_bits
 
 def get_local_random_bits(num_bits):
     return list(np.random.randint(0, 2, size=num_bits))
