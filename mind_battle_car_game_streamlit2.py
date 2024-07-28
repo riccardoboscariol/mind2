@@ -3,13 +3,13 @@ import time
 import numpy as np
 import pandas as pd
 from PIL import Image
-from scipy.stats import mannwhitneyu, binomtest
 import requests
 import base64
 import io
 
-def get_random_bits_from_qrng_ethz(num_bits):
-    url = "https://qrng.ethz.ch/api/rand"
+# Supponiamo che ID Quantique abbia un'API per ottenere numeri casuali
+def get_random_bits_from_idquantique(num_bits):
+    url = "https://randomapi.idquantique.com/api/rand"  # Supposta URL API
     params = {
         "type": "uint8",
         "n": num_bits
@@ -18,10 +18,13 @@ def get_random_bits_from_qrng_ethz(num_bits):
         response = requests.get(url, params=params)
         response.raise_for_status()
         random_bytes = response.content
-        random_bits = [(byte & 1) for byte in random_bytes]  # Convert bytes to bits
+        random_bits = [(byte & 1) for byte in random_bytes]  # Converti bytes in bit
         return random_bits
-    except (requests.RequestException, ValueError) as e:
-        st.warning(f"Errore durante l'accesso a qrng.ethz.ch: {e}")
+    except requests.RequestException as e:
+        st.error(f"Errore durante l'accesso a idquantique.com: {e}")
+        return None
+    except ValueError as e:
+        st.error(f"Errore nel processamento dei dati da idquantique.com: {e}")
         return None
 
 def get_local_random_bits(num_bits):
@@ -71,15 +74,15 @@ def main():
         }
         .slider-container.first {
             margin-top: 50px;
-            margin-bottom: 40px;
+            margin-bottom: 40px.
         }
         .car-image {
             position: absolute;
             top: -80px;
-            width: 150px;
+            width: 150px.
         }
         .slider-container input[type=range] {
-            width: 100%;
+            width: 100%.
         }
         </style>
         """, unsafe_allow_html=True)
@@ -90,7 +93,7 @@ def main():
         La macchina verde si muove quando l'entropia è a favore del suo bit scelto e inferiore al 5%.
         La macchina rossa si muove quando l'entropia è a favore dell'altro bit e inferiore al 5%.
         Ogni 0.1 secondi vengono generati 5000 bit casuali per ciascuno slot.
-        Il programma utilizza qrng.ethz.ch.
+        Il programma utilizza idquantique.com.
         L'entropia è calcolata usando la formula di Shannon. La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
         La distanza di movimento è calcolata con la formula: Distanza = 15 × (1 + ((percentile - entropia) / percentile)).
         """)
@@ -159,8 +162,8 @@ def main():
     car2_placeholder = st.empty()
 
     while st.session_state.running:
-        random_bits_1 = get_random_bits_from_qrng_ethz(2500)
-        random_bits_2 = get_random_bits_from_qrng_ethz(2500)
+        random_bits_1 = get_random_bits_from_idquantique(2500)
+        random_bits_2 = get_random_bits_from_idquantique(2500)
 
         if random_bits_1 is None or random_bits_2 is None:
             st.session_state.running = False
@@ -241,4 +244,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
