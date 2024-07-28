@@ -132,6 +132,8 @@ def main():
         st.session_state.running = False
     if "widget_key_counter" not in st.session_state:
         st.session_state.widget_key_counter = 0
+    if "player_choice" not in st.session_state:
+        st.session_state.player_choice = None
 
     car_image = Image.open("car.png").resize((150, 150))
     car2_image = Image.open("car2.png").resize((150, 150))
@@ -144,6 +146,12 @@ def main():
 
     if stop_button:
         st.session_state.running = False
+
+    st.write("Scegli il tuo bit per la macchina verde:")
+    if st.button("Scegli 1"):
+        st.session_state.player_choice = 1
+    if st.button("Scegli 0"):
+        st.session_state.player_choice = 0
 
     car_placeholder = st.empty()
     car2_placeholder = st.empty()
@@ -172,18 +180,18 @@ def main():
         percentile_5_1 = np.percentile(st.session_state.data_for_condition_1, 5)
         percentile_5_2 = np.percentile(st.session_state.data_for_condition_2, 5)
 
-        if entropy_score_1 < percentile_5_1:
-            rarity_percentile = 1 - (entropy_score_1 / percentile_5_1)
-            st.session_state.car_pos = move_car(st.session_state.car_pos, 15 * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
-            st.session_state.car1_moves += 1
-        
-        if entropy_score_2 < percentile_5_2:
-            rarity_percentile = 1 - (entropy_score_2 / percentile_5_2)
-            st.session_state.car2_pos = move_car(st.session_state.car2_pos, 15 * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
-            st.session_state.car2_moves += 1
-        
-        st.session_state.widget_key_counter += 1
-        
+        count_1 = sum(random_bits_1)
+        count_0 = len(random_bits_1) - count_1
+
+        if st.session_state.player_choice == 1:
+            if entropy_score_1 < percentile_5_1 and count_1 > count_0:
+                st.session_state.car_pos = move_car(st.session_state.car_pos, 15 * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
+                st.session_state.car1_moves += 1
+        elif st.session_state.player_choice == 0:
+            if entropy_score_1 < percentile_5_1 and count_0 > count_1:
+                st.session_state.car_pos = move_car(st.session_state.car_pos, 15 * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
+                st.session_state.car1_moves += 1
+
         car_placeholder.markdown(f"""
             <div class="slider-container first">
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
@@ -226,6 +234,7 @@ def main():
         st.session_state.random_numbers_1 = []
         st.session_state.random_numbers_2 = []
         st.session_state.widget_key_counter = 0
+        st.session_state.player_choice = None
         st.write("Gioco resettato!")
 
 if __name__ == "__main__":
