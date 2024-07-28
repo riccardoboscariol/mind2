@@ -95,17 +95,8 @@ def main():
         La distanza di movimento è calcolata con la formula: Distanza = 15 × (1 + ((percentile - entropia) / percentile)).
         """)
 
-    st.sidebar.title("Menu")
-    if st.session_state.player_choice is None:
-        start_button = st.sidebar.button("Avvia Gara", disabled=True)
-    else:
-        start_button = st.sidebar.button("Avvia Gara")
-    stop_button = st.sidebar.button("Blocca Gara")
-    download_menu = st.sidebar.expander("Download")
-    with download_menu:
-        download_button = st.button("Scarica Dati")
-    reset_button = st.sidebar.button("Resetta Gioco")
-
+    if "player_choice" not in st.session_state:
+        st.session_state.player_choice = None
     if "car_pos" not in st.session_state:
         st.session_state.car_pos = 50
     if "car2_pos" not in st.session_state:
@@ -134,8 +125,17 @@ def main():
         st.session_state.running = False
     if "widget_key_counter" not in st.session_state:
         st.session_state.widget_key_counter = 0
-    if "player_choice" not in st.session_state:
-        st.session_state.player_choice = None
+
+    st.sidebar.title("Menu")
+    if st.session_state.player_choice is None:
+        start_button = st.sidebar.button("Avvia Gara", disabled=True)
+    else:
+        start_button = st.sidebar.button("Avvia Gara")
+    stop_button = st.sidebar.button("Blocca Gara")
+    download_menu = st.sidebar.expander("Download")
+    with download_menu:
+        download_button = st.button("Scarica Dati")
+    reset_button = st.sidebar.button("Resetta Gioco")
 
     car_image = Image.open("car.png").resize((150, 150))
     car2_image = Image.open("car2.png").resize((150, 150))
