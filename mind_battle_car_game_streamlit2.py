@@ -7,25 +7,21 @@ import requests
 import base64
 import io
 
-# Supponiamo che ID Quantique abbia un'API per ottenere numeri casuali
-def get_random_bits_from_idquantique(num_bits):
-    url = "https://randomapi.idquantique.com/api/rand"  # Supposta URL API
+def get_random_bits_from_qrng_ethz(num_bits):
+    url = "https://qrng.ethz.ch/api/randint"
     params = {
-        "type": "uint8",
-        "n": num_bits
+        "min": 0,
+        "max": 1,
+        "size": num_bits
     }
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
-        random_bytes = response.content
-        random_bits = [(byte & 1) for byte in random_bytes]  # Converti bytes in bit
+        random_bits = response.json()
         return random_bits
-    except requests.RequestException as e:
-        st.error(f"Errore durante l'accesso a idquantique.com: {e}")
-        return None
-    except ValueError as e:
-        st.error(f"Errore nel processamento dei dati da idquantique.com: {e}")
-        return None
+    except (requests.RequestException, ValueError) as e:
+        st.warning(f"Errore durante l'accesso a qrng.ethz.ch: {e}. Utilizzo numeri casuali locali.")
+        return get_local_random_bits(num_bits)
 
 def get_local_random_bits(num_bits):
     return list(np.random.randint(0, 2, size=num_bits))
@@ -93,7 +89,7 @@ def main():
         La macchina verde si muove quando l'entropia è a favore del suo bit scelto e inferiore al 5%.
         La macchina rossa si muove quando l'entropia è a favore dell'altro bit e inferiore al 5%.
         Ogni 0.1 secondi vengono generati 5000 bit casuali per ciascuno slot.
-        Il programma utilizza idquantique.com.
+        Il programma utilizza qrng.ethz.ch.
         L'entropia è calcolata usando la formula di Shannon. La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
         La distanza di movimento è calcolata con la formula: Distanza = 15 × (1 + ((percentile - entropia) / percentile)).
         """)
@@ -162,8 +158,8 @@ def main():
     car2_placeholder = st.empty()
 
     while st.session_state.running:
-        random_bits_1 = get_random_bits_from_idquantique(2500)
-        random_bits_2 = get_random_bits_from_idquantique(2500)
+        random_bits_1 = get_random_bits_from_qrng_ethz(2500)
+        random_bits_2 = get_random_bits_from_qrng_ethz(2500)
 
         if random_bits_1 is None or random_bits_2 is None:
             st.session_state.running = False
@@ -244,5 +240,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
