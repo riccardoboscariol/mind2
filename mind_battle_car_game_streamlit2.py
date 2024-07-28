@@ -97,7 +97,10 @@ def main():
         """)
 
     st.sidebar.title("Menu")
-    start_button = st.sidebar.button("Avvia Gara")
+    if st.session_state.player_choice is None:
+        start_button = st.sidebar.button("Avvia Gara", disabled=True)
+    else:
+        start_button = st.sidebar.button("Avvia Gara")
     stop_button = st.sidebar.button("Blocca Gara")
     download_menu = st.sidebar.expander("Download")
     with download_menu:
@@ -140,18 +143,18 @@ def main():
     car_image_base64 = image_to_base64(car_image)
     car2_image_base64 = image_to_base64(car2_image)
 
-    if start_button:
-        st.session_state.running = True
-        st.session_state.car_start_time = time.time()
-
-    if stop_button:
-        st.session_state.running = False
-
     st.write("Scegli il tuo bit per la macchina verde:")
     if st.button("Scegli 1"):
         st.session_state.player_choice = 1
     if st.button("Scegli 0"):
         st.session_state.player_choice = 0
+
+    if start_button and st.session_state.player_choice is not None:
+        st.session_state.running = True
+        st.session_state.car_start_time = time.time()
+
+    if stop_button:
+        st.session_state.running = False
 
     car_placeholder = st.empty()
     car2_placeholder = st.empty()
@@ -239,3 +242,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
