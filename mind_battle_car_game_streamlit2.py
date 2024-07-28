@@ -7,25 +7,29 @@ import requests
 import base64
 import io
 
-MAX_BATCH_SIZE = 1000  # Dimensione massima del batch per le richieste a qrng.ethz.ch
+MAX_BATCH_SIZE = 1000  # Dimensione massima del batch per le richieste a random.org
 
-def get_random_bits_from_qrng_ethz(num_bits):
+def get_random_bits_from_random_org(num_bits):
     random_bits = []
     while num_bits > 0:
         batch_size = min(num_bits, MAX_BATCH_SIZE)
-        url = "https://qrng.ethz.ch/api/randint"
+        url = "https://www.random.org/integers/"
         params = {
+            "num": batch_size,
             "min": 0,
             "max": 1,
-            "size": batch_size
+            "col": 1,
+            "base": 10,
+            "format": "plain",
+            "rnd": "new"
         }
         try:
             response = requests.get(url, params=params)
             response.raise_for_status()
-            random_bits.extend(response.json()['result'])
+            random_bits.extend(list(map(int, response.text.strip().split())))
             num_bits -= batch_size
         except (requests.RequestException, ValueError) as e:
-            st.warning(f"Errore durante l'accesso a qrng.ethz.ch: {e}. Utilizzo numeri casuali locali.")
+            st.warning(f"Errore durante l'accesso a random.org: {e}. Utilizzo numeri casuali locali.")
             random_bits.extend(get_local_random_bits(num_bits))
             break
     return random_bits
@@ -96,7 +100,7 @@ def main():
         La macchina verde si muove quando l'entropia è a favore del suo bit scelto e inferiore al 5%.
         La macchina rossa si muove quando l'entropia è a favore dell'altro bit e inferiore al 5%.
         Ogni 0.1 secondi vengono generati 2500 bit casuali per ciascuno slot.
-        Il programma utilizza qrng.ethz.ch.
+        Il programma utilizza random.org.
         L'entropia è calcolata usando la formula di Shannon. La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
         La distanza di movimento è calcolata con la formula: Distanza = 15 × (1 + ((percentile - entropia) / percentile)).
         """)
@@ -165,8 +169,8 @@ def main():
     car2_placeholder = st.empty()
 
     while st.session_state.running:
-        random_bits_1 = get_random_bits_from_qrng_ethz(2500)
-        random_bits_2 = get_random_bits_from_qrng_ethz(2500)
+        random_bits_1 = get_random_bits_from_random_org(2500)
+        random_bits_2 = get_random_bits_from_random_org(2500)
 
         if random_bits_1 is None or random_bits_2 is None:
             st.session_state.running = False
@@ -247,4 +251,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
