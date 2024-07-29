@@ -108,7 +108,7 @@ def main():
         L'entropia è calcolata usando la formula di Shannon. La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
         La distanza di movimento è calcolata con la formula: Distanza = 15 × (1 + ((percentile - entropia) / percentile)).
         """)
-    
+
     if "player_choice" not in st.session_state:
         st.session_state.player_choice = None
     if "car_pos" not in st.session_state:
@@ -192,6 +192,9 @@ def main():
         st.session_state.running = False
 
     while st.session_state.running:
+        start_time = time.time()
+
+        # Ottieni numeri casuali da random.org
         random_bits_1 = get_random_bits_from_random_org(2500)
         random_bits_2 = get_random_bits_from_random_org(2500)
 
@@ -236,7 +239,8 @@ def main():
 
         display_cars()
 
-        time.sleep(0.5)  # Incrementato il tempo di attesa per ridurre la frequenza delle richieste
+        time_elapsed = time.time() - start_time
+        time.sleep(max(0.1 - time_elapsed, 0))
 
     if download_button:
         df = pd.DataFrame({
@@ -270,4 +274,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
