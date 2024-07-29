@@ -8,10 +8,12 @@ import base64
 import io
 
 MAX_BATCH_SIZE = 1000  # Dimensione massima del batch per le richieste a random.org
+RETRY_LIMIT = 3  # Numero di tentativi per le richieste a random.org
 
 def get_random_bits_from_random_org(num_bits):
     random_bits = []
-    while num_bits > 0:
+    attempts = 0
+    while num_bits > 0 and attempts < RETRY_LIMIT:
         batch_size = min(num_bits, MAX_BATCH_SIZE)
         url = "https://www.random.org/integers/"
         params = {
@@ -24,14 +26,16 @@ def get_random_bits_from_random_org(num_bits):
             "rnd": "new"
         }
         try:
-            response = requests.get(url, params=params)
+            response = requests.get(url, params=params, timeout=5)
             response.raise_for_status()
             random_bits.extend(list(map(int, response.text.strip().split())))
             num_bits -= batch_size
         except (requests.RequestException, ValueError) as e:
-            st.warning(f"Errore durante l'accesso a random.org: {e}. Utilizzo numeri casuali locali.")
-            random_bits.extend(get_local_random_bits(num_bits))
-            break
+            attempts += 1
+            if attempts >= RETRY_LIMIT:
+                st.warning(f"Errore durante l'accesso a random.org: {e}. Utilizzo numeri casuali locali.")
+                random_bits.extend(get_local_random_bits(num_bits))
+                break
     return random_bits
 
 def get_local_random_bits(num_bits):
@@ -232,7 +236,7 @@ def main():
 
         display_cars()
 
-        time.sleep(0.2)
+        time.sleep(0.5)  # Incrementato il tempo di attesa per ridurre la frequenza delle richieste
 
     if download_button:
         df = pd.DataFrame({
@@ -266,5 +270,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
