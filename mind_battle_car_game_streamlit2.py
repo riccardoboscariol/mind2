@@ -104,7 +104,7 @@ def main():
         L'entropia è calcolata usando la formula di Shannon. La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
         La distanza di movimento è calcolata con la formula: Distanza = 15 × (1 + ((percentile - entropia) / percentile)).
         """)
-
+    
     if "player_choice" not in st.session_state:
         st.session_state.player_choice = None
     if "car_pos" not in st.session_state:
@@ -147,6 +147,8 @@ def main():
         download_button = st.button("Scarica Dati")
     reset_button = st.sidebar.button("Resetta Gioco")
 
+    move_multiplier = st.sidebar.slider("Moltiplicatore di Movimento", min_value=1, max_value=100, value=15)
+
     car_image = Image.open("car.png").resize((150, 150))
     car2_image = Image.open("car2.png").resize((150, 150))
     car_image_base64 = image_to_base64(car_image)
@@ -158,15 +160,32 @@ def main():
     if st.button("Scegli 0"):
         st.session_state.player_choice = 0
 
+    car_placeholder = st.empty()
+    car2_placeholder = st.empty()
+
+    def display_cars():
+        car_placeholder.markdown(f"""
+            <div class="slider-container first">
+                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
+                <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        car2_placeholder.markdown(f"""
+            <div class="slider-container">
+                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
+                <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
+            </div>
+        """, unsafe_allow_html=True)
+
+    display_cars()
+
     if start_button and st.session_state.player_choice is not None:
         st.session_state.running = True
         st.session_state.car_start_time = time.time()
 
     if stop_button:
         st.session_state.running = False
-
-    car_placeholder = st.empty()
-    car2_placeholder = st.empty()
 
     while st.session_state.running:
         random_bits_1 = get_random_bits_from_random_org(2500)
@@ -195,28 +214,23 @@ def main():
         count_1 = sum(random_bits_1)
         count_0 = len(random_bits_1) - count_1
 
-        if st.session_state.player_choice == 1:
-            if entropy_score_1 < percentile_5_1 and count_1 > count_0:
-                st.session_state.car_pos = move_car(st.session_state.car_pos, 15 * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
+        if entropy_score_1 < percentile_5_1:
+            if st.session_state.player_choice == 1 and count_1 > count_0:
+                st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
                 st.session_state.car1_moves += 1
-        elif st.session_state.player_choice == 0:
-            if entropy_score_1 < percentile_5_1 and count_0 > count_1:
-                st.session_state.car_pos = move_car(st.session_state.car_pos, 15 * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
+            elif st.session_state.player_choice == 0 and count_0 > count_1:
+                st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
                 st.session_state.car1_moves += 1
 
-        car_placeholder.markdown(f"""
-            <div class="slider-container first">
-                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
-                <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        car2_placeholder.markdown(f"""
-            <div class="slider-container">
-                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
-                <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
-            </div>
-        """, unsafe_allow_html=True)
+        if entropy_score_2 < percentile_5_2:
+            if st.session_state.player_choice == 1 and count_0 > count_1:
+                st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
+                st.session_state.car2_moves += 1
+            elif st.session_state.player_choice == 0 and count_1 > count_0:
+                st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
+                st.session_state.car2_moves += 1
+
+        display_cars()
 
         time.sleep(0.2)
 
@@ -248,6 +262,7 @@ def main():
         st.session_state.widget_key_counter = 0
         st.session_state.player_choice = None
         st.write("Gioco resettato!")
+        display_cars()
 
 if __name__ == "__main__":
     main()
