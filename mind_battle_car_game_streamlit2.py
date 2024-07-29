@@ -10,7 +10,7 @@ import io
 MAX_BATCH_SIZE = 1000  # Dimensione massima del batch per le richieste a random.org
 RETRY_LIMIT = 3  # Numero di tentativi per le richieste a random.org
 
-def get_random_bits_from_random_org(num_bits):
+def get_random_bits_from_random_org(num_bits, api_key=None):
     random_bits = []
     attempts = 0
     while num_bits > 0 and attempts < RETRY_LIMIT:
@@ -25,8 +25,11 @@ def get_random_bits_from_random_org(num_bits):
             "format": "plain",
             "rnd": "new"
         }
+        headers = {"User-Agent": "streamlit_app"}
+        if api_key:
+            headers["Random-Org-API-Key"] = api_key
         try:
-            response = requests.get(url, params=params, timeout=5)
+            response = requests.get(url, params=params, headers=headers, timeout=5)
             response.raise_for_status()
             random_bits.extend(list(map(int, response.text.strip().split())))
             num_bits -= batch_size
@@ -146,6 +149,7 @@ def main():
     else:
         start_button = st.sidebar.button("Avvia Gara")
     stop_button = st.sidebar.button("Blocca Gara")
+    api_key = st.sidebar.text_input("Inserisci API Key per random.org")
     download_menu = st.sidebar.expander("Download")
     with download_menu:
         download_button = st.button("Scarica Dati")
@@ -184,6 +188,38 @@ def main():
 
     display_cars()
 
+    def check_winner():
+        if st.session_state.car_pos >= 1000:
+            return "Verde"
+        elif st.session_state.car2_pos >= 1000:
+            return "Rossa"
+        return None
+
+    def end_race(winner):
+        st.session_state.running = False
+        st.success(f"Vince l'auto {winner}, complimenti!")
+        if st.button("Nuova Gara"):
+            reset_game()
+        if st.button("Termina Gioco"):
+            st.stop()
+
+    def reset_game():
+        st.session_state.car_pos = 50
+        st.session_state.car2_pos = 50
+        st.session_state.car1_moves = 0
+        st.session_state.car2_moves = 0
+        st.session_state.data_for_excel_1 = []
+        st.session_state.data_for_excel_2 = []
+        st.session_state.data_for_condition_1 = []
+        st.session_state.data_for_condition_2 = []
+        st.session_state.random_numbers_1 = []
+        st.session_state.random_numbers_2 = []
+        st.session_state.widget_key_counter = 0
+        st.session_state.player_choice = None
+        st.session_state.running = False
+        st.write("Gioco resettato!")
+        display_cars()
+
     if start_button and st.session_state.player_choice is not None:
         st.session_state.running = True
         st.session_state.car_start_time = time.time()
@@ -195,8 +231,8 @@ def main():
         start_time = time.time()
 
         # Ottieni numeri casuali da random.org
-        random_bits_1 = get_random_bits_from_random_org(2500)
-        random_bits_2 = get_random_bits_from_random_org(2500)
+        random_bits_1 = get_random_bits_from_random_org(2500, api_key)
+        random_bits_2 = get_random_bits_from_random_org(2500, api_key)
 
         if random_bits_1 is None or random_bits_2 is None:
             st.session_state.running = False
@@ -239,6 +275,11 @@ def main():
 
         display_cars()
 
+        winner = check_winner()
+        if winner:
+            end_race(winner)
+            break
+
         time_elapsed = time.time() - start_time
         time.sleep(max(0.1 - time_elapsed, 0))
 
@@ -257,20 +298,7 @@ def main():
             )
 
     if reset_button:
-        st.session_state.car_pos = 50
-        st.session_state.car2_pos = 50
-        st.session_state.car1_moves = 0
-        st.session_state.car2_moves = 0
-        st.session_state.data_for_excel_1 = []
-        st.session_state.data_for_excel_2 = []
-        st.session_state.data_for_condition_1 = []
-        st.session_state.data_for_condition_2 = []
-        st.session_state.random_numbers_1 = []
-        st.session_state.random_numbers_2 = []
-        st.session_state.widget_key_counter = 0
-        st.session_state.player_choice = None
-        st.write("Gioco resettato!")
-        display_cars()
+        reset_game()
 
 if __name__ == "__main__":
     main()
