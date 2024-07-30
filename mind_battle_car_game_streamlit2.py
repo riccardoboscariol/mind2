@@ -207,6 +207,7 @@ def main():
         st.session_state.running = False
         st.session_state.show_end_buttons = True
         st.success(f"Vince l'auto {winner}, complimenti!")
+        show_end_buttons()
 
     def reset_game():
         st.session_state.car_pos = 50
@@ -225,6 +226,15 @@ def main():
         st.session_state.show_end_buttons = False
         st.write("Gioco resettato!")
         display_cars()
+
+    def show_end_buttons():
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Nuova Gara"):
+                reset_game()
+        with col2:
+            if st.button("Termina Gioco"):
+                st.stop()
 
     if start_button and st.session_state.player_choice is not None:
         st.session_state.running = True
@@ -291,13 +301,7 @@ def main():
         time.sleep(max(0.1 - time_elapsed, 0))
 
     if st.session_state.show_end_buttons:
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Nuova Gara"):
-                reset_game()
-        with col2:
-            if st.button("Termina Gioco"):
-                st.stop()
+        show_end_buttons()
 
     if download_button:
         df = pd.DataFrame({
