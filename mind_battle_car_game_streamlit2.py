@@ -220,7 +220,7 @@ def main():
         st.session_state.data_for_condition_2 = []
         st.session_state.random_numbers_1 = []
         st.session_state.random_numbers_2 = []
-        st.session_state.widget_key_counter = 0
+        st.session_state.widget_key_counter += 1
         st.session_state.player_choice = None
         st.session_state.running = False
         st.session_state.show_end_buttons = False
@@ -228,12 +228,13 @@ def main():
         display_cars()
 
     def show_end_buttons():
+        key_suffix = st.session_state.widget_key_counter
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("Nuova Gara", key="new_race_button"):
+            if st.button("Nuova Gara", key=f"new_race_button_{key_suffix}"):
                 reset_game()
         with col2:
-            if st.button("Termina Gioco", key="end_game_button"):
+            if st.button("Termina Gioco", key=f"end_game_button_{key_suffix}"):
                 st.stop()
 
     if start_button and st.session_state.player_choice is not None:
