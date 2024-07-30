@@ -205,8 +205,8 @@ def main():
 
     def end_race(winner):
         st.session_state.running = False
-        st.success(f"Vince l'auto {winner}, complimenti!")
         st.session_state.show_end_buttons = True
+        st.success(f"Vince l'auto {winner}, complimenti!")
 
     def reset_game():
         st.session_state.car_pos = 50
@@ -233,15 +233,6 @@ def main():
 
     if stop_button:
         st.session_state.running = False
-
-    if st.session_state.show_end_buttons:
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Nuova Gara"):
-                reset_game()
-        with col2:
-            if st.button("Termina Gioco"):
-                st.stop()
 
     while st.session_state.running:
         start_time = time.time()
@@ -298,6 +289,15 @@ def main():
 
         time_elapsed = time.time() - start_time
         time.sleep(max(0.1 - time_elapsed, 0))
+
+    if st.session_state.show_end_buttons:
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Nuova Gara"):
+                reset_game()
+        with col2:
+            if st.button("Termina Gioco"):
+                st.stop()
 
     if download_button:
         df = pd.DataFrame({
