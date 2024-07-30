@@ -165,8 +165,8 @@ def main():
 
     move_multiplier = st.sidebar.slider("Moltiplicatore di Movimento", min_value=1, max_value=100, value=20)
 
-    car_image = Image.open("car.png").resize((150, 150))
-    car2_image = Image.open("car2.png").resize((150, 150))
+    car_image = Image.open("car.png").resize((150, 150))  # Macchina rossa
+    car2_image = Image.open("car2.png").resize((150, 150))  # Macchina verde
     car_image_base64 = image_to_base64(car_image)
     car2_image_base64 = image_to_base64(car2_image)
 
@@ -180,26 +180,26 @@ def main():
     car2_placeholder = st.empty()
 
     def display_cars():
-        car2_placeholder.markdown(f"""
+        car_placeholder.markdown(f"""
             <div class="slider-container first">
-                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
-                <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
+                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
+                <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
             </div>
         """, unsafe_allow_html=True)
 
-        car_placeholder.markdown(f"""
+        car2_placeholder.markdown(f"""
             <div class="slider-container">
-                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
-                <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
+                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
+                <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
             </div>
         """, unsafe_allow_html=True)
 
     display_cars()
 
     def check_winner():
-        if st.session_state.car2_pos >= 1000:
+        if st.session_state.car_pos >= 1000:
             return "Rossa"
-        elif st.session_state.car_pos >= 1000:
+        elif st.session_state.car2_pos >= 1000:
             return "Verde"
         return None
 
@@ -277,18 +277,18 @@ def main():
 
         if entropy_score_1 < percentile_5_1:
             if st.session_state.player_choice == 1 and count_1 > count_0:
-                st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
+                st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
                 st.session_state.car1_moves += 1
             elif st.session_state.player_choice == 0 and count_0 > count_1:
-                st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
+                st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
                 st.session_state.car1_moves += 1
 
         if entropy_score_2 < percentile_5_2:
             if st.session_state.player_choice == 1 and count_0 > count_1:
-                st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
+                st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
                 st.session_state.car2_moves += 1
             elif st.session_state.player_choice == 0 and count_1 > count_0:
-                st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
+                st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
                 st.session_state.car2_moves += 1
 
         display_cars()
