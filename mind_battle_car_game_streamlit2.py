@@ -109,7 +109,7 @@ def main():
         Ogni 0.1 secondi vengono generati 2500 bit casuali per ciascuno slot.
         Il programma utilizza random.org.
         L'entropia è calcolata usando la formula di Shannon. La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
-        La distanza di movimento è calcolata con la formula: Distanza = 15 × (1 + ((percentile - entropia) / percentile)).
+        La distanza di movimento è calcolata con la formula: Distanza = Moltiplicatore × (1 + ((percentile - entropia) / percentile)).
         """)
 
     if "player_choice" not in st.session_state:
@@ -142,6 +142,8 @@ def main():
         st.session_state.running = False
     if "widget_key_counter" not in st.session_state:
         st.session_state.widget_key_counter = 0
+    if "show_end_buttons" not in st.session_state:
+        st.session_state.show_end_buttons = False
 
     st.sidebar.title("Menu")
     if st.session_state.player_choice is None:
@@ -161,7 +163,7 @@ def main():
         download_button = st.button("Scarica Dati")
     reset_button = st.sidebar.button("Resetta Gioco")
 
-    move_multiplier = st.sidebar.slider("Moltiplicatore di Movimento", min_value=1, max_value=100, value=15)
+    move_multiplier = st.sidebar.slider("Moltiplicatore di Movimento", min_value=1, max_value=100, value=20)
 
     car_image = Image.open("car.png").resize((150, 150))
     car2_image = Image.open("car2.png").resize((150, 150))
@@ -231,9 +233,6 @@ def main():
 
     if stop_button:
         st.session_state.running = False
-
-    if "show_end_buttons" not in st.session_state:
-        st.session_state.show_end_buttons = False
 
     if st.session_state.show_end_buttons:
         col1, col2 = st.columns(2)
