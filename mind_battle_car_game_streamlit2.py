@@ -106,9 +106,9 @@ def main():
         L'altro giocatore (o il PC) avrà la macchina rossa e l'altra cifra.
         La macchina verde si muove quando l'entropia è a favore del suo bit scelto e inferiore al 5%.
         La macchina rossa si muove quando l'entropia è a favore dell'altro bit e inferiore al 5%.
-        Ogni 0.1 secondi, esclusi i tempi di latenza per la versione gratuita senza API, vengono generati 2500 bit casuali per ciascuno slot.
-        Il programma utilizza random.org. L'entropia è calcolata usando la formula di Shannon.
-        La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
+        Ogni 0.1 secondi vengono generati 2500 bit casuali per ciascuno slot.
+        Il programma utilizza random.org.
+        L'entropia è calcolata usando la formula di Shannon. La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
         La distanza di movimento è calcolata con la formula: Distanza = Moltiplicatore × (1 + ((percentile - entropia) / percentile)).
         """)
 
@@ -171,9 +171,9 @@ def main():
     car2_image_base64 = image_to_base64(car2_image)
 
     st.write("Scegli il tuo bit per la macchina verde:")
-    if st.button("Scegli 1", key="button1"):
+    if st.button("Scegli 1"):
         st.session_state.player_choice = 1
-    if st.button("Scegli 0", key="button0"):
+    if st.button("Scegli 0"):
         st.session_state.player_choice = 0
 
     car_placeholder = st.empty()
@@ -198,16 +198,15 @@ def main():
 
     def check_winner():
         if st.session_state.car2_pos >= 1000:
-            return "Verde"
-        elif st.session_state.car_pos >= 1000:
             return "Rossa"
+        elif st.session_state.car_pos >= 1000:
+            return "Verde"
         return None
 
     def end_race(winner):
         st.session_state.running = False
         st.session_state.show_end_buttons = True
         st.success(f"Vince l'auto {winner}, complimenti!")
-        show_end_buttons()
 
     def reset_game():
         st.session_state.car_pos = 50
@@ -227,15 +226,6 @@ def main():
         st.write("Gioco resettato!")
         display_cars()
 
-    def show_end_buttons():
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Nuova Gara", key="new_race_button"):
-                reset_game()
-        with col2:
-            if st.button("Termina Gioco", key="end_game_button"):
-                st.stop()
-
     if start_button and st.session_state.player_choice is not None:
         st.session_state.running = True
         st.session_state.car_start_time = time.time()
@@ -254,7 +244,6 @@ def main():
         if random_bits_1 is None or random_bits_2 is None:
             st.session_state.running = False
             st.write("Errore nella generazione dei bit casuali. Fermato il gioco.")
-            show_end_buttons()
             break
 
         st.session_state.random_numbers_1.extend(random_bits_1)
@@ -302,7 +291,13 @@ def main():
         time.sleep(max(0.1 - time_elapsed, 0))
 
     if st.session_state.show_end_buttons:
-        show_end_buttons()
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Nuova Gara"):
+                reset_game()
+        with col2:
+            if st.button("Termina Gioco"):
+                st.stop()
 
     if download_button:
         df = pd.DataFrame({
