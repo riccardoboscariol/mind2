@@ -171,9 +171,9 @@ def main():
     car2_image_base64 = image_to_base64(car2_image)
 
     st.write("Scegli il tuo bit per la macchina verde:")
-    if st.button("Scegli 1"):
+    if st.button("Scegli 1", key="button1"):
         st.session_state.player_choice = 1
-    if st.button("Scegli 0"):
+    if st.button("Scegli 0", key="button0"):
         st.session_state.player_choice = 0
 
     car_placeholder = st.empty()
@@ -230,10 +230,10 @@ def main():
     def show_end_buttons():
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("Nuova Gara"):
+            if st.button("Nuova Gara", key="new_race_button"):
                 reset_game()
         with col2:
-            if st.button("Termina Gioco"):
+            if st.button("Termina Gioco", key="end_game_button"):
                 st.stop()
 
     if start_button and st.session_state.player_choice is not None:
@@ -254,6 +254,7 @@ def main():
         if random_bits_1 is None or random_bits_2 is None:
             st.session_state.running = False
             st.write("Errore nella generazione dei bit casuali. Fermato il gioco.")
+            show_end_buttons()
             break
 
         st.session_state.random_numbers_1.extend(random_bits_1)
