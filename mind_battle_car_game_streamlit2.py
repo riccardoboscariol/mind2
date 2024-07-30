@@ -204,10 +204,7 @@ def main():
     def end_race(winner):
         st.session_state.running = False
         st.success(f"Vince l'auto {winner}, complimenti!")
-        if st.button("Nuova Gara"):
-            reset_game()
-        if st.button("Termina Gioco"):
-            st.stop()
+        st.session_state.show_end_buttons = True
 
     def reset_game():
         st.session_state.car_pos = 50
@@ -223,15 +220,29 @@ def main():
         st.session_state.widget_key_counter = 0
         st.session_state.player_choice = None
         st.session_state.running = False
+        st.session_state.show_end_buttons = False
         st.write("Gioco resettato!")
         display_cars()
 
     if start_button and st.session_state.player_choice is not None:
         st.session_state.running = True
         st.session_state.car_start_time = time.time()
+        st.session_state.show_end_buttons = False
 
     if stop_button:
         st.session_state.running = False
+
+    if "show_end_buttons" not in st.session_state:
+        st.session_state.show_end_buttons = False
+
+    if st.session_state.show_end_buttons:
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Nuova Gara"):
+                reset_game()
+        with col2:
+            if st.button("Termina Gioco"):
+                st.stop()
 
     while st.session_state.running:
         start_time = time.time()
