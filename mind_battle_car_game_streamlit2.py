@@ -106,7 +106,7 @@ def main():
         L'altro giocatore (o il PC) avrà la macchina rossa e l'altra cifra.
         La macchina verde si muove quando l'entropia è a favore del suo bit scelto e inferiore al 5%.
         La macchina rossa si muove quando l'entropia è a favore dell'altro bit e inferiore al 5%.
-        Ogni 0.1 secondi vengono generati 2500 bit casuali per ciascuno slot.
+        Ogni 0.1 secondi, esclusi i tempi di latenza per la versione gratuita senza API, vengono generati 2500 bit casuali per ciascuno slot.
         Il programma utilizza random.org.
         L'entropia è calcolata usando la formula di Shannon. La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
         La distanza di movimento è calcolata con la formula: Distanza = Moltiplicatore × (1 + ((percentile - entropia) / percentile)).
