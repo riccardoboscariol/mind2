@@ -180,27 +180,27 @@ def main():
     car2_placeholder = st.empty()
 
     def display_cars():
-        car_placeholder.markdown(f"""
-            <div class="slider-container first">
-                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
-                <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
-            </div>
-        """, unsafe_allow_html=True)
-        
         car2_placeholder.markdown(f"""
-            <div class="slider-container">
+            <div class="slider-container first">
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
+            </div>
+        """, unsafe_allow_html=True)
+
+        car_placeholder.markdown(f"""
+            <div class="slider-container">
+                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
+                <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
             </div>
         """, unsafe_allow_html=True)
 
     display_cars()
 
     def check_winner():
-        if st.session_state.car_pos >= 1000:
-            return "Verde"
-        elif st.session_state.car2_pos >= 1000:
+        if st.session_state.car2_pos >= 1000:
             return "Rossa"
+        elif st.session_state.car_pos >= 1000:
+            return "Verde"
         return None
 
     def end_race(winner):
@@ -318,4 +318,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
