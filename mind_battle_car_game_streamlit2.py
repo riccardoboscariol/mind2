@@ -150,6 +150,12 @@ def main():
         start_button = st.sidebar.button("Avvia Gara")
     stop_button = st.sidebar.button("Blocca Gara")
     api_key = st.sidebar.text_input("Inserisci API Key per random.org")
+    
+    # Aggiunta della descrizione sotto l'inserimento della chiave API
+    st.sidebar.markdown(
+        "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
+    )
+
     download_menu = st.sidebar.expander("Download")
     with download_menu:
         download_button = st.button("Scarica Dati")
@@ -302,3 +308,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
