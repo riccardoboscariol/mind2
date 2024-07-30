@@ -147,11 +147,11 @@ def main():
 
     st.sidebar.title("Menu")
     if st.session_state.player_choice is None:
-        start_button = st.sidebar.button("Avvia Gara", disabled=True)
+        start_button = st.sidebar.button("Avvia Gara", key="start_button", disabled=True)
     else:
-        start_button = st.sidebar.button("Avvia Gara")
-    stop_button = st.sidebar.button("Blocca Gara")
-    api_key = st.sidebar.text_input("Inserisci API Key per random.org")
+        start_button = st.sidebar.button("Avvia Gara", key="start_button")
+    stop_button = st.sidebar.button("Blocca Gara", key="stop_button")
+    api_key = st.sidebar.text_input("Inserisci API Key per random.org", key="api_key")
     
     # Aggiunta della descrizione sotto l'inserimento della chiave API
     st.sidebar.markdown(
@@ -160,10 +160,10 @@ def main():
 
     download_menu = st.sidebar.expander("Download")
     with download_menu:
-        download_button = st.button("Scarica Dati")
-    reset_button = st.sidebar.button("Resetta Gioco")
+        download_button = st.button("Scarica Dati", key="download_button")
+    reset_button = st.sidebar.button("Resetta Gioco", key="reset_button")
 
-    move_multiplier = st.sidebar.slider("Moltiplicatore di Movimento", min_value=1, max_value=100, value=20)
+    move_multiplier = st.sidebar.slider("Moltiplicatore di Movimento", min_value=1, max_value=100, value=20, key="move_multiplier")
 
     car_image = Image.open("car.png").resize((150, 150))  # Macchina rossa
     car2_image = Image.open("car2.png").resize((150, 150))  # Macchina verde
