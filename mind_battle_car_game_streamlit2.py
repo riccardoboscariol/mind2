@@ -161,7 +161,7 @@ def main():
         }
         .flag-image {
             position: absolute;
-            top: -77px;
+            top: -85px;
             width: 150px;
             left: 96%;  /* Sposta la bandierina a destra, cambia il valore per regolare */
         }
