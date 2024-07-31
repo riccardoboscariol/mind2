@@ -89,7 +89,6 @@ def main():
             La macchina rossa si muove quando l'entropia è a favore dell'altro bit e inferiore al 5%.
             Ogni 0.1 secondi, esclusi i tempi di latenza per la versione gratuita senza API, vengono generati 2500 bit casuali per ciascuno slot.
             Il programma utilizza random.org. L'entropia è calcolata usando la formula di Shannon.
-            La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
             La distanza di movimento è calcolata con la formula: Distanza = Moltiplicatore × (1 + ((percentile - entropia) / percentile)).
             """
         choose_bit_text = "Scegli il tuo bit per la macchina verde. Puoi scegliere anche la 'velocità' di movimento indicando il punteggio nello slider 'Moltiplicatore di Movimento'."
@@ -114,7 +113,6 @@ def main():
             The red car moves when the entropy favors the other bit and is below 5%.
             Every 0.1 seconds, excluding latency times for the free version without API, 2500 random bits are generated for each slot.
             The program uses random.org. Entropy is calculated using Shannon's formula.
-            The car moves if the entropy is below the 5th percentile and the chosen digit is more frequent.
             The movement distance is calculated with the formula: Distance = Multiplier × (1 + ((percentile - entropy) / percentile)).
             """
         choose_bit_text = "Choose your bit for the green car. You can also choose the 'speed' of movement by setting the score on the 'Movement Multiplier' slider."
