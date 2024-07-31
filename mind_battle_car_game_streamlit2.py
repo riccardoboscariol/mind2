@@ -163,7 +163,7 @@ def main():
             position: absolute;
             top: -80px;
             width: 150px;
-            left: 85%;  /* Spostiamo la bandierina più a sinistra */
+            transform: translateX(3cm);
         }
         .slider-container input[type=range] {
             width: 100%;
@@ -223,7 +223,7 @@ def main():
 
     move_multiplier = st.sidebar.slider("Moltiplicatore di Movimento", min_value=1, max_value=100, value=20, key="move_multiplier")
 
-    image_dir = os.path.dirname(__file__)
+    image_dir = os.path.abspath(os.path.dirname(__file__))
     car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Macchina rossa
     car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Macchina verde
     flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Bandierina della stessa dimensione delle macchine
@@ -246,7 +246,7 @@ def main():
             <div class="slider-container first">
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
-                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image" style="left: 100%">
             </div>
         """, unsafe_allow_html=True)
 
@@ -254,7 +254,7 @@ def main():
             <div class="slider-container">
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
-                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image" style="left: 100%">
             </div>
         """, unsafe_allow_html=True)
 
