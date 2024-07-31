@@ -163,7 +163,7 @@ def main():
             position: absolute;
             top: -80px;
             width: 150px;
-            left: 88%;  /* Sposta la bandierina a destra, cambia il valore per regolare */
+            left: 77%;  /* Sposta la bandierina a destra, cambia il valore per regolare */
         }
         .slider-container input[type=range] {
             width: 100%;
