@@ -104,6 +104,7 @@ def main():
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
         api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
+        move_multiplier_text = "Moltiplicatore di Movimento"
     else:
         title_text = "Car Mind Race"
         instruction_text = """
@@ -128,6 +129,7 @@ def main():
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
+        move_multiplier_text = "Movement Multiplier"
 
     st.title(title_text)
 
@@ -221,7 +223,7 @@ def main():
         download_button = st.button(download_data_text, key="download_button")
     reset_button = st.sidebar.button(reset_game_text, key="reset_button")
 
-    move_multiplier = st.sidebar.slider("Moltiplicatore di Movimento", min_value=1, max_value=100, value=20, key="move_multiplier")
+    move_multiplier = st.sidebar.slider(move_multiplier_text, min_value=1, max_value=100, value=20, key="move_multiplier")
 
     image_dir = os.path.abspath(os.path.dirname(__file__))
     car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Macchina rossa
@@ -392,4 +394,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
