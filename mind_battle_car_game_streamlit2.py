@@ -223,9 +223,10 @@ def main():
 
     move_multiplier = st.sidebar.slider("Moltiplicatore di Movimento", min_value=1, max_value=100, value=20, key="move_multiplier")
 
-    car_image = Image.open("car.png").resize((150, 150))  # Macchina rossa
-    car2_image = Image.open("car2.png").resize((150, 150))  # Macchina verde
-    flag_image = Image.open("bandierina.png").resize((150, 150))  # Bandierina della stessa dimensione delle macchine
+    image_dir = os.path.dirname(__file__)
+    car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Macchina rossa
+    car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Macchina verde
+    flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Bandierina della stessa dimensione delle macchine
 
     car_image_base64 = image_to_base64(car_image)
     car2_image_base64 = image_to_base64(car2_image)
