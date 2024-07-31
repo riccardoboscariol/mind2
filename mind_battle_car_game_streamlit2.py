@@ -92,7 +92,7 @@ def main():
             La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
             La distanza di movimento è calcolata con la formula: Distanza = Moltiplicatore × (1 + ((percentile - entropia) / percentile)).
             """
-        choose_bit_text = "Scegli il tuo bit per la macchina verde:"
+        choose_bit_text = "Scegli il tuo bit per la macchina verde. Puoi scegliere anche la 'velocità' di movimento indicando il punteggio nello slider 'Moltiplicatore di Movimento'."
         start_race_text = "Avvia Gara"
         stop_race_text = "Blocca Gara"
         reset_game_text = "Resetta Gioco"
@@ -116,7 +116,7 @@ def main():
             The car moves if the entropy is below the 5th percentile and the chosen digit is more frequent.
             The movement distance is calculated with the formula: Distance = Multiplier × (1 + ((percentile - entropy) / percentile)).
             """
-        choose_bit_text = "Choose your bit for the green car:"
+        choose_bit_text = "Choose your bit for the green car. You can also choose the 'speed' of movement by setting the score on the 'Movement Multiplier' slider."
         start_race_text = "Start Race"
         stop_race_text = "Stop Race"
         reset_game_text = "Reset Game"
@@ -392,3 +392,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
