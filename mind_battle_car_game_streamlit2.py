@@ -27,7 +27,7 @@ def get_random_bits_from_random_org(num_bits, api_key=None):
         }
         headers = {"User-Agent": "streamlit_app"}
         if api_key:
-            headers["Random-Org-API-Key"] = api_key
+            headers["Random-Org-API-Key"] = api_key.strip()  # Rimuove spazi bianchi
         try:
             response = requests.get(url, params=params, headers=headers, timeout=5)
             response.raise_for_status()
@@ -54,8 +54,8 @@ def calculate_entropy(bits):
 
 def move_car(car_pos, distance):
     car_pos += distance
-    if car_pos > 1000:
-        car_pos = 1000
+    if car_pos > 900:  # Accorciamo la pista per lasciare spazio alla bandierina
+        car_pos = 900
     return car_pos
 
 def image_to_base64(image):
@@ -146,7 +146,7 @@ def main():
         }
         .slider-container {
             position: relative;
-            height: 120px;
+            height: 150px;
             margin-bottom: 50px;
         }
         .slider-container.first {
@@ -157,6 +157,12 @@ def main():
             position: absolute;
             top: -80px;
             width: 150px;
+        }
+        .flag-image {
+            position: absolute;
+            top: -80px;
+            width: 150px;
+            left: 85%;  /* Spostiamo la bandierina più a sinistra */
         }
         .slider-container input[type=range] {
             width: 100%;
@@ -218,8 +224,11 @@ def main():
 
     car_image = Image.open("car.png").resize((150, 150))  # Macchina rossa
     car2_image = Image.open("car2.png").resize((150, 150))  # Macchina verde
+    flag_image = Image.open("bandierina.png").resize((150, 150))  # Bandierina della stessa dimensione delle macchine
+
     car_image_base64 = image_to_base64(car_image)
     car2_image_base64 = image_to_base64(car2_image)
+    flag_image_base64 = image_to_base64(flag_image)
 
     st.write(choose_bit_text)
     if st.button("Scegli 1", key="button1"):
@@ -235,6 +244,7 @@ def main():
             <div class="slider-container first">
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
         """, unsafe_allow_html=True)
 
@@ -242,15 +252,16 @@ def main():
             <div class="slider-container">
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
         """, unsafe_allow_html=True)
 
     display_cars()
 
     def check_winner():
-        if st.session_state.car_pos >= 1000:
+        if st.session_state.car_pos >= 900:  # Accorciamo la pista per lasciare spazio alla bandierina
             return "Rossa"
-        elif st.session_state.car2_pos >= 1000:
+        elif st.session_state.car2_pos >= 900:  # Accorciamo la pista per lasciare spazio alla bandierina
             return "Verde"
         return None
 
