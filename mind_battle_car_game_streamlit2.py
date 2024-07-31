@@ -6,6 +6,7 @@ from PIL import Image
 import requests
 import base64
 import io
+import os
 
 MAX_BATCH_SIZE = 1000  # Dimensione massima del batch per le richieste a random.org
 RETRY_LIMIT = 3  # Numero di tentativi per le richieste a random.org
@@ -224,18 +225,11 @@ def main():
 
     car_image = Image.open("car.png").resize((150, 150))  # Macchina rossa
     car2_image = Image.open("car2.png").resize((150, 150))  # Macchina verde
-
-    # Caricamento immagine bandierina
-    uploaded_flag = st.file_uploader("Carica immagine della bandierina", type=["png"])
-    if uploaded_flag:
-        flag_image = Image.open(uploaded_flag).resize((150, 150))
-        flag_image_base64 = image_to_base64(flag_image)
-    else:
-        flag_image = None
-        flag_image_base64 = None
+    flag_image = Image.open("bandierina.png").resize((150, 150))  # Bandierina della stessa dimensione delle macchine
 
     car_image_base64 = image_to_base64(car_image)
     car2_image_base64 = image_to_base64(car2_image)
+    flag_image_base64 = image_to_base64(flag_image)
 
     st.write(choose_bit_text)
     if st.button("Scegli 1", key="button1"):
@@ -251,7 +245,7 @@ def main():
             <div class="slider-container first">
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
-                {"<img src='data:image/png;base64," + flag_image_base64 + "' class='flag-image'>" if flag_image_base64 else ""}
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
         """, unsafe_allow_html=True)
 
@@ -259,7 +253,7 @@ def main():
             <div class="slider-container">
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
-                {"<img src='data:image/png;base64," + flag_image_base64 + "' class='flag-image'>" if flag_image_base64 else ""}
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
         """, unsafe_allow_html=True)
 
