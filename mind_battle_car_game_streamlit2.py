@@ -163,7 +163,7 @@ def main():
             position: absolute;
             top: -80px;
             width: 150px;
-            transform: translateX(100px);
+            margin-left: 3cm;
         }
         .slider-container input[type=range] {
             width: 100%;
