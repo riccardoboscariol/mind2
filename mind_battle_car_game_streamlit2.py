@@ -161,9 +161,9 @@ def main():
         }
         .flag-image {
             position: absolute;
-            top: -80px;
+            top: -75px;
             width: 150px;
-            left: 100%;  /* Sposta la bandierina a destra, cambia il valore per regolare */
+            left: 95%;  /* Sposta la bandierina a destra, cambia il valore per regolare */
         }
         .slider-container input[type=range] {
             width: 100%;
