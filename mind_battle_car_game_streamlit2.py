@@ -102,6 +102,7 @@ def main():
         reset_game_message = "Gioco resettato!"
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
+        api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
     else:
         title_text = "Car Mind Race"
         instruction_text = """
@@ -125,6 +126,7 @@ def main():
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
+        api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
 
     st.title(title_text)
 
@@ -205,9 +207,7 @@ def main():
     stop_button = st.sidebar.button(stop_race_text, key="stop_button")
     api_key = st.sidebar.text_input(api_key_text, key="api_key")
     
-    st.sidebar.markdown(
-        "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
-    )
+    st.sidebar.markdown(api_description_text)
 
     download_menu = st.sidebar.expander("Download")
     with download_menu:
