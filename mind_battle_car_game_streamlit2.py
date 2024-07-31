@@ -163,7 +163,7 @@ def main():
             position: absolute;
             top: -80px;
             width: 150px;
-            margin-left: 3cm;
+            left: 88%;  /* Sposta la bandierina a destra, cambia il valore per regolare */
         }
         .slider-container input[type=range] {
             width: 100%;
@@ -246,7 +246,7 @@ def main():
             <div class="slider-container first">
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
-                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image" style="left: 100%">
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
         """, unsafe_allow_html=True)
 
@@ -254,7 +254,7 @@ def main():
             <div class="slider-container">
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
-                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image" style="left: 100%">
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
         """, unsafe_allow_html=True)
 
