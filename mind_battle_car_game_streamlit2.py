@@ -8,10 +8,12 @@ import base64
 import io
 import os
 
-MAX_BATCH_SIZE = 100  # Riduci la dimensione massima del batch per le richieste a random.org
+# Configurazione
+MAX_BATCH_SIZE = 1000  # Dimensione del batch per le richieste a random.org
 RETRY_LIMIT = 3  # Numero di tentativi per le richieste a random.org
-DELAY_BETWEEN_REQUESTS = 0.5  # Aggiungi un ritardo tra le richieste per evitare sovraccarichi
+REQUEST_INTERVAL = 0.1  # Secondi di attesa tra le richieste per non superare 10 richieste/sec
 
+# Funzione per ottenere bit casuali da random.org
 def get_random_bits_from_random_org(num_bits, api_key=None):
     random_bits = []
     attempts = 0
@@ -30,29 +32,35 @@ def get_random_bits_from_random_org(num_bits, api_key=None):
         headers = {"User-Agent": "streamlit_app"}
         if api_key:
             headers["Random-Org-API-Key"] = api_key.strip()  # Rimuove spazi bianchi
+
         try:
             response = requests.get(url, params=params, headers=headers, timeout=10)
             response.raise_for_status()
             random_bits.extend(list(map(int, response.text.strip().split())))
             num_bits -= batch_size
-            # Aggiungi un ritardo tra le richieste
-            time.sleep(DELAY_BETWEEN_REQUESTS)
+            time.sleep(REQUEST_INTERVAL)  # Attendi per rispettare il limite di 10 richieste/sec
+
         except requests.RequestException as e:
             attempts += 1
             st.error(f"Errore durante l'accesso a random.org: {e}. Tentativo {attempts}/{RETRY_LIMIT}.")
-            time.sleep(2)  # Attendi 2 secondi prima di riprovare
+            time.sleep(2 ** attempts)  # Backoff esponenziale
+
             if attempts >= RETRY_LIMIT:
                 st.warning(f"Utilizzo numeri casuali locali dopo {RETRY_LIMIT} tentativi falliti.")
                 random_bits.extend(get_local_random_bits(num_bits))
                 break
+
         except ValueError as e:
             st.error(f"Errore nel processamento dei dati da random.org: {e}")
             break
+
     return random_bits
 
+# Funzione per ottenere bit casuali localmente (fallback)
 def get_local_random_bits(num_bits):
     return list(np.random.randint(0, 2, size=num_bits))
 
+# Calcolo dell'entropia
 def calculate_entropy(bits):
     n = len(bits)
     counts = np.bincount(bits, minlength=2)
@@ -61,17 +69,20 @@ def calculate_entropy(bits):
     entropy = -np.sum(p * np.log2(p))
     return entropy
 
+# Funzione per muovere la macchina
 def move_car(car_pos, distance):
     car_pos += distance
     if car_pos > 900:  # Accorciamo la pista per lasciare spazio alla bandierina
         car_pos = 900
     return car_pos
 
+# Funzione per convertire un'immagine in base64
 def image_to_base64(image):
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
 
+# Funzione principale
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
     
@@ -95,7 +106,7 @@ def main():
             L'altro giocatore (o il PC) avrà la macchina rossa e l'altra cifra.
             La macchina verde si muove quando l'entropia è a favore del suo bit scelto e inferiore al 5%.
             La macchina rossa si muove quando l'entropia è a favore dell'altro bit e inferiore al 5%.
-            Ogni 0.1 secondi, esclusi i tempi di latenza per la versione gratuita senza API, vengono generati 2500 bit casuali per ciascuno slot.
+            Ogni 0.1 secondi, esclusi i tempi di latenza per la versione gratuita senza API, vengono generati 1000 bit casuali per ciascuno slot.
             Il programma utilizza random.org. L'entropia è calcolata usando la formula di Shannon.
             La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
             La distanza di movimento è calcolata con la formula: Distanza = Moltiplicatore × (1 + ((percentile - entropia) / percentile)).
@@ -120,7 +131,7 @@ def main():
             The other player (or the PC) will have the red car and the other digit.
             The green car moves when the entropy favors its chosen bit and is below 5%.
             The red car moves when the entropy favors the other bit and is below 5%.
-            Every 0.1 seconds, excluding latency times for the free version without API, 2500 random bits are generated for each slot.
+            Every 0.1 seconds, excluding latency times for the free version without API, 1000 random bits are generated for each slot.
             The program uses random.org. Entropy is calculated using Shannon's formula.
             The car moves if the entropy is below the 5th percentile and the chosen digit is more frequent.
             The movement distance is calculated with the formula: Distance = Multiplier × (1 + ((percentile - entropy) / percentile)).
