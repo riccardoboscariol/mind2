@@ -170,7 +170,7 @@ def main():
             position: absolute;
             top: -50px; /* Aggiustamento per posizionare il numero sopra l'auto */
             width: 70px; /* Dimensione ridotta delle immagini numeriche */
-            opacity: 0.4; /* Riduzione della trasparenza per renderle più visibili */
+            opacity: 1.9; /* Riduzione della trasparenza per renderle più visibili */
         }
         .flag-image {
             position: absolute;
