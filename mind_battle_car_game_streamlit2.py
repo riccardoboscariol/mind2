@@ -2,7 +2,7 @@ import streamlit as st
 import time
 import numpy as np
 import pandas as pd
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import requests
 import base64
 import io
@@ -30,14 +30,16 @@ def get_random_bits_from_random_org(num_bits, api_key=None):
         if api_key:
             headers["Random-Org-API-Key"] = api_key.strip()  # Rimuove spazi bianchi
         try:
-            response = requests.get(url, params=params, headers=headers, timeout=10)  # Aumenta il timeout a 10 secondi
+            response = requests.get(url, params=params, headers=headers, timeout=10)
             response.raise_for_status()
             random_bits.extend(list(map(int, response.text.strip().split())))
             num_bits -= batch_size
         except requests.RequestException as e:
             attempts += 1
+            st.error(f"Errore durante l'accesso a random.org: {e}. Tentativo {attempts}/{RETRY_LIMIT}.")
+            time.sleep(2)  # Attendi 2 secondi prima di riprovare
             if attempts >= RETRY_LIMIT:
-                st.warning(f"Errore durante l'accesso a random.org: {e}. Utilizzo numeri casuali locali.")
+                st.warning(f"Utilizzo numeri casuali locali dopo {RETRY_LIMIT} tentativi falliti.")
                 random_bits.extend(get_local_random_bits(num_bits))
                 break
         except ValueError as e:
@@ -66,6 +68,17 @@ def image_to_base64(image):
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
+
+def add_number_to_image(image, number):
+    draw = ImageDraw.Draw(image)
+    font_size = 40
+    font = ImageFont.load_default()  # Usa il font di default
+    width, height = image.size
+    text_width, text_height = draw.textsize(str(number), font=font)
+    # Posiziona il numero al centro dell'immagine
+    position = ((width - text_width) // 2, (height - text_height) // 2)
+    draw.text(position, str(number), font=font, fill="white")
+    return image
 
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
@@ -233,15 +246,19 @@ def main():
     car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Macchina verde
     flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Bandierina della stessa dimensione delle macchine
 
-    car_image_base64 = image_to_base64(car_image)
-    car2_image_base64 = image_to_base64(car2_image)
-    flag_image_base64 = image_to_base64(flag_image)
-
     st.write(choose_bit_text)
     if st.button("Scegli 1", key="button1"):
         st.session_state.player_choice = 1
+        car2_image = add_number_to_image(car2_image, 1)  # Aggiunge il numero 1 alla macchina verde
+        car_image = add_number_to_image(car_image, 0)    # Aggiunge il numero 0 alla macchina rossa
     if st.button("Scegli 0", key="button0"):
         st.session_state.player_choice = 0
+        car2_image = add_number_to_image(car2_image, 0)  # Aggiunge il numero 0 alla macchina verde
+        car_image = add_number_to_image(car_image, 1)    # Aggiunge il numero 1 alla macchina rossa
+
+    car_image_base64 = image_to_base64(car_image)
+    car2_image_base64 = image_to_base64(car2_image)
+    flag_image_base64 = image_to_base64(flag_image)
 
     car_placeholder = st.empty()
     car2_placeholder = st.empty()
@@ -379,9 +396,10 @@ def main():
         st.error(f"Si è verificato un errore: {e}")
 
     if download_button:
+        # Creazione del DataFrame con le colonne "Macchina verde" e "Macchina rossa"
         df = pd.DataFrame({
-            "Condizione 1": [''.join(map(str, row)) for row in st.session_state.data_for_excel_1],
-            "Condizione 2": [''.join(map(str, row)) for row in st.session_state.data_for_excel_2]
+            "Macchina verde": [''.join(map(str, row)) for row in st.session_state.data_for_excel_1],
+            "Macchina rossa": [''.join(map(str, row)) for row in st.session_state.data_for_excel_2]
         })
         df.to_excel("random_numbers.xlsx", index=False)
         with open("random_numbers.xlsx", "rb") as file:
@@ -397,3 +415,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
