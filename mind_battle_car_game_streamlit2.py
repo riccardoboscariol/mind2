@@ -168,9 +168,9 @@ def main():
         }
         .number-image {
             position: absolute;
-            top: -20px; /* Aggiustamento per posizionare il numero sopra l'auto */
-            width: 40px; /* Dimensione delle immagini numeriche */
-            left: 2%;
+            top: -30px; /* Aggiustamento per posizionare il numero sopra l'auto */
+            width: 30px; /* Dimensione delle immagini numeriche */
+            left: 1%;
         }
         .flag-image {
             position: absolute;
