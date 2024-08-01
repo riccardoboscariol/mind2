@@ -256,13 +256,18 @@ def main():
     # Determina quale immagine di numero visualizzare per ogni macchina
     if st.button("Scegli 1", key="button1"):
         st.session_state.player_choice = 1
-        green_car_number_image = number_1_green_image
-        red_car_number_image = number_0_red_image
+        st.session_state.green_car_number_image = number_1_green_image
+        st.session_state.red_car_number_image = number_0_red_image
 
     if st.button("Scegli 0", key="button0"):
         st.session_state.player_choice = 0
-        green_car_number_image = number_0_green_image
-        red_car_number_image = number_1_red_image
+        st.session_state.green_car_number_image = number_0_green_image
+        st.session_state.red_car_number_image = number_1_red_image
+
+    # Assegna le immagini scelte se è stata fatta una scelta
+    if st.session_state.player_choice is not None:
+        green_car_number_image = st.session_state.green_car_number_image
+        red_car_number_image = st.session_state.red_car_number_image
 
     car_image_base64 = image_to_base64(car_image)
     car2_image_base64 = image_to_base64(car2_image)
