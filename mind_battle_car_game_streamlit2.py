@@ -72,15 +72,15 @@ def image_to_base64(image):
 def add_number_to_image(image, number):
     draw = ImageDraw.Draw(image)
     font_size = 40
-    font = ImageFont.load_default()  # Usa il font di default
-    
-    # Se vuoi utilizzare un font TTF specifico, puoi caricarlo con ImageFont.truetype()
-    # font = ImageFont.truetype("path/to/your/font.ttf", font_size)
+    # Carica il font DejaVuSans
+    try:
+        font = ImageFont.truetype("DejaVuSans-Bold.ttf", font_size)
+    except IOError:
+        font = ImageFont.load_default()  # Usa il font predefinito se DejaVuSans non è disponibile
     
     width, height = image.size
     text = str(number)
-    text_width, text_height = font.getsize(text)  # Usa font.getsize() invece di draw.textsize()
-    
+    text_width, text_height = draw.textsize(text, font=font)
     # Posiziona il numero al centro dell'immagine
     position = ((width - text_width) // 2, (height - text_height) // 2)
     draw.text(position, text, font=font, fill="white")
