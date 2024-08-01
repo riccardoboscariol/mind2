@@ -235,16 +235,22 @@ def main():
 
     move_multiplier = st.sidebar.slider(move_multiplier_text, min_value=1, max_value=100, value=20, key="move_multiplier")
 
+    # Aggiunta del controllo per l'esistenza delle immagini
     image_dir = os.path.abspath(os.path.dirname(__file__))
-    car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Macchina rossa
-    car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Macchina verde
-    flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Bandierina della stessa dimensione delle macchine
+    
+    try:
+        car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Macchina rossa
+        car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Macchina verde
+        flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Bandierina della stessa dimensione delle macchine
 
-    # Carica le immagini per i numeri e ridimensiona ulteriormente a 20x20 pixel
-    number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize((20, 20))
-    number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize((20, 20))
-    number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize((20, 20))
-    number_1_red_image = Image.open(os.path.join(image_dir, "1red.png")).resize((20, 20))
+        # Carica le immagini per i numeri e ridimensiona ulteriormente a 20x20 pixel
+        number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize((20, 20))
+        number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize((20, 20))
+        number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize((20, 20))
+        number_1_red_image = Image.open(os.path.join(image_dir, "1red.png")).resize((20, 20))
+    except FileNotFoundError as e:
+        st.error(f"Errore: Immagine non trovata. Assicurati che il file immagine esista nella directory. {e}")
+        return
 
     st.write(choose_bit_text)
 
