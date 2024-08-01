@@ -165,12 +165,12 @@ def main():
             position: absolute;
             top: -80px;
             width: 150px;
-            left: 2%;
         }
         .number-image {
             position: absolute;
-            top: -10px; /* Aggiustamento per posizionare il numero sopra l'auto */
-            width: 80px; /* Dimensione delle immagini numeriche */
+            top: -20px; /* Aggiustamento per posizionare il numero sopra l'auto */
+            width: 40px; /* Dimensione delle immagini numeriche */
+            left: 2%;
         }
         .flag-image {
             position: absolute;
