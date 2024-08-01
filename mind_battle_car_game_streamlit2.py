@@ -30,16 +30,19 @@ def get_random_bits_from_random_org(num_bits, api_key=None):
         if api_key:
             headers["Random-Org-API-Key"] = api_key.strip()  # Rimuove spazi bianchi
         try:
-            response = requests.get(url, params=params, headers=headers, timeout=5)
+            response = requests.get(url, params=params, headers=headers, timeout=10)  # Aumenta il timeout a 10 secondi
             response.raise_for_status()
             random_bits.extend(list(map(int, response.text.strip().split())))
             num_bits -= batch_size
-        except (requests.RequestException, ValueError) as e:
+        except requests.RequestException as e:
             attempts += 1
             if attempts >= RETRY_LIMIT:
                 st.warning(f"Errore durante l'accesso a random.org: {e}. Utilizzo numeri casuali locali.")
                 random_bits.extend(get_local_random_bits(num_bits))
                 break
+        except ValueError as e:
+            st.error(f"Errore nel processamento dei dati da random.org: {e}")
+            break
     return random_bits
 
 def get_local_random_bits(num_bits):
@@ -89,6 +92,7 @@ def main():
             La macchina rossa si muove quando l'entropia è a favore dell'altro bit e inferiore al 5%.
             Ogni 0.1 secondi, esclusi i tempi di latenza per la versione gratuita senza API, vengono generati 2500 bit casuali per ciascuno slot.
             Il programma utilizza random.org. L'entropia è calcolata usando la formula di Shannon.
+            La macchina si muove se l'entropia è inferiore al 5° percentile e la cifra scelta è più frequente.
             La distanza di movimento è calcolata con la formula: Distanza = Moltiplicatore × (1 + ((percentile - entropia) / percentile)).
             """
         choose_bit_text = "Scegli il tuo bit per la macchina verde. Puoi scegliere anche la 'velocità' di movimento indicando il punteggio nello slider 'Moltiplicatore di Movimento'."
@@ -113,6 +117,7 @@ def main():
             The red car moves when the entropy favors the other bit and is below 5%.
             Every 0.1 seconds, excluding latency times for the free version without API, 2500 random bits are generated for each slot.
             The program uses random.org. Entropy is calculated using Shannon's formula.
+            The car moves if the entropy is below the 5th percentile and the chosen digit is more frequent.
             The movement distance is calculated with the formula: Distance = Multiplier × (1 + ((percentile - entropy) / percentile)).
             """
         choose_bit_text = "Choose your bit for the green car. You can also choose the 'speed' of movement by setting the score on the 'Movement Multiplier' slider."
@@ -212,7 +217,7 @@ def main():
     else:
         start_button = st.sidebar.button(start_race_text, key="start_button")
     stop_button = st.sidebar.button(stop_race_text, key="stop_button")
-    api_key = st.sidebar.text_input(api_key_text, key="api_key")
+    api_key = st.sidebar.text_input(api_key_text, key="api_key", value="a40af516-6c94-4750-95cb-7a5d6f5bf68a")  # Default con chiave API inserita
     
     st.sidebar.markdown(api_description_text)
 
@@ -392,5 +397,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
