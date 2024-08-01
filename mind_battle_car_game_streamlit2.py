@@ -8,8 +8,9 @@ import base64
 import io
 import os
 
-MAX_BATCH_SIZE = 1000  # Dimensione massima del batch per le richieste a random.org
+MAX_BATCH_SIZE = 100  # Riduci la dimensione massima del batch per le richieste a random.org
 RETRY_LIMIT = 3  # Numero di tentativi per le richieste a random.org
+DELAY_BETWEEN_REQUESTS = 0.5  # Aggiungi un ritardo tra le richieste per evitare sovraccarichi
 
 def get_random_bits_from_random_org(num_bits, api_key=None):
     random_bits = []
@@ -34,6 +35,8 @@ def get_random_bits_from_random_org(num_bits, api_key=None):
             response.raise_for_status()
             random_bits.extend(list(map(int, response.text.strip().split())))
             num_bits -= batch_size
+            # Aggiungi un ritardo tra le richieste
+            time.sleep(DELAY_BETWEEN_REQUESTS)
         except requests.RequestException as e:
             attempts += 1
             st.error(f"Errore durante l'accesso a random.org: {e}. Tentativo {attempts}/{RETRY_LIMIT}.")
@@ -235,22 +238,16 @@ def main():
 
     move_multiplier = st.sidebar.slider(move_multiplier_text, min_value=1, max_value=100, value=20, key="move_multiplier")
 
-    # Aggiunta del controllo per l'esistenza delle immagini
     image_dir = os.path.abspath(os.path.dirname(__file__))
-    
-    try:
-        car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Macchina rossa
-        car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Macchina verde
-        flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Bandierina della stessa dimensione delle macchine
+    car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Macchina rossa
+    car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Macchina verde
+    flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Bandierina della stessa dimensione delle macchine
 
-        # Carica le immagini per i numeri e ridimensiona ulteriormente a 20x20 pixel
-        number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize((20, 20))
-        number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize((20, 20))
-        number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize((20, 20))
-        number_1_red_image = Image.open(os.path.join(image_dir, "1red.png")).resize((20, 20))
-    except FileNotFoundError as e:
-        st.error(f"Errore: Immagine non trovata. Assicurati che il file immagine esista nella directory. {e}")
-        return
+    # Carica le immagini per i numeri e ridimensiona ulteriormente a 20x20 pixel
+    number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize((20, 20))
+    number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize((20, 20))
+    number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize((20, 20))
+    number_1_red_image = Image.open(os.path.join(image_dir, "1red.png")).resize((20, 20))
 
     st.write(choose_bit_text)
 
@@ -358,8 +355,8 @@ def main():
             start_time = time.time()
 
             # Ottieni numeri casuali da random.org
-            random_bits_1 = get_random_bits_from_random_org(2500, api_key)
-            random_bits_2 = get_random_bits_from_random_org(2500, api_key)
+            random_bits_1 = get_random_bits_from_random_org(1000, api_key)
+            random_bits_2 = get_random_bits_from_random_org(1000, api_key)
 
             if random_bits_1 is None or random_bits_2 is None:
                 st.session_state.running = False
@@ -437,4 +434,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
