@@ -168,8 +168,8 @@ def main():
         }
         .number-image {
             position: absolute;
-            top: -70px; /* Aggiustamento per posizionare il numero sopra l'auto */
-            width: 20px; /* Dimensione ridotta delle immagini numeriche */
+            top: -60px; /* Aggiustamento per posizionare il numero sopra l'auto */
+            width: 90px; /* Dimensione ridotta delle immagini numeriche */
             opacity: 0.8; /* Riduzione della trasparenza per renderle più visibili */
         }
         .flag-image {
