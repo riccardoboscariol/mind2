@@ -73,11 +73,17 @@ def add_number_to_image(image, number):
     draw = ImageDraw.Draw(image)
     font_size = 40
     font = ImageFont.load_default()  # Usa il font di default
+    
+    # Se vuoi utilizzare un font TTF specifico, puoi caricarlo con ImageFont.truetype()
+    # font = ImageFont.truetype("path/to/your/font.ttf", font_size)
+    
     width, height = image.size
-    text_width, text_height = draw.textsize(str(number), font=font)
+    text = str(number)
+    text_width, text_height = font.getsize(text)  # Usa font.getsize() invece di draw.textsize()
+    
     # Posiziona il numero al centro dell'immagine
     position = ((width - text_width) // 2, (height - text_height) // 2)
-    draw.text(position, str(number), font=font, fill="white")
+    draw.text(position, text, font=font, fill="white")
     return image
 
 def main():
