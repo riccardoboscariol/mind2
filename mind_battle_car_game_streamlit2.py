@@ -80,7 +80,11 @@ def add_number_to_image(image, number):
     
     width, height = image.size
     text = str(number)
-    text_width, text_height = draw.textsize(text, font=font)
+    
+    # Get the bounding box of the text
+    bbox = draw.textbbox((0, 0), text, font=font)
+    text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    
     # Posiziona il numero al centro dell'immagine
     position = ((width - text_width) // 2, (height - text_height) // 2)
     draw.text(position, text, font=font, fill="white")
