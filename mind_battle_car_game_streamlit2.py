@@ -235,19 +235,19 @@ def main():
     car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Macchina verde
     flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Bandierina della stessa dimensione delle macchine
 
-    # Carica le immagini per i numeri
-    number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize((50, 50))
-    number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize((50, 50))
-    number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize((50, 50))
-    number_1_red_image = Image.open(os.path.join(image_dir, "1red.png")).resize((50, 50))
+    # Carica le immagini per i numeri e ridimensiona a 25x25 pixel
+    number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize((25, 25))
+    number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize((25, 25))
+    number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize((25, 25))
+    number_1_red_image = Image.open(os.path.join(image_dir, "1red.png")).resize((25, 25))
 
     st.write(choose_bit_text)
 
-    # Determina quale immagine di numero visualizzare per ogni macchina
-    if st.session_state.player_choice is None:
-        green_car_number_image = number_0_green_image
-        red_car_number_image = number_1_red_image
+    # Inizializza le immagini dei numeri con valori predefiniti
+    green_car_number_image = number_0_green_image
+    red_car_number_image = number_1_red_image
 
+    # Determina quale immagine di numero visualizzare per ogni macchina
     if st.button("Scegli 1", key="button1"):
         st.session_state.player_choice = 1
         green_car_number_image = number_1_green_image
@@ -270,7 +270,7 @@ def main():
     def display_cars():
         car_placeholder.markdown(f"""
             <div class="slider-container first">
-                <img src="data:image/png;base64,{red_car_number_base64}" class="car-image" style="left:{st.session_state.car_pos / 10 - 5}%">
+                <img src="data:image/png;base64,{red_car_number_base64}" class="car-image" style="left:{st.session_state.car_pos / 10 - 3}%">
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
@@ -279,7 +279,7 @@ def main():
 
         car2_placeholder.markdown(f"""
             <div class="slider-container">
-                <img src="data:image/png;base64,{green_car_number_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10 - 5}%">
+                <img src="data:image/png;base64,{green_car_number_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10 - 3}%">
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
