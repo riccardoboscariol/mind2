@@ -8,22 +8,11 @@ import base64
 import io
 import os
 
-# Costanti di configurazione
 MAX_BATCH_SIZE = 1000  # Dimensione massima del batch per le richieste a random.org
-RETRY_LIMIT = 3  # Numero massimo di tentativi per le richieste a random.org
-REQUEST_INTERVAL = 0.5  # Intervallo tra le richieste per rispettare il limite
+RETRY_LIMIT = 3  # Numero di tentativi per le richieste a random.org
+REQUEST_INTERVAL = 0.5  # Intervallo tra le richieste in secondi
 
 def get_random_bits_from_random_org(num_bits, api_key=None):
-    """
-    Ottiene bit casuali da random.org o genera numeri casuali locali in caso di fallimento.
-
-    Args:
-        num_bits (int): Numero di bit casuali richiesti.
-        api_key (str): Chiave API per random.org.
-
-    Returns:
-        list: Una lista di bit casuali.
-    """
     random_bits = []
     attempts = 0
     while num_bits > 0 and attempts < RETRY_LIMIT:
@@ -41,16 +30,11 @@ def get_random_bits_from_random_org(num_bits, api_key=None):
         headers = {"User-Agent": "streamlit_app"}
         if api_key:
             headers["Random-Org-API-Key"] = api_key.strip()  # Rimuove spazi bianchi
-
         try:
-            # Richiesta a random.org
             response = requests.get(url, params=params, headers=headers, timeout=10)
             response.raise_for_status()
-            # Conversione dei bit ricevuti in una lista di interi
             random_bits.extend(list(map(int, response.text.strip().split())))
             num_bits -= batch_size
-            attempts = 0  # Reset attempts after a successful request
-            time.sleep(REQUEST_INTERVAL)  # Sleep to maintain request limit
         except requests.RequestException as e:
             attempts += 1
             st.error(f"Errore durante l'accesso a random.org: {e}. Tentativo {attempts}/{RETRY_LIMIT}.")
@@ -65,27 +49,9 @@ def get_random_bits_from_random_org(num_bits, api_key=None):
     return random_bits
 
 def get_local_random_bits(num_bits):
-    """
-    Genera bit casuali localmente utilizzando numpy.
-
-    Args:
-        num_bits (int): Numero di bit casuali richiesti.
-
-    Returns:
-        list: Una lista di bit casuali.
-    """
     return list(np.random.randint(0, 2, size=num_bits))
 
 def calculate_entropy(bits):
-    """
-    Calcola l'entropia di una lista di bit usando la formula di Shannon.
-
-    Args:
-        bits (list): Lista di bit.
-
-    Returns:
-        float: Entropia dei bit.
-    """
     n = len(bits)
     counts = np.bincount(bits, minlength=2)
     p = counts / n
@@ -94,37 +60,17 @@ def calculate_entropy(bits):
     return entropy
 
 def move_car(car_pos, distance):
-    """
-    Muove la posizione di una macchina in avanti di una distanza specificata.
-
-    Args:
-        car_pos (float): Posizione attuale della macchina.
-        distance (float): Distanza da percorrere.
-
-    Returns:
-        float: Nuova posizione della macchina.
-    """
     car_pos += distance
-    if car_pos > 900:  # Limite della pista
+    if car_pos > 900:  # Accorciamo la pista per lasciare spazio alla bandierina
         car_pos = 900
     return car_pos
 
 def image_to_base64(image):
-    """
-    Converte un'immagine in una stringa base64.
-
-    Args:
-        image (PIL.Image): Immagine da convertire.
-
-    Returns:
-        str: Immagine codificata in base64.
-    """
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
 
 def main():
-    # Configurazione della pagina Streamlit
     st.set_page_config(page_title="Car Mind Race", layout="wide")
     
     if "language" not in st.session_state:
@@ -140,7 +86,6 @@ def main():
     # Pulsante per cambiare la lingua
     st.sidebar.button("Change Language", on_click=toggle_language)
 
-    # Testo e istruzioni in base alla lingua selezionata
     if st.session_state.language == "Italiano":
         title_text = "Car Mind Race"
         instruction_text = """
@@ -192,10 +137,8 @@ def main():
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
         move_multiplier_text = "Movement Multiplier"
 
-    # Titolo della pagina
     st.title(title_text)
 
-    # Stile CSS per slider e immagini
     st.markdown("""
         <style>
         .stSlider > div > div > div > div {
@@ -277,27 +220,24 @@ def main():
     if "show_end_buttons" not in st.session_state:
         st.session_state.show_end_buttons = False
 
-    # Sidebar per i controlli
+    # Configurazione del menu
     st.sidebar.title("Menu")
     if st.session_state.player_choice is None:
         start_button = st.sidebar.button(start_race_text, key="start_button", disabled=True)
     else:
         start_button = st.sidebar.button(start_race_text, key="start_button")
     stop_button = st.sidebar.button(stop_race_text, key="stop_button")
-    api_key = st.sidebar.text_input(api_key_text, key="api_key", value="")  # Campo per l'API Key
+    api_key = st.sidebar.text_input(api_key_text, key="api_key", value="a40af516-6c94-4750-95cb-7a5d6f5bf68a")  # Default con chiave API inserita
     
     st.sidebar.markdown(api_description_text)
 
-    # Opzioni di download e reset
     download_menu = st.sidebar.expander("Download")
     with download_menu:
         download_button = st.button(download_data_text, key="download_button")
     reset_button = st.sidebar.button(reset_game_text, key="reset_button")
 
-    # Slider per il moltiplicatore di movimento
     move_multiplier = st.sidebar.slider(move_multiplier_text, min_value=1, max_value=100, value=20, key="move_multiplier")
 
-    # Caricamento delle immagini
     image_dir = os.path.abspath(os.path.dirname(__file__))
     car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Macchina rossa
     car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Macchina verde
@@ -331,24 +271,30 @@ def main():
         green_car_number_image = st.session_state.green_car_number_image
         red_car_number_image = st.session_state.red_car_number_image
 
-    # Conversione delle immagini in base64 per l'uso in HTML
     car_image_base64 = image_to_base64(car_image)
     car2_image_base64 = image_to_base64(car2_image)
     flag_image_base64 = image_to_base64(flag_image)
     green_car_number_base64 = image_to_base64(green_car_number_image)
     red_car_number_base64 = image_to_base64(red_car_number_image)
 
-    # Spazi per la visualizzazione delle macchine
     car_placeholder = st.empty()
     car2_placeholder = st.empty()
 
     def display_cars():
         """
-        Visualizza le auto sulla pista con posizioni aggiornate.
+        Visualizza le macchine sulla pista.
         """
+        # Mostra i numeri solo quando la gara è in corso
+        if st.session_state.running:
+            red_number_image = f'<img src="data:image/png;base64,{red_car_number_base64}" class="number-image" style="left:{st.session_state.car_pos / 10 - 1.5}%">'
+            green_number_image = f'<img src="data:image/png;base64,{green_car_number_base64}" class="number-image" style="left:{st.session_state.car2_pos / 10 - 1.5}%">'
+        else:
+            red_number_image = ""
+            green_number_image = ""
+
         car_placeholder.markdown(f"""
             <div class="slider-container first">
-                <img src="data:image/png;base64,{red_car_number_base64}" class="number-image" style="left:{st.session_state.car_pos / 10 - 1.5}%">
+                {red_number_image}
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
@@ -357,7 +303,7 @@ def main():
 
         car2_placeholder.markdown(f"""
             <div class="slider-container">
-                <img src="data:image/png;base64,{green_car_number_base64}" class="number-image" style="left:{st.session_state.car2_pos / 10 - 1.5}%">
+                {green_number_image}
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
@@ -368,10 +314,7 @@ def main():
 
     def check_winner():
         """
-        Controlla se una delle due macchine ha vinto.
-
-        Returns:
-            str: "Rossa" o "Verde" se c'è un vincitore, altrimenti None.
+        Controlla se c'è un vincitore tra le macchine.
         """
         if st.session_state.car_pos >= 900:  # Accorciamo la pista per lasciare spazio alla bandierina
             return "Rossa"
@@ -382,9 +325,6 @@ def main():
     def end_race(winner):
         """
         Termina la gara e mostra il vincitore.
-
-        Args:
-            winner (str): Nome della macchina vincente.
         """
         st.session_state.running = False
         st.session_state.show_end_buttons = True
@@ -393,7 +333,7 @@ def main():
 
     def reset_game():
         """
-        Resetta lo stato del gioco per una nuova partita.
+        Resetta lo stato del gioco.
         """
         st.session_state.car_pos = 50
         st.session_state.car2_pos = 50
@@ -466,7 +406,6 @@ def main():
             count_1 = sum(random_bits_1)
             count_0 = len(random_bits_1) - count_1
 
-            # Movimento delle macchine basato sull'entropia
             if entropy_score_1 < percentile_5_1:
                 if st.session_state.player_choice == 1 and count_1 > count_0:
                     st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
@@ -485,13 +424,11 @@ def main():
 
             display_cars()
 
-            # Controllo del vincitore
             winner = check_winner()
             if winner:
                 end_race(winner)
                 break
 
-            # Tempo di attesa per rispettare il limite di richiesta
             time_elapsed = time.time() - start_time
             time.sleep(max(REQUEST_INTERVAL - time_elapsed, 0))
 
@@ -501,7 +438,6 @@ def main():
     except Exception as e:
         st.error(f"Si è verificato un errore: {e}")
 
-    # Scarica i dati in un file Excel
     if download_button:
         # Creazione del DataFrame con le colonne "Macchina verde" e "Macchina rossa"
         df = pd.DataFrame({
@@ -517,7 +453,6 @@ def main():
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
-    # Pulsante di reset del gioco
     if reset_button:
         reset_game()
 
