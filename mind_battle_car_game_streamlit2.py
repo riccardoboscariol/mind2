@@ -159,6 +159,9 @@ def main():
             position: relative;
             height: 150px;
             margin-bottom: 50px;
+        .slider-container:last-child {  /* Seleziona il secondo slider */
+        margin-top: 30px;  /* Aumenta questo valore per alzare lo slider */
+        
         }
         .slider-container.first {
             margin-top: 50px;
