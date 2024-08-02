@@ -3,75 +3,22 @@ import time
 import numpy as np
 import pandas as pd
 from PIL import Image
-import requests
 import base64
 import io
 import os
+from rdoclient import RandomOrgClient
 
-MAX_BATCH_SIZE = 1000  # Dimensione massima del batch per le richieste a random.org
-RETRY_LIMIT = 3  # Numero di tentativi per le richieste a random.org
-REQUEST_INTERVAL = 0.5  # Intervallo tra le richieste (in secondi)
-
-def validate_api_key(api_key):
-    """Verifica se la chiave API è valida effettuando una richiesta di prova a random.org."""
-    try:
-        response = requests.get(
-            "https://www.random.org/integers/",
-            params={
-                "num": 1,
-                "min": 0,
-                "max": 1,
-                "col": 1,
-                "base": 10,
-                "format": "plain",
-                "rnd": "new"
-            },
-            headers={
-                "User-Agent": "streamlit_app",
-                "Random-Org-API-Key": api_key.strip()
-            },
-            timeout=10
-        )
-        response.raise_for_status()
-        return True
-    except requests.RequestException as e:
-        st.error(f"Errore nella verifica della chiave API: {e}")
-        return False
+MAX_BATCH_SIZE = 1000  # Maximum batch size for requests to random.org
+REQUEST_INTERVAL = 0.5  # Interval between requests (in seconds)
 
 def get_random_bits_from_random_org(num_bits, api_key=None):
-    random_bits = []
-    attempts = 0
-    while num_bits > 0 and attempts < RETRY_LIMIT:
-        batch_size = min(num_bits, MAX_BATCH_SIZE)
-        url = "https://www.random.org/integers/"
-        params = {
-            "num": batch_size,
-            "min": 0,
-            "max": 1,
-            "col": 1,
-            "base": 10,
-            "format": "plain",
-            "rnd": "new"
-        }
-        headers = {"User-Agent": "streamlit_app"}
-        if api_key:
-            headers["Random-Org-API-Key"] = api_key.strip()  # Rimuove spazi bianchi
-        try:
-            response = requests.get(url, params=params, headers=headers, timeout=10)
-            response.raise_for_status()
-            random_bits.extend(list(map(int, response.text.strip().split())))
-            num_bits -= batch_size
-        except requests.RequestException:
-            attempts += 1
-            if attempts >= RETRY_LIMIT:
-                st.warning(f"Problemi con il server di random.org: verrà utilizzato un metodo di generazione pseudorandomico locale.")
-                random_bits.extend(get_local_random_bits(num_bits))
-                break
-            time.sleep(2)  # Attendi 2 secondi prima di riprovare
-        except ValueError as e:
-            st.error(f"Errore nel processamento dei dati da random.org: {e}")
-            break
-    return random_bits
+    try:
+        r = RandomOrgClient(api_key)
+        random_bits = r.generate_integers(num_bits, 0, 1)
+        return random_bits, True
+    except Exception as e:
+        st.warning(f"Problemi con il server di random.org: verrà utilizzato un metodo di generazione pseudorandomico locale. Errore: {e}")
+        return get_local_random_bits(num_bits), False
 
 def get_local_random_bits(num_bits):
     return list(np.random.randint(0, 2, size=num_bits))
@@ -86,7 +33,7 @@ def calculate_entropy(bits):
 
 def move_car(car_pos, distance):
     car_pos += distance
-    if car_pos > 900:  # Accorciamo la pista per lasciare spazio alla bandierina
+    if car_pos > 900:  # Shorten the track to leave space for the flag
         car_pos = 900
     return car_pos
 
@@ -101,14 +48,14 @@ def main():
     if "language" not in st.session_state:
         st.session_state.language = "Italiano"
     
-    # Funzione per cambiare la lingua
+    # Function to toggle language
     def toggle_language():
         if st.session_state.language == "Italiano":
             st.session_state.language = "English"
         else:
             st.session_state.language = "Italiano"
 
-    # Pulsante per cambiare la lingua
+    # Button to toggle language
     st.sidebar.button("Change Language", on_click=toggle_language)
 
     if st.session_state.language == "Italiano":
@@ -194,14 +141,14 @@ def main():
         }
         .number-image {
             position: absolute;
-            top: -50px; /* Aggiustamento per posizionare il numero sopra l'auto */
-            width: 20px; /* Dimensione delle immagini numeriche */
+            top: -50px; /* Position adjustment for number above the car */
+            width: 20px; /* Size of number images */
         }
         .flag-image {
             position: absolute;
             top: -100px;
             width: 150px;
-            left: 96%;  /* Sposta la bandierina a destra, cambia il valore per regolare */
+            left: 96%;  /* Move the flag to the right, change value to adjust */
         }
         .slider-container input[type=range] {
             width: 100%;
@@ -251,9 +198,9 @@ def main():
         start_button = st.sidebar.button(start_race_text, key="start_button")
     stop_button = st.sidebar.button(stop_race_text, key="stop_button")
     
-    api_key = st.sidebar.text_input(api_key_text, key="api_key", value="")  # Default con chiave API inserita
+    api_key = st.sidebar.text_input(api_key_text, key="api_key", value="")  # Default with API key input
     
-    if api_key and not validate_api_key(api_key):
+    if not api_key:
         st.warning("Chiave API non valida o il server di random.org non è accessibile.")
 
     st.sidebar.markdown(api_description_text)
@@ -266,11 +213,11 @@ def main():
     move_multiplier = st.sidebar.slider(move_multiplier_text, min_value=1, max_value=100, value=20, key="move_multiplier")
 
     image_dir = os.path.abspath(os.path.dirname(__file__))
-    car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Macchina rossa
-    car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Macchina verde
-    flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Bandierina della stessa dimensione delle macchine
+    car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Red car
+    car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Green car
+    flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Flag image
 
-    # Carica le immagini per i numeri e ridimensiona ulteriormente a 20x20 pixel
+    # Load number images and resize to 20x20 pixels
     number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize((20, 20))
     number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize((20, 20))
     number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize((20, 20))
@@ -278,11 +225,11 @@ def main():
 
     st.write(choose_bit_text)
 
-    # Inizializza le immagini dei numeri con valori predefiniti
+    # Initialize number images with default values
     green_car_number_image = number_0_green_image
     red_car_number_image = number_1_red_image
 
-    # Determina quale immagine di numero visualizzare per ogni macchina
+    # Determine which number image to display for each car
     if st.button("Scegli 1", key="button1"):
         st.session_state.player_choice = 1
         st.session_state.green_car_number_image = number_1_green_image
@@ -293,7 +240,7 @@ def main():
         st.session_state.green_car_number_image = number_0_green_image
         st.session_state.red_car_number_image = number_1_red_image
 
-    # Assegna le immagini scelte se è stata fatta una scelta
+    # Assign the chosen images if a choice has been made
     if st.session_state.player_choice is not None:
         green_car_number_image = st.session_state.green_car_number_image
         red_car_number_image = st.session_state.red_car_number_image
@@ -329,9 +276,9 @@ def main():
     display_cars()
 
     def check_winner():
-        if st.session_state.car_pos >= 900:  # Accorciamo la pista per lasciare spazio alla bandierina
+        if st.session_state.car_pos >= 900:  # Shorten the track to leave space for the flag
             return "Rossa"
-        elif st.session_state.car2_pos >= 900:  # Accorciamo la pista per lasciare spazio alla bandierina
+        elif st.session_state.car2_pos >= 900:  # Shorten the track to leave space for the flag
             return "Verde"
         return None
 
@@ -378,12 +325,21 @@ def main():
         st.session_state.running = False
 
     try:
+        local_generation_used = False
         while st.session_state.running:
             start_time = time.time()
 
-            # Ottieni numeri casuali da random.org
-            random_bits_1 = get_random_bits_from_random_org(1000, api_key)
-            random_bits_2 = get_random_bits_from_random_org(1000, api_key)
+            # Get random numbers from random.org
+            random_bits_1, success_1 = get_random_bits_from_random_org(1000, api_key)
+            random_bits_2, success_2 = get_random_bits_from_random_org(1000, api_key)
+
+            if not success_1 or not success_2:
+                if not local_generation_used:
+                    st.warning(
+                        "Utilizzo numeri casuali locali a causa di un problema con random.org. "
+                        "Ciò potrebbe essere dovuto a troppe richieste al server."
+                    )
+                    local_generation_used = True
 
             if random_bits_1 is None or random_bits_2 is None:
                 st.session_state.running = False
@@ -442,7 +398,7 @@ def main():
         st.error(f"Si è verificato un errore: {e}")
 
     if download_button:
-        # Creazione del DataFrame con le colonne "Macchina verde" e "Macchina rossa"
+        # Create DataFrame with columns "Macchina verde" and "Macchina rossa"
         df = pd.DataFrame({
             "Macchina verde": [''.join(map(str, row)) for row in st.session_state.data_for_excel_1],
             "Macchina rossa": [''.join(map(str, row)) for row in st.session_state.data_for_excel_2]
