@@ -38,7 +38,7 @@ def get_random_bits_from_random_org(num_bits, api_key=None):
         except requests.RequestException as e:
             attempts += 1
             st.error(f"Errore durante l'accesso a random.org: {e}. Tentativo {attempts}/{RETRY_LIMIT}.")
-            time.sleep(2 ** attempts)  # Backoff esponenziale
+            time.sleep(2)  # Attendi 2 secondi prima di riprovare
             if attempts >= RETRY_LIMIT:
                 st.warning(f"Utilizzo numeri casuali locali dopo {RETRY_LIMIT} tentativi falliti.")
                 random_bits.extend(get_local_random_bits(num_bits))
@@ -186,7 +186,6 @@ def main():
 
     st.markdown(instruction_text)
 
-    # Stato della sessione
     if "player_choice" not in st.session_state:
         st.session_state.player_choice = None
     if "car_pos" not in st.session_state:
@@ -220,7 +219,6 @@ def main():
     if "show_end_buttons" not in st.session_state:
         st.session_state.show_end_buttons = False
 
-    # Configurazione del menu
     st.sidebar.title("Menu")
     if st.session_state.player_choice is None:
         start_button = st.sidebar.button(start_race_text, key="start_button", disabled=True)
@@ -252,8 +250,8 @@ def main():
     st.write(choose_bit_text)
 
     # Inizializza le immagini dei numeri con valori predefiniti
-    green_car_number_image = number_0_green_image
-    red_car_number_image = number_1_red_image
+    green_car_number_image = None
+    red_car_number_image = None
 
     # Determina quale immagine di numero visualizzare per ogni macchina
     if st.button("Scegli 1", key="button1"):
@@ -274,48 +272,52 @@ def main():
     car_image_base64 = image_to_base64(car_image)
     car2_image_base64 = image_to_base64(car2_image)
     flag_image_base64 = image_to_base64(flag_image)
-    green_car_number_base64 = image_to_base64(green_car_number_image)
-    red_car_number_base64 = image_to_base64(red_car_number_image)
+    green_car_number_base64 = image_to_base64(green_car_number_image) if green_car_number_image else None
+    red_car_number_base64 = image_to_base64(red_car_number_image) if red_car_number_image else None
 
     car_placeholder = st.empty()
     car2_placeholder = st.empty()
 
     def display_cars():
-        """
-        Visualizza le macchine sulla pista.
-        """
-        # Mostra i numeri solo quando la gara è in corso
-        if st.session_state.running:
-            red_number_image = f'<img src="data:image/png;base64,{red_car_number_base64}" class="number-image" style="left:{st.session_state.car_pos / 10 - 1.5}%">'
-            green_number_image = f'<img src="data:image/png;base64,{green_car_number_base64}" class="number-image" style="left:{st.session_state.car2_pos / 10 - 1.5}%">'
+        if st.session_state.running and green_car_number_base64 and red_car_number_base64:
+            car_placeholder.markdown(f"""
+                <div class="slider-container first">
+                    <img src="data:image/png;base64,{red_car_number_base64}" class="number-image" style="left:{st.session_state.car_pos / 10 - 1.5}%">
+                    <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
+                    <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
+                    <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
+                </div>
+            """, unsafe_allow_html=True)
+
+            car2_placeholder.markdown(f"""
+                <div class="slider-container">
+                    <img src="data:image/png;base64,{green_car_number_base64}" class="number-image" style="left:{st.session_state.car2_pos / 10 - 1.5}%">
+                    <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
+                    <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
+                    <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
+                </div>
+            """, unsafe_allow_html=True)
         else:
-            red_number_image = ""
-            green_number_image = ""
+            # Mostra solo le macchine e la bandiera senza numeri
+            car_placeholder.markdown(f"""
+                <div class="slider-container first">
+                    <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
+                    <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
+                    <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
+                </div>
+            """, unsafe_allow_html=True)
 
-        car_placeholder.markdown(f"""
-            <div class="slider-container first">
-                {red_number_image}
-                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
-                <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
-                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
-            </div>
-        """, unsafe_allow_html=True)
-
-        car2_placeholder.markdown(f"""
-            <div class="slider-container">
-                {green_number_image}
-                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
-                <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
-                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
-            </div>
-        """, unsafe_allow_html=True)
+            car2_placeholder.markdown(f"""
+                <div class="slider-container">
+                    <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
+                    <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
+                    <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
+                </div>
+            """, unsafe_allow_html=True)
 
     display_cars()
 
     def check_winner():
-        """
-        Controlla se c'è un vincitore tra le macchine.
-        """
         if st.session_state.car_pos >= 900:  # Accorciamo la pista per lasciare spazio alla bandierina
             return "Rossa"
         elif st.session_state.car2_pos >= 900:  # Accorciamo la pista per lasciare spazio alla bandierina
@@ -323,18 +325,12 @@ def main():
         return None
 
     def end_race(winner):
-        """
-        Termina la gara e mostra il vincitore.
-        """
         st.session_state.running = False
         st.session_state.show_end_buttons = True
         st.success(win_message.format(winner))
         show_end_buttons()
 
     def reset_game():
-        """
-        Resetta lo stato del gioco.
-        """
         st.session_state.car_pos = 50
         st.session_state.car2_pos = 50
         st.session_state.car1_moves = 0
@@ -353,9 +349,6 @@ def main():
         display_cars()
 
     def show_end_buttons():
-        """
-        Mostra i pulsanti per iniziare una nuova gara o terminare il gioco.
-        """
         key_suffix = st.session_state.widget_key_counter
         col1, col2 = st.columns(2)
         with col1:
@@ -365,7 +358,6 @@ def main():
             if st.button(end_game_text, key=f"end_game_button_{key_suffix}"):
                 st.stop()
 
-    # Inizia la gara se il pulsante è premuto
     if start_button and st.session_state.player_choice is not None:
         st.session_state.running = True
         st.session_state.car_start_time = time.time()
