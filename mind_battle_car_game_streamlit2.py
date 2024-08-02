@@ -160,7 +160,7 @@ def main():
             height: 150px;
             margin-bottom: 50px;
         .slider-container:last-child {  /* Seleziona il secondo slider */
-        margin-top: 30px;  /* Aumenta questo valore per alzare lo slider */
+        margin-top: -20px;  /* Aumenta questo valore per alzare lo slider */
         
         }
         .slider-container.first {
