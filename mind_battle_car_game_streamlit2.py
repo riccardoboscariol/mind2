@@ -9,27 +9,42 @@ import io
 import os
 from rdoclient import RandomOrgClient
 
-# Constants
+# Constants for the application
 MAX_BATCH_SIZE = 1000  # Maximum batch size for requests to random.org
-RETRY_LIMIT = 3  # Number of retry attempts for requests to random.org
+RETRY_LIMIT = 3  # Number of attempts for requests to random.org
 REQUEST_INTERVAL = 0.5  # Interval between requests (in seconds)
 
+# Function to validate the API key by making a test request to random.org
+def validate_api_key(api_key):
+    try:
+        random_client = RandomOrgClient(api_key.strip())
+        # Try a simple request to validate the API key
+        random_client.generate_integers(n=1, min=0, max=1, replacement=True)
+        return True
+    except Exception as e:
+        st.error(f"Errore nella verifica della chiave API: {e}")
+        return False
+
+# Function to get random bits from random.org
 def get_random_bits_from_random_org(num_bits, api_key=None):
-    """Fetch random bits from random.org or use local generation on failure."""
     random_bits = []
     attempts = 0
-    success = False
+    success = True
+    random_client = None
 
-    while num_bits > 0 and attempts < RETRY_LIMIT:
-        batch_size = min(num_bits, MAX_BATCH_SIZE)
-
-        # Create a RandomOrgClient instance
+    if api_key:
         try:
-            client = RandomOrgClient(api_key.strip())
-            response = client.generate_integers(batch_size, 0, 1)
-            random_bits.extend(response)
+            random_client = RandomOrgClient(api_key.strip())
+        except Exception as e:
+            st.error(f"Errore di connessione al client RandomOrg: {e}")
+            success = False
+
+    while num_bits > 0 and attempts < RETRY_LIMIT and random_client:
+        batch_size = min(num_bits, MAX_BATCH_SIZE)
+        try:
+            bits = random_client.generate_integers(n=batch_size, min=0, max=1, replacement=True)
+            random_bits.extend(bits)
             num_bits -= batch_size
-            success = True
         except Exception as e:
             attempts += 1
             if attempts >= RETRY_LIMIT:
@@ -37,17 +52,17 @@ def get_random_bits_from_random_org(num_bits, api_key=None):
                     "Problemi con il server di random.org: verrà utilizzato un metodo di generazione pseudorandomico locale."
                 )
                 random_bits.extend(get_local_random_bits(num_bits))
+                success = False
                 break
             time.sleep(2)  # Wait 2 seconds before retrying
-
     return random_bits, success
 
+# Fallback function to generate random bits locally
 def get_local_random_bits(num_bits):
-    """Generate random bits locally using numpy."""
     return list(np.random.randint(0, 2, size=num_bits))
 
+# Function to calculate entropy using Shannon's formula
 def calculate_entropy(bits):
-    """Calculate the entropy of a list of bits."""
     n = len(bits)
     counts = np.bincount(bits, minlength=2)
     p = counts / n
@@ -55,37 +70,38 @@ def calculate_entropy(bits):
     entropy = -np.sum(p * np.log2(p))
     return entropy
 
+# Function to move the car a certain distance
 def move_car(car_pos, distance):
-    """Move the car to a new position, ensuring it doesn't exceed the track."""
     car_pos += distance
     if car_pos > 900:  # Shorten the track to make space for the flag
         car_pos = 900
     return car_pos
 
+# Function to convert images to base64
 def image_to_base64(image):
-    """Convert an image to a base64 string."""
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
 
+# Main function for the application
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
 
-    # Initialize session state variables
+    # Initialize session state variables if not already set
     if "language" not in st.session_state:
         st.session_state.language = "Italiano"
 
-    # Function to toggle the language
+    # Function to toggle language
     def toggle_language():
         if st.session_state.language == "Italiano":
             st.session_state.language = "English"
         else:
             st.session_state.language = "Italiano"
 
-    # Button to change the language
+    # Button to toggle language
     st.sidebar.button("Change Language", on_click=toggle_language)
 
-    # Texts in different languages
+    # Texts based on selected language
     if st.session_state.language == "Italiano":
         title_text = "Car Mind Race"
         instruction_text = """
@@ -137,22 +153,26 @@ def main():
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
         move_multiplier_text = "Movement Multiplier"
 
+    # Display the title and logo
     st.title(title_text)
 
     # Load and display the logo
-    logo_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "logo_A.png")
-    if os.path.exists(logo_path):
-        logo_image = Image.open(logo_path)
-        logo_image = logo_image.resize((int(249 / 2), int(140 / 2)))  # Resize to 249x140, maintaining aspect ratio
-        st.markdown(
-            f'<div style="text-align:center;"><a href="http://socrg.org/" target="_blank"><img src="data:image/png;base64,{image_to_base64(logo_image)}" alt="Logo" style="height:140px;width:auto;"></a></div>',
-            unsafe_allow_html=True
-        )
-    else:
-        st.error("Logo image not found.")
+    image_dir = os.path.abspath(os.path.dirname(__file__))
+    logo_image = Image.open(os.path.join(image_dir, "logo_A.png")).resize((125, 70))  # Resize the logo
+    st.markdown(
+        f"""
+        <div style="display: flex; justify-content: flex-start;">
+            <a href="http://socrg.org/" target="_blank">
+                <img src="data:image/png;base64,{image_to_base64(logo_image)}" alt="Logo">
+            </a>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-    # CSS styling for sliders and images
-    st.markdown("""
+    # Display instructions and styles
+    st.markdown(
+        """
         <style>
         .stSlider > div > div > div > div {
             background: white;
@@ -182,33 +202,46 @@ def main():
         }
         .number-image {
             position: absolute;
-            top: -50px; /* Adjusts to position the number above the car */
-            width: 20px; /* Size of number images */
+            top: -50px;
+            width: 20px;
         }
         .flag-image {
             position: absolute;
             top: -100px;
             width: 150px;
-            left: 96%;  /* Move the flag to the right, change the value to adjust */
+            left: 96%;
         }
         .slider-container input[type=range] {
             width: 100%;
         }
         .button-container {
-            margin: 20px 0;  /* Add spacing between buttons */
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
+            gap: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
-        .button-container button {
-            margin-right: 20px;
-            margin-left: 20px;
+        .styled-button {
+            padding: 10px 20px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .active {
+            background-color: #4CAF50; /* Green */
+        }
+        .inactive {
+            background-color: #f44336; /* Red */
         }
         </style>
-        """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True
+    )
 
     st.markdown(instruction_text)
 
-    # Initialize session state variables if not already set
+    # Initialize session state variables
     if "player_choice" not in st.session_state:
         st.session_state.player_choice = None
     if "car_pos" not in st.session_state:
@@ -242,14 +275,18 @@ def main():
     if "show_end_buttons" not in st.session_state:
         st.session_state.show_end_buttons = False
 
-    # Sidebar and main interface setup
+    # Sidebar and settings
     st.sidebar.title("Menu")
-    start_button = st.sidebar.button(start_race_text, key="start_button", disabled=(st.session_state.player_choice is None))
+    if st.session_state.player_choice is None:
+        start_button = st.sidebar.button(start_race_text, key="start_button", disabled=True)
+    else:
+        start_button = st.sidebar.button(start_race_text, key="start_button")
     stop_button = st.sidebar.button(stop_race_text, key="stop_button")
 
-    # API key input
-    api_key = st.sidebar.text_input(api_key_text, key="api_key", value="")  # Default with API key inserted
-    if api_key and not get_random_bits_from_random_org(1, api_key)[1]:
+    api_key = st.sidebar.text_input(api_key_text, key="api_key", value="")
+    
+    # Validate the API key only if entered
+    if api_key and not validate_api_key(api_key):
         st.warning("Chiave API non valida o il server di random.org non è accessibile.")
 
     st.sidebar.markdown(api_description_text)
@@ -261,37 +298,33 @@ def main():
 
     move_multiplier = st.sidebar.slider(move_multiplier_text, min_value=1, max_value=100, value=20, key="move_multiplier")
 
-    # Image loading
-    image_dir = os.path.abspath(os.path.dirname(__file__))
+    # Load car and number images
     car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Red car
     car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Green car
-    flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Flag same size as cars
+    flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Flag image
 
-    # Load and resize number images to 20x20 pixels
+    # Load and resize number images
     number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize((20, 20))
     number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize((20, 20))
     number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize((20, 20))
     number_1_red_image = Image.open(os.path.join(image_dir, "1red.png")).resize((20, 20))
 
-    # Write text and handle button actions
     st.write(choose_bit_text)
 
     # Initialize number images with default values
     green_car_number_image = number_0_green_image
     red_car_number_image = number_1_red_image
 
-    # Add button container with styling
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        if st.button("Scegli 1", key="button1", use_container_width=True):
-            st.session_state.player_choice = 1
-            st.session_state.green_car_number_image = number_1_green_image
-            st.session_state.red_car_number_image = number_0_red_image
-    with col2:
-        if st.button("Scegli 0", key="button0", use_container_width=True):
-            st.session_state.player_choice = 0
-            st.session_state.green_car_number_image = number_0_green_image
-            st.session_state.red_car_number_image = number_1_red_image
+    # Determine which number image to display for each car
+    if st.button("Scegli 1", key="button1"):
+        st.session_state.player_choice = 1
+        st.session_state.green_car_number_image = number_1_green_image
+        st.session_state.red_car_number_image = number_0_red_image
+
+    if st.button("Scegli 0", key="button0"):
+        st.session_state.player_choice = 0
+        st.session_state.green_car_number_image = number_0_green_image
+        st.session_state.red_car_number_image = number_1_red_image
 
     # Assign chosen images if a choice has been made
     if st.session_state.player_choice is not None:
@@ -305,50 +338,56 @@ def main():
     red_car_number_base64 = image_to_base64(red_car_number_image)
     green_car_number_base64 = image_to_base64(green_car_number_image)
 
-    # Placeholders for car and flag images
+    # Create placeholders for cars
     car_placeholder = st.empty()
     car2_placeholder = st.empty()
 
+    # Display cars function
     def display_cars():
-        """Display car images and their positions."""
-        car_placeholder.markdown(f"""
+        car_placeholder.markdown(
+            f"""
             <div class="slider-container first">
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image" style="left:{st.session_state.car_pos / 10 - 1.5}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
-        """, unsafe_allow_html=True)
+            """,
+            unsafe_allow_html=True
+        )
 
-        car2_placeholder.markdown(f"""
+        car2_placeholder.markdown(
+            f"""
             <div class="slider-container">
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image" style="left:{st.session_state.car2_pos / 10 - 1.5}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
-        """, unsafe_allow_html=True)
+            """,
+            unsafe_allow_html=True
+        )
 
     # Display cars initially
     display_cars()
 
+    # Check for winner function
     def check_winner():
-        """Check if there's a winner."""
         if st.session_state.car_pos >= 900:  # Shorten the track to make space for the flag
             return "Rossa"
         elif st.session_state.car2_pos >= 900:  # Shorten the track to make space for the flag
             return "Verde"
         return None
 
+    # End race function
     def end_race(winner):
-        """End the race and display the winner."""
         st.session_state.running = False
         st.session_state.show_end_buttons = True
         st.success(win_message.format(winner))
         show_end_buttons()
 
+    # Reset game function
     def reset_game():
-        """Reset the game to its initial state."""
         st.session_state.car_pos = 50
         st.session_state.car2_pos = 50
         st.session_state.car1_moves = 0
@@ -366,8 +405,8 @@ def main():
         st.write(reset_game_message)
         display_cars()
 
+    # Show end buttons function
     def show_end_buttons():
-        """Display buttons for starting a new race or ending the game."""
         key_suffix = st.session_state.widget_key_counter
         col1, col2 = st.columns(2)
         with col1:
@@ -377,22 +416,22 @@ def main():
             if st.button(end_game_text, key=f"end_game_button_{key_suffix}"):
                 st.stop()
 
-    # Start race if button is pressed and a choice is made
+    # Start the race if start button is pressed
     if start_button and st.session_state.player_choice is not None:
         st.session_state.running = True
         st.session_state.car_start_time = time.time()
         st.session_state.show_end_buttons = False
 
-    # Stop race if button is pressed
+    # Stop the race if stop button is pressed
     if stop_button:
         st.session_state.running = False
 
-    # Run the race logic
     try:
+        # Run the game loop while the race is active
         while st.session_state.running:
             start_time = time.time()
 
-            # Obtain random bits from random.org
+            # Get random bits from random.org
             random_bits_1, success_1 = get_random_bits_from_random_org(1000, api_key)
             random_bits_2, success_2 = get_random_bits_from_random_org(1000, api_key)
 
@@ -448,45 +487,49 @@ def main():
                     )
                     st.session_state.car2_moves += 1
 
-            # Update car display
             display_cars()
 
-            # Check for winner
             winner = check_winner()
             if winner:
                 end_race(winner)
                 break
 
-            # Sleep for remaining interval time
             time_elapsed = time.time() - start_time
             time.sleep(max(REQUEST_INTERVAL - time_elapsed, 0))
 
-        # Show end buttons if the race is over
         if st.session_state.show_end_buttons:
             show_end_buttons()
 
     except Exception as e:
         st.error(f"Si è verificato un errore: {e}")
 
-    # Download button functionality
+    # Allow users to download race data
     if download_button:
-        # Create DataFrame with columns "Macchina verde" and "Macchina rossa"
-        df = pd.DataFrame({
-            "Macchina verde": [''.join(map(str, row)) for row in st.session_state.data_for_excel_1],
-            "Macchina rossa": [''.join(map(str, row)) for row in st.session_state.data_for_excel_2]
-        })
+        # Create a DataFrame with the columns "Macchina verde" and "Macchina rossa"
+        df = pd.DataFrame(
+            {
+                "Macchina verde": [
+                    "".join(map(str, row)) for row in st.session_state.data_for_excel_1
+                ],
+                "Macchina rossa": [
+                    "".join(map(str, row)) for row in st.session_state.data_for_excel_2
+                ],
+            }
+        )
         df.to_excel("random_numbers.xlsx", index=False)
         with open("random_numbers.xlsx", "rb") as file:
             st.download_button(
                 label=download_data_text,
                 data=file,
                 file_name="random_numbers.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             )
 
-    # Reset button functionality
+    # Reset the game if reset button is pressed
     if reset_button:
         reset_game()
 
+# Run the main function when the script is executed
 if __name__ == "__main__":
     main()
+
