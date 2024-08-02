@@ -10,7 +10,33 @@ import os
 
 MAX_BATCH_SIZE = 1000  # Dimensione massima del batch per le richieste a random.org
 RETRY_LIMIT = 3  # Numero di tentativi per le richieste a random.org
-REQUEST_INTERVAL = 0.5  # Intervallo tra le richieste in secondi
+REQUEST_INTERVAL = 0.5  # Intervallo tra le richieste (in secondi)
+
+def validate_api_key(api_key):
+    """Verifica se la chiave API è valida effettuando una richiesta di prova a random.org."""
+    try:
+        response = requests.get(
+            "https://www.random.org/integers/",
+            params={
+                "num": 1,
+                "min": 0,
+                "max": 1,
+                "col": 1,
+                "base": 10,
+                "format": "plain",
+                "rnd": "new"
+            },
+            headers={
+                "User-Agent": "streamlit_app",
+                "Random-Org-API-Key": api_key.strip()
+            },
+            timeout=10
+        )
+        response.raise_for_status()
+        return True
+    except requests.RequestException as e:
+        st.error(f"Errore nella verifica della chiave API: {e}")
+        return False
 
 def get_random_bits_from_random_org(num_bits, api_key=None):
     random_bits = []
@@ -225,8 +251,12 @@ def main():
     else:
         start_button = st.sidebar.button(start_race_text, key="start_button")
     stop_button = st.sidebar.button(stop_race_text, key="stop_button")
-    api_key = st.sidebar.text_input(api_key_text, key="api_key", value="a40af516-6c94-4750-95cb-7a5d6f5bf68a")  # Default con chiave API inserita
     
+    api_key = st.sidebar.text_input(api_key_text, key="api_key", value="")  # Default con chiave API inserita
+    
+    if api_key and not validate_api_key(api_key):
+        st.warning("Chiave API non valida o il server di random.org non è accessibile.")
+
     st.sidebar.markdown(api_description_text)
 
     download_menu = st.sidebar.expander("Download")
@@ -250,8 +280,8 @@ def main():
     st.write(choose_bit_text)
 
     # Inizializza le immagini dei numeri con valori predefiniti
-    green_car_number_image = None
-    red_car_number_image = None
+    green_car_number_image = number_0_green_image
+    red_car_number_image = number_1_red_image
 
     # Determina quale immagine di numero visualizzare per ogni macchina
     if st.button("Scegli 1", key="button1"):
@@ -272,46 +302,39 @@ def main():
     car_image_base64 = image_to_base64(car_image)
     car2_image_base64 = image_to_base64(car2_image)
     flag_image_base64 = image_to_base64(flag_image)
-    green_car_number_base64 = image_to_base64(green_car_number_image) if green_car_number_image else None
-    red_car_number_base64 = image_to_base64(red_car_number_image) if red_car_number_image else None
 
     car_placeholder = st.empty()
     car2_placeholder = st.empty()
 
     def display_cars():
-        if st.session_state.running and green_car_number_base64 and red_car_number_base64:
+        car_placeholder.markdown(f"""
+            <div class="slider-container first">
+                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
+                <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
+            </div>
+        """, unsafe_allow_html=True)
+
+        car2_placeholder.markdown(f"""
+            <div class="slider-container">
+                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
+                <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
+            </div>
+        """, unsafe_allow_html=True)
+
+    def display_car_numbers():
+        """Display numbers above cars when the race is running."""
+        if st.session_state.running:
             car_placeholder.markdown(f"""
                 <div class="slider-container first">
                     <img src="data:image/png;base64,{red_car_number_base64}" class="number-image" style="left:{st.session_state.car_pos / 10 - 1.5}%">
-                    <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
-                    <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
-                    <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
                 </div>
             """, unsafe_allow_html=True)
 
             car2_placeholder.markdown(f"""
                 <div class="slider-container">
                     <img src="data:image/png;base64,{green_car_number_base64}" class="number-image" style="left:{st.session_state.car2_pos / 10 - 1.5}%">
-                    <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
-                    <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
-                    <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
-                </div>
-            """, unsafe_allow_html=True)
-        else:
-            # Mostra solo le macchine e la bandiera senza numeri
-            car_placeholder.markdown(f"""
-                <div class="slider-container first">
-                    <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
-                    <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
-                    <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
-                </div>
-            """, unsafe_allow_html=True)
-
-            car2_placeholder.markdown(f"""
-                <div class="slider-container">
-                    <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
-                    <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
-                    <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
                 </div>
             """, unsafe_allow_html=True)
 
@@ -415,6 +438,7 @@ def main():
                     st.session_state.car2_moves += 1
 
             display_cars()
+            display_car_numbers()
 
             winner = check_winner()
             if winner:
@@ -450,3 +474,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
