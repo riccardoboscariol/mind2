@@ -12,7 +12,6 @@ MAX_BATCH_SIZE = 1000  # Dimensione massima del batch per le richieste a random.
 RETRY_LIMIT = 3  # Numero di tentativi per le richieste a random.org
 REQUEST_INTERVAL = 0.5  # Intervallo tra le richieste (in secondi)
 
-
 def validate_api_key(api_key):
     """Verifica se la chiave API è valida effettuando una richiesta di prova a random.org."""
     try:
@@ -35,10 +34,16 @@ def validate_api_key(api_key):
         )
         response.raise_for_status()
         return True
-    except requests.RequestException as e:
-        st.error(f"Errore nella verifica della chiave API: {e}")
+    except requests.HTTPError as e:
+        # Error specific for 503 server errors
+        if response.status_code == 503:
+            st.error("Il server di random.org non è attualmente disponibile. Riprova più tardi.")
+        else:
+            st.error(f"Errore nella verifica della chiave API: {e}")
         return False
-
+    except requests.RequestException as e:
+        st.error(f"Errore generale di richiesta: {e}")
+        return False
 
 def get_random_bits_from_random_org(num_bits, api_key=None):
     random_bits = []
@@ -63,23 +68,25 @@ def get_random_bits_from_random_org(num_bits, api_key=None):
             response.raise_for_status()
             random_bits.extend(list(map(int, response.text.strip().split())))
             num_bits -= batch_size
-        except requests.RequestException as e:
-            attempts += 1
-            st.error(f"Errore durante l'accesso a random.org: {e}. Tentativo {attempts}/{RETRY_LIMIT}.")
-            time.sleep(2)  # Attendi 2 secondi prima di riprovare
-            if attempts >= RETRY_LIMIT:
-                st.warning(f"Utilizzo numeri casuali locali dopo {RETRY_LIMIT} tentativi falliti.")
-                random_bits.extend(get_local_random_bits(num_bits))
-                break
+        except requests.HTTPError as e:
+            if response.status_code == 503:
+                st.error("Il server di random.org non è attualmente disponibile. Riprova più tardi.")
+                break  # Exit the loop if the server is unavailable
+            else:
+                attempts += 1
+                st.error(f"Errore durante l'accesso a random.org: {e}. Tentativo {attempts}/{RETRY_LIMIT}.")
+                time.sleep(2)  # Attendi 2 secondi prima di riprovare
+                if attempts >= RETRY_LIMIT:
+                    st.warning(f"Utilizzo numeri casuali locali dopo {RETRY_LIMIT} tentativi falliti.")
+                    random_bits.extend(get_local_random_bits(num_bits))
+                    break
         except ValueError as e:
             st.error(f"Errore nel processamento dei dati da random.org: {e}")
             break
     return random_bits
 
-
 def get_local_random_bits(num_bits):
     return list(np.random.randint(0, 2, size=num_bits))
-
 
 def calculate_entropy(bits):
     n = len(bits)
@@ -89,26 +96,23 @@ def calculate_entropy(bits):
     entropy = -np.sum(p * np.log2(p))
     return entropy
 
-
 def move_car(car_pos, distance):
     car_pos += distance
     if car_pos > 900:  # Accorciamo la pista per lasciare spazio alla bandierina
         car_pos = 900
     return car_pos
 
-
 def image_to_base64(image):
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
 
-
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
-
+    
     if "language" not in st.session_state:
         st.session_state.language = "Italiano"
-
+    
     # Funzione per cambiare la lingua
     def toggle_language():
         if st.session_state.language == "Italiano":
@@ -258,9 +262,9 @@ def main():
     else:
         start_button = st.sidebar.button(start_race_text, key="start_button")
     stop_button = st.sidebar.button(stop_race_text, key="stop_button")
-
+    
     api_key = st.sidebar.text_input(api_key_text, key="api_key", value="")  # Default con chiave API inserita
-
+    
     if api_key and not validate_api_key(api_key):
         st.warning("Chiave API non valida o il server di random.org non è accessibile.")
 
@@ -271,14 +275,12 @@ def main():
         download_button = st.button(download_data_text, key="download_button")
     reset_button = st.sidebar.button(reset_game_text, key="reset_button")
 
-    move_multiplier = st.sidebar.slider(move_multiplier_text, min_value=1, max_value=100, value=20,
-                                        key="move_multiplier")
+    move_multiplier = st.sidebar.slider(move_multiplier_text, min_value=1, max_value=100, value=20, key="move_multiplier")
 
     image_dir = os.path.abspath(os.path.dirname(__file__))
     car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Macchina rossa
     car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Macchina verde
-    flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize(
-        (150, 150))  # Bandierina della stessa dimensione delle macchine
+    flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Bandierina della stessa dimensione delle macchine
 
     # Carica le immagini per i numeri e ridimensiona ulteriormente a 20x20 pixel
     number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize((20, 20))
@@ -312,6 +314,7 @@ def main():
     car2_image_base64 = image_to_base64(car2_image)
     flag_image_base64 = image_to_base64(flag_image)
 
+    # Add encoding for the number images
     green_car_number_base64 = image_to_base64(green_car_number_image)
     red_car_number_base64 = image_to_base64(red_car_number_image)
 
@@ -336,8 +339,6 @@ def main():
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
         """, unsafe_allow_html=True)
-
-    display_cars()
 
     def check_winner():
         if st.session_state.car_pos >= 900:  # Accorciamo la pista per lasciare spazio alla bandierina
@@ -404,16 +405,16 @@ def main():
 
             st.session_state.random_numbers_1.extend(random_bits_1)
             st.session_state.random_numbers_2.extend(random_bits_2)
-
+            
             st.session_state.data_for_excel_1.append(random_bits_1)
             st.session_state.data_for_excel_2.append(random_bits_2)
-
+            
             entropy_score_1 = calculate_entropy(random_bits_1)
             entropy_score_2 = calculate_entropy(random_bits_2)
-
+            
             st.session_state.data_for_condition_1.append(entropy_score_1)
             st.session_state.data_for_condition_2.append(entropy_score_2)
-
+            
             percentile_5_1 = np.percentile(st.session_state.data_for_condition_1, 5)
             percentile_5_2 = np.percentile(st.session_state.data_for_condition_2, 5)
 
@@ -422,22 +423,18 @@ def main():
 
             if entropy_score_1 < percentile_5_1:
                 if st.session_state.player_choice == 1 and count_1 > count_0:
-                    st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (
-                                1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
+                    st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
                     st.session_state.car1_moves += 1
                 elif st.session_state.player_choice == 0 and count_0 > count_1:
-                    st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (
-                                1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
+                    st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
                     st.session_state.car1_moves += 1
 
             if entropy_score_2 < percentile_5_2:
                 if st.session_state.player_choice == 1 and count_0 > count_1:
-                    st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (
-                                1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
+                    st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
                     st.session_state.car2_moves += 1
                 elif st.session_state.player_choice == 0 and count_1 > count_0:
-                    st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (
-                                1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
+                    st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
                     st.session_state.car2_moves += 1
 
             display_cars()
@@ -474,7 +471,5 @@ def main():
     if reset_button:
         reset_game()
 
-
 if __name__ == "__main__":
     main()
-
