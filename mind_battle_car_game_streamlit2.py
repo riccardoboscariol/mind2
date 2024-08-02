@@ -288,19 +288,19 @@ def main():
     st.write(choose_bit_text)
 
     # Inizializza le immagini dei numeri con valori predefiniti
-    green_car_number_base64 = image_to_base64(number_0_green_image)
-    red_car_number_base64 = image_to_base64(number_1_red_image)
+    st.session_state.green_car_number_base64 = image_to_base64(number_0_green_image)
+    st.session_state.red_car_number_base64 = image_to_base64(number_1_red_image)
 
     # Determina quale immagine di numero visualizzare per ogni macchina
     if st.button("Scegli 1", key="button1"):
         st.session_state.player_choice = 1
-        green_car_number_base64 = image_to_base64(number_1_green_image)
-        red_car_number_base64 = image_to_base64(number_0_red_image)
+        st.session_state.green_car_number_base64 = image_to_base64(number_1_green_image)
+        st.session_state.red_car_number_base64 = image_to_base64(number_0_red_image)
 
     if st.button("Scegli 0", key="button0"):
         st.session_state.player_choice = 0
-        green_car_number_base64 = image_to_base64(number_0_green_image)
-        red_car_number_base64 = image_to_base64(number_1_red_image)
+        st.session_state.green_car_number_base64 = image_to_base64(number_0_green_image)
+        st.session_state.red_car_number_base64 = image_to_base64(number_1_red_image)
 
     car_image_base64 = image_to_base64(car_image)
     car2_image_base64 = image_to_base64(car2_image)
@@ -313,6 +313,7 @@ def main():
         car_placeholder.markdown(f"""
             <div class="slider-container first">
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
+
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -331,13 +332,19 @@ def main():
         if st.session_state.running:
             car_placeholder.markdown(f"""
                 <div class="slider-container first">
-                    <img src="data:image/png;base64,{red_car_number_base64}" class="number-image" style="left:{st.session_state.car_pos / 10 - 1.5}%">
+                    <img src="data:image/png;base64,{st.session_state.red_car_number_base64}" class="number-image" style="left:{st.session_state.car_pos / 10 - 1.5}%">
+                    <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
+                    <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
+                    <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
                 </div>
             """, unsafe_allow_html=True)
 
             car2_placeholder.markdown(f"""
                 <div class="slider-container">
-                    <img src="data:image/png;base64,{green_car_number_base64}" class="number-image" style="left:{st.session_state.car2_pos / 10 - 1.5}%">
+                    <img src="data:image/png;base64,{st.session_state.green_car_number_base64}" class="number-image" style="left:{st.session_state.car2_pos / 10 - 1.5}%">
+                    <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
+                    <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
+                    <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
                 </div>
             """, unsafe_allow_html=True)
 
@@ -426,29 +433,24 @@ def main():
 
             if entropy_score_1 < percentile_5_1:
                 if st.session_state.player_choice == 1 and count_1 > count_0:
-                    st.session_state.car2_pos = move_car(st.session_state.car2_pos,
-                                                         move_multiplier * (
-                                                                     1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
+                    st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (
+                            1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
                     st.session_state.car1_moves += 1
                 elif st.session_state.player_choice == 0 and count_0 > count_1:
-                    st.session_state.car2_pos = move_car(st.session_state.car2_pos,
-                                                         move_multiplier * (
-                                                                     1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
+                    st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (
+                            1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
                     st.session_state.car1_moves += 1
 
             if entropy_score_2 < percentile_5_2:
                 if st.session_state.player_choice == 1 and count_0 > count_1:
-                    st.session_state.car_pos = move_car(st.session_state.car_pos,
-                                                        move_multiplier * (
-                                                                    1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
+                    st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (
+                            1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
                     st.session_state.car2_moves += 1
                 elif st.session_state.player_choice == 0 and count_1 > count_0:
-                    st.session_state.car_pos = move_car(st.session_state.car_pos,
-                                                        move_multiplier * (
-                                                                    1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
+                    st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (
+                            1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
                     st.session_state.car2_moves += 1
 
-            display_cars()
             display_car_numbers()
 
             winner = check_winner()
