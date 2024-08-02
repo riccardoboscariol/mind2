@@ -3,41 +3,42 @@ import time
 import numpy as np
 import pandas as pd
 from PIL import Image
-import requests
 import base64
 import io
 import os
 from rdoclient import RandomOrgClient
 
+# Constants
 MAX_BATCH_SIZE = 1000  # Dimensione massima del batch per le richieste a random.org
 RETRY_LIMIT = 3  # Numero di tentativi per le richieste a random.org
 REQUEST_INTERVAL = 0.5  # Intervallo tra le richieste (in secondi)
 
-# Configura il cliente per RANDOM.ORG
 def configure_random_org(api_key):
+    """Configura il client per accedere a RANDOM.ORG."""
     try:
-        return RandomOrgClient(api_key.strip())
+        client = RandomOrgClient(api_key)
+        return client
     except Exception as e:
-        st.error(f"Errore nella configurazione del client RANDOM.ORG: {e}")
+        st.error(f"Errore nella configurazione della chiave API: {e}")
         return None
 
 def get_random_bits_from_random_org(num_bits, client):
-    """Genera numeri casuali usando RANDOM.ORG, oppure fallisce con numeri pseudocasuali locali."""
+    """Ottiene numeri casuali da random.org o genera pseudocasuali localmente."""
+    if not client:
+        return get_local_random_bits(num_bits), False
+
     try:
         random_bits = client.generate_integers(num_bits, 0, 1)
         return random_bits, True
-    except Exception as e:
-        st.warning(
-            "Problemi con il server di random.org: verrà utilizzato un metodo di generazione pseudorandomico locale."
-        )
+    except Exception:
         return get_local_random_bits(num_bits), False
 
 def get_local_random_bits(num_bits):
-    """Genera numeri casuali locali."""
+    """Genera numeri casuali pseudorandomici localmente."""
     return list(np.random.randint(0, 2, size=num_bits))
 
 def calculate_entropy(bits):
-    """Calcola l'entropia di un elenco di bit."""
+    """Calcola l'entropia di Shannon di una lista di bit."""
     n = len(bits)
     counts = np.bincount(bits, minlength=2)
     p = counts / n
@@ -46,34 +47,22 @@ def calculate_entropy(bits):
     return entropy
 
 def move_car(car_pos, distance):
-    """Muove l'auto di una certa distanza, fermandosi a 900."""
+    """Muove la macchina di una certa distanza."""
     car_pos += distance
-    if car_pos > 900:  # Accorcia la pista per lasciare spazio alla bandierina
+    if car_pos > 900:  # Accorciamo la pista per lasciare spazio alla bandierina
         car_pos = 900
     return car_pos
 
 def image_to_base64(image):
-    """Converte un'immagine in formato base64 per l'incorporamento HTML."""
+    """Converte un'immagine in una stringa base64."""
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
 
 def main():
-    # Configurazione iniziale della pagina
     st.set_page_config(page_title="Car Mind Race", layout="wide")
 
-    # Mantiene le proporzioni del logo
-    logo_image = Image.open("logo_A.png").resize((125, 70))
-
-    # Mostra il logo con un link cliccabile
-    st.markdown(
-        f'<a href="http://socrg.org/" target="_blank">'
-        f'<img src="data:image/png;base64,{image_to_base64(logo_image)}" style="display:block;margin:0 auto;margin-top:-30px;"/>'
-        f'</a>',
-        unsafe_allow_html=True
-    )
-
-    # Configurazione della lingua
+    # Stato della sessione per gestire lo stato dell'app
     if "language" not in st.session_state:
         st.session_state.language = "Italiano"
 
@@ -87,7 +76,6 @@ def main():
     # Pulsante per cambiare la lingua
     st.sidebar.button("Change Language", on_click=toggle_language)
 
-    # Impostazioni del testo basate sulla lingua
     if st.session_state.language == "Italiano":
         title_text = "Car Mind Race"
         instruction_text = """
@@ -139,64 +127,28 @@ def main():
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
         move_multiplier_text = "Movement Multiplier"
 
-    st.title(title_text)
+    # Mostra titolo e logo
+    logo_image = Image.open("logo_A.png")
+    st.markdown(
+        f"""
+        <h1 style="text-align: left;">{title_text}</h1>
+        <a href="http://socrg.org/" target="_blank">
+            <img src="data:image/png;base64,{image_to_base64(logo_image)}" style="width: 124px; height: 70px; display: block; margin-bottom: 20px; margin-top: 0px;">
+        </a>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    # CSS per stile personalizzato
+    # Stile CSS per i pulsanti
     st.markdown(
         """
         <style>
-        .stSlider > div > div > div > div {
-            background: white;
-        }
-        .stSlider > div > div > div {
-            background: white;
-        }
-        .stSlider > div > div > div > div > div {
-            background: white;
-            border-radius: 50%;
-            height: 14px;
-            width: 14px;
-        }
-        .slider-container {
-            position: relative;
-            height: 150px;
-            margin-bottom: 50px;
-        }
-        .slider-container.first {
-            margin-top: 50px;
-            margin-bottom: 40px;
-        }
-        .car-image {
-            position: absolute;
-            top: -80px;
-            width: 150px;
-        }
-        .number-image {
-            position: absolute;
-            top: -50px;
-            width: 20px;
-        }
-        .flag-image {
-            position: absolute;
-            top: -100px;
-            width: 150px;
-            left: 96%;
-        }
-        .slider-container input[type=range] {
-            width: 100%;
-        }
-        .button-container {
-            display: flex;
-            justify-content: flex-start;
-            gap: 10px;
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
         .styled-button {
-            padding: 10px 20px;
-            border: none;
-            color: white;
-            cursor: pointer;
+            width: 120px;
+            height: 50px;
+            margin: 10px;
+            text-align: center;
+            line-height: 50px;
             font-size: 16px;
             border-radius: 5px;
         }
@@ -247,7 +199,6 @@ def main():
     if "show_end_buttons" not in st.session_state:
         st.session_state.show_end_buttons = False
 
-    # Sezione del menu
     st.sidebar.title("Menu")
     if st.session_state.player_choice is None:
         start_button = st.sidebar.button(start_race_text, key="start_button", disabled=True)
@@ -255,15 +206,12 @@ def main():
         start_button = st.sidebar.button(start_race_text, key="start_button")
     stop_button = st.sidebar.button(stop_race_text, key="stop_button")
 
-    # Inserimento della chiave API
-    api_key = st.sidebar.text_input(api_key_text, key="api_key", value="")
+    api_key = st.sidebar.text_input(api_key_text, key="api_key", value="")  # Default con chiave API inserita
 
-    # Configura RANDOM.ORG
+    # Configura il client per RANDOM.ORG
     client = None
     if api_key:
         client = configure_random_org(api_key)
-        if not client:
-            st.warning("Chiave API non valida o il server di random.org non è accessibile.")
 
     st.sidebar.markdown(api_description_text)
 
@@ -272,14 +220,13 @@ def main():
         download_button = st.button(download_data_text, key="download_button")
     reset_button = st.sidebar.button(reset_game_text, key="reset_button")
 
-    move_multiplier = st.sidebar.slider(
-        move_multiplier_text, min_value=1, max_value=100, value=20, key="move_multiplier"
-    )
+    move_multiplier = st.sidebar.slider(move_multiplier_text, min_value=1, max_value=100, value=20, key="move_multiplier")
 
+    # Carica immagini delle auto e dei numeri
     image_dir = os.path.abspath(os.path.dirname(__file__))
     car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Macchina rossa
     car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Macchina verde
-    flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Bandierina
+    flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Bandierina della stessa dimensione delle macchine
 
     # Carica le immagini per i numeri e ridimensiona ulteriormente a 20x20 pixel
     number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize((20, 20))
@@ -293,15 +240,19 @@ def main():
     green_car_number_image = number_0_green_image
     red_car_number_image = number_1_red_image
 
-    # Bottoni per scegliere i bit
     col1, col2 = st.columns(2)
+
+    # Determina quale immagine di numero visualizzare per ogni macchina
     with col1:
-        if st.button("Scegli 1", key="button1", help="Scegli 1 per la macchina verde"):
+        button1_class = "styled-button active" if st.session_state.player_choice == 1 else "styled-button inactive"
+        if st.button("Scegli 1", key="button1", use_container_width=False, help="Scegli il bit 1", css_classes=[button1_class]):
             st.session_state.player_choice = 1
             st.session_state.green_car_number_image = number_1_green_image
             st.session_state.red_car_number_image = number_0_red_image
+
     with col2:
-        if st.button("Scegli 0", key="button0", help="Scegli 0 per la macchina verde"):
+        button0_class = "styled-button active" if st.session_state.player_choice == 0 else "styled-button inactive"
+        if st.button("Scegli 0", key="button0", use_container_width=False, help="Scegli il bit 0", css_classes=[button0_class]):
             st.session_state.player_choice = 0
             st.session_state.green_car_number_image = number_0_green_image
             st.session_state.red_car_number_image = number_1_red_image
@@ -311,7 +262,6 @@ def main():
         green_car_number_image = st.session_state.green_car_number_image
         red_car_number_image = st.session_state.red_car_number_image
 
-    # Converti le immagini in base64
     car_image_base64 = image_to_base64(car_image)
     car2_image_base64 = image_to_base64(car2_image)
     flag_image_base64 = image_to_base64(flag_image)
@@ -322,7 +272,7 @@ def main():
     car2_placeholder = st.empty()
 
     def display_cars():
-        """Mostra le macchine e i numeri sulla pista."""
+        """Visualizza le auto nella posizione corrente."""
         car_placeholder.markdown(
             f"""
             <div class="slider-container first">
@@ -331,7 +281,7 @@ def main():
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
-        """,
+            """,
             unsafe_allow_html=True,
         )
 
@@ -343,7 +293,7 @@ def main():
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
-        """,
+            """,
             unsafe_allow_html=True,
         )
 
@@ -351,21 +301,21 @@ def main():
 
     def check_winner():
         """Controlla se c'è un vincitore."""
-        if st.session_state.car_pos >= 900:
+        if st.session_state.car_pos >= 900:  # Accorciamo la pista per lasciare spazio alla bandierina
             return "Rossa"
-        elif st.session_state.car2_pos >= 900:
+        elif st.session_state.car2_pos >= 900:  # Accorciamo la pista per lasciare spazio alla bandierina
             return "Verde"
         return None
 
     def end_race(winner):
-        """Termina la gara e mostra il vincitore."""
+        """Termina la gara."""
         st.session_state.running = False
         st.session_state.show_end_buttons = True
         st.success(win_message.format(winner))
         show_end_buttons()
 
     def reset_game():
-        """Resetta il gioco allo stato iniziale."""
+        """Resetta il gioco."""
         st.session_state.car_pos = 50
         st.session_state.car2_pos = 50
         st.session_state.car1_moves = 0
@@ -384,7 +334,7 @@ def main():
         display_cars()
 
     def show_end_buttons():
-        """Mostra i pulsanti per una nuova gara o per terminare il gioco."""
+        """Mostra i pulsanti di fine gara."""
         key_suffix = st.session_state.widget_key_counter
         col1, col2 = st.columns(2)
         with col1:
@@ -406,18 +356,18 @@ def main():
 
     try:
         # Loop della gara
+        warning_displayed = False
         while st.session_state.running:
             start_time = time.time()
 
             # Genera numeri casuali usando RANDOM.ORG o pseudocasuali locali
-            random_bits_1, success_1 = get_random_bits_from_random_org(1000, client)
-            random_bits_2, success_2 = get_random_bits_from_random_org(1000, client)
+            random_bits_1, used_random_org_1 = get_random_bits_from_random_org(1000, client)
+            random_bits_2, used_random_org_2 = get_random_bits_from_random_org(1000, client)
 
-            if not success_1 or not success_2:
-                st.session_state.running = False
-                st.write(error_message)
-                show_end_buttons()
-                break
+            if not used_random_org_1 or not used_random_org_2:
+                if not warning_displayed:
+                    st.warning("Problemi con il server di random.org: verrà utilizzato un metodo di generazione pseudorandomico locale.")
+                    warning_displayed = True
 
             st.session_state.random_numbers_1.extend(random_bits_1)
             st.session_state.random_numbers_2.extend(random_bits_2)
@@ -437,34 +387,20 @@ def main():
             count_1 = sum(random_bits_1)
             count_0 = len(random_bits_1) - count_1
 
-            # Movimento della macchina verde
             if entropy_score_1 < percentile_5_1:
                 if st.session_state.player_choice == 1 and count_1 > count_0:
-                    st.session_state.car2_pos = move_car(
-                        st.session_state.car2_pos,
-                        move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)),
-                    )
+                    st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
                     st.session_state.car1_moves += 1
                 elif st.session_state.player_choice == 0 and count_0 > count_1:
-                    st.session_state.car2_pos = move_car(
-                        st.session_state.car2_pos,
-                        move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)),
-                    )
+                    st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
                     st.session_state.car1_moves += 1
 
-            # Movimento della macchina rossa
             if entropy_score_2 < percentile_5_2:
                 if st.session_state.player_choice == 1 and count_0 > count_1:
-                    st.session_state.car_pos = move_car(
-                        st.session_state.car_pos,
-                        move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)),
-                    )
+                    st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
                     st.session_state.car2_moves += 1
                 elif st.session_state.player_choice == 0 and count_1 > count_0:
-                    st.session_state.car_pos = move_car(
-                        st.session_state.car_pos,
-                        move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)),
-                    )
+                    st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
                     st.session_state.car2_moves += 1
 
             display_cars()
@@ -486,19 +422,17 @@ def main():
     # Download dei dati
     if download_button:
         # Creazione del DataFrame con le colonne "Macchina verde" e "Macchina rossa"
-        df = pd.DataFrame(
-            {
-                "Macchina verde": ["".join(map(str, row)) for row in st.session_state.data_for_excel_1],
-                "Macchina rossa": ["".join(map(str, row)) for row in st.session_state.data_for_excel_2],
-            }
-        )
+        df = pd.DataFrame({
+            "Macchina verde": [''.join(map(str, row)) for row in st.session_state.data_for_excel_1],
+            "Macchina rossa": [''.join(map(str, row)) for row in st.session_state.data_for_excel_2]
+        })
         df.to_excel("random_numbers.xlsx", index=False)
         with open("random_numbers.xlsx", "rb") as file:
             st.download_button(
                 label=download_data_text,
                 data=file,
                 file_name="random_numbers.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
     # Reset del gioco
@@ -507,4 +441,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
