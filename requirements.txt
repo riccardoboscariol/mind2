@@ -9,3 +9,4 @@ playsound
 pygame
 pydub
 openpyxl
+rdoclient
