@@ -34,15 +34,8 @@ def validate_api_key(api_key):
         )
         response.raise_for_status()
         return True
-    except requests.HTTPError as e:
-        # Error specific for 503 server errors
-        if response.status_code == 503:
-            st.error("Il server di random.org non è attualmente disponibile. Riprova più tardi.")
-        else:
-            st.error(f"Errore nella verifica della chiave API: {e}")
-        return False
     except requests.RequestException as e:
-        st.error(f"Errore generale di richiesta: {e}")
+        st.error(f"Errore nella verifica della chiave API: {e}")
         return False
 
 def get_random_bits_from_random_org(num_bits, api_key=None):
@@ -68,18 +61,14 @@ def get_random_bits_from_random_org(num_bits, api_key=None):
             response.raise_for_status()
             random_bits.extend(list(map(int, response.text.strip().split())))
             num_bits -= batch_size
-        except requests.HTTPError as e:
-            if response.status_code == 503:
-                st.error("Il server di random.org non è attualmente disponibile. Riprova più tardi.")
-                break  # Exit the loop if the server is unavailable
-            else:
-                attempts += 1
-                st.error(f"Errore durante l'accesso a random.org: {e}. Tentativo {attempts}/{RETRY_LIMIT}.")
-                time.sleep(2)  # Attendi 2 secondi prima di riprovare
-                if attempts >= RETRY_LIMIT:
-                    st.warning(f"Utilizzo numeri casuali locali dopo {RETRY_LIMIT} tentativi falliti.")
-                    random_bits.extend(get_local_random_bits(num_bits))
-                    break
+        except requests.RequestException as e:
+            attempts += 1
+            st.error(f"Errore durante l'accesso a random.org: {e}. Tentativo {attempts}/{RETRY_LIMIT}.")
+            time.sleep(2)  # Attendi 2 secondi prima di riprovare
+            if attempts >= RETRY_LIMIT:
+                st.warning(f"Utilizzo numeri casuali locali dopo {RETRY_LIMIT} tentativi falliti.")
+                random_bits.extend(get_local_random_bits(num_bits))
+                break
         except ValueError as e:
             st.error(f"Errore nel processamento dei dati da random.org: {e}")
             break
@@ -314,17 +303,13 @@ def main():
     car2_image_base64 = image_to_base64(car2_image)
     flag_image_base64 = image_to_base64(flag_image)
 
-    # Add encoding for the number images
-    green_car_number_base64 = image_to_base64(green_car_number_image)
-    red_car_number_base64 = image_to_base64(red_car_number_image)
-
     car_placeholder = st.empty()
     car2_placeholder = st.empty()
 
     def display_cars():
+        """ Display car images on the track. """
         car_placeholder.markdown(f"""
             <div class="slider-container first">
-                <img src="data:image/png;base64,{red_car_number_base64}" class="number-image" style="left:{st.session_state.car_pos / 10 - 1.5}%">
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
@@ -333,12 +318,29 @@ def main():
 
         car2_placeholder.markdown(f"""
             <div class="slider-container">
-                <img src="data:image/png;base64,{green_car_number_base64}" class="number-image" style="left:{st.session_state.car2_pos / 10 - 1.5}%">
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
         """, unsafe_allow_html=True)
+
+    def display_car_numbers():
+        """Display numbers above cars when the race is running."""
+        if st.session_state.running:
+            car_placeholder.markdown(f"""
+                <div class="slider-container first">
+                    <img src="data:image/png;base64,{red_car_number_base64}" class="number-image" style="left:{st.session_state.car_pos / 10 - 1.5}%">
+                </div>
+            """, unsafe_allow_html=True)
+
+            car2_placeholder.markdown(f"""
+                <div class="slider-container">
+                    <img src="data:image/png;base64,{green_car_number_base64}" class="number-image" style="left:{st.session_state.car2_pos / 10 - 1.5}%">
+                </div>
+            """, unsafe_allow_html=True)
+
+    # Display cars initially
+    display_cars()
 
     def check_winner():
         if st.session_state.car_pos >= 900:  # Accorciamo la pista per lasciare spazio alla bandierina
@@ -438,6 +440,7 @@ def main():
                     st.session_state.car2_moves += 1
 
             display_cars()
+            display_car_numbers()
 
             winner = check_winner()
             if winner:
