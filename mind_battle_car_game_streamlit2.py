@@ -283,31 +283,33 @@ def main():
     green_car_number_image = number_0_green_image
     red_car_number_image = number_1_red_image
 
-    # Determina quale immagine di numero visualizzare per ogni macchina
-    if st.button("Scegli 1", key="button1"):
-        st.session_state.player_choice = 1
-        st.session_state.green_car_number_image = number_1_green_image
-        st.session_state.red_car_number_image = number_0_red_image
-
-    if st.button("Scegli 0", key="button0"):
-        st.session_state.player_choice = 0
-        st.session_state.green_car_number_image = number_0_green_image
-        st.session_state.red_car_number_image = number_1_red_image
-
     # Assegna le immagini scelte se è stata fatta una scelta
     if st.session_state.player_choice is not None:
         green_car_number_image = st.session_state.green_car_number_image
         red_car_number_image = st.session_state.red_car_number_image
+    else:
+        # Determina quale immagine di numero visualizzare per ogni macchina
+        if st.button("Scegli 1", key="button1"):
+            st.session_state.player_choice = 1
+            st.session_state.green_car_number_image = number_1_green_image
+            st.session_state.red_car_number_image = number_0_red_image
 
+        if st.button("Scegli 0", key="button0"):
+            st.session_state.player_choice = 0
+            st.session_state.green_car_number_image = number_0_green_image
+            st.session_state.red_car_number_image = number_1_red_image
+
+    # Converti immagini a base64
     car_image_base64 = image_to_base64(car_image)
     car2_image_base64 = image_to_base64(car2_image)
     flag_image_base64 = image_to_base64(flag_image)
+    green_car_number_base64 = image_to_base64(green_car_number_image)
+    red_car_number_base64 = image_to_base64(red_car_number_image)
 
     car_placeholder = st.empty()
     car2_placeholder = st.empty()
 
     def display_cars():
-        """ Display car images on the track. """
         car_placeholder.markdown(f"""
             <div class="slider-container first">
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
@@ -329,17 +331,22 @@ def main():
         if st.session_state.running:
             car_placeholder.markdown(f"""
                 <div class="slider-container first">
+                    <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                     <img src="data:image/png;base64,{red_car_number_base64}" class="number-image" style="left:{st.session_state.car_pos / 10 - 1.5}%">
+                    <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
+                    <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
                 </div>
             """, unsafe_allow_html=True)
 
             car2_placeholder.markdown(f"""
                 <div class="slider-container">
+                    <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                     <img src="data:image/png;base64,{green_car_number_base64}" class="number-image" style="left:{st.session_state.car2_pos / 10 - 1.5}%">
+                    <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
+                    <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
                 </div>
             """, unsafe_allow_html=True)
 
-    # Display cars initially
     display_cars()
 
     def check_winner():
@@ -439,7 +446,6 @@ def main():
                     st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
                     st.session_state.car2_moves += 1
 
-            display_cars()
             display_car_numbers()
 
             winner = check_winner()
@@ -476,3 +482,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
