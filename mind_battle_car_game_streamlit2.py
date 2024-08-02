@@ -176,7 +176,7 @@ def main():
     logo_image_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "logo_A.png")
     if os.path.exists(logo_image_path):
         logo_image = Image.open(logo_image_path)
-        logo_image_resized = logo_image.resize((200, 200))  # Resize to a quarter size
+        logo_image_resized = logo_image.resize((200, 150))  # Resize to a quarter size
         logo_image_base64 = image_to_base64(logo_image_resized)
         st.markdown(
             f'<div style="text-align:center;"><a href="http://socrg.org/"><img src="data:image/png;base64,{logo_image_base64}" width="200" height="200"></a></div>',
