@@ -173,10 +173,10 @@ def main():
 
             .number-image {
          position: absolute;
-        top: -5px;  /* Adjust this value to move numbers up or down */
-        right: 40px; /* Move numbers to the right */
+        top: -6px;  /* Adjust this value to move numbers up or down */
+        right: 150px; /* Move numbers to the right */
         width: 22px;  /* Width of the number images */
-        z-index: 10;  /* Ensure numbers are above cars */
+        z-index: 15;  /* Ensure numbers are above cars */
         
         }
         .flag-image {
