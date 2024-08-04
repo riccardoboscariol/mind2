@@ -172,9 +172,9 @@ def main():
         }
         .number-image {
             position: absolute;
-            top: -40px; /* Aggiustamento per posizionare il numero sopra l'auto */
+            top: -20px; /* Aggiustamento per posizionare il numero sopra l'auto */
             width: 22px; /* Dimensione delle immagini numeriche */
-            right: 30px;
+            right: 90px;
         }
         .flag-image {
             position: absolute;
