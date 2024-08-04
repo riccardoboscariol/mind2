@@ -172,10 +172,10 @@ def main():
         }
         .number-image {
             position: absolute;
-            top: -60px;  /* Adjust this value to move numbers up or down */
-            right: -30px; /* Shift numbers to the right over the car */
+            top: -20px;  /* Adjust this value to move numbers up or down */
+            right: -1px; /* Shift numbers to the right over the car */
             width: 22px;  /* Width of the number images */
-            z-index: 15;  /* Ensure numbers are above cars */
+            z-index: 25;  /* Ensure numbers are above cars */
         }
         .flag-image {
             position: absolute;
