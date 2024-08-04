@@ -172,8 +172,8 @@ def main():
         }
         .number-image {
             position: absolute;
-            top: -70px;  /* Adjust this value to move numbers up or down */
-            right: -100px; /* Shift numbers to the right over the car */
+            top: -150px;  /* Adjust this value to move numbers up or down */
+            right: -340px; /* Shift numbers to the right over the car */
             width: 22px;  /* Width of the number images */
             z-index: 25;  /* Ensure numbers are above cars */
         }
