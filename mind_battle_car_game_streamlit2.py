@@ -173,7 +173,7 @@ def main():
         .number-image {
             position: absolute;
             top: -60px;  /* Adjust this value to move numbers up or down */
-            left: 100px; /* Shift numbers to the right over the car */
+            left: 50px; /* Shift numbers to the right over the car */
             width: 22px;  /* Width of the number images */
             z-index: 25;  /* Ensure numbers are above cars */
         }
