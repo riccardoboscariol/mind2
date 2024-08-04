@@ -172,7 +172,7 @@ def main():
         }
         .number-image {
             position: absolute;
-            top: -70px;  /* Adjust this value to move numbers up or down */
+            top: -10px;  /* Adjust this value to move numbers up or down */
             left: 50%; /* Start with centering the number images */
             transform: translateX(-50%); /* Adjust to perfectly center */
             width: 22px;  /* Width of the number images */
