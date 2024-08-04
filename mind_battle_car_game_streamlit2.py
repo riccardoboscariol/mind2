@@ -172,10 +172,10 @@ def main():
         }
         .number-image {
             position: absolute;
-            top: -150px;  /* Adjust this value to move numbers up or down */
-            right: -340px; /* Shift numbers to the right over the car */
+            top: -50px;  /* Adjust this value to move numbers up or down */
+            right: 10px; /* Shift numbers to the right over the car */
             width: 22px;  /* Width of the number images */
-            z-index: 90;  /* Ensure numbers are above cars */
+            z-index: 25;  /* Ensure numbers are above cars */
         }
         .flag-image {
             position: absolute;
@@ -334,7 +334,7 @@ def main():
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <!-- Red car number image -->
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image" 
-                     style="left:{st.session_state.car_pos / 10}%; top: -70px; right: -100px; z-index: 25;">
+                     style="left:calc({st.session_state.car_pos / 10}% + 10px); top: -50px; z-index: 25;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -346,7 +346,7 @@ def main():
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <!-- Green car number image -->
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image" 
-                     style="left:{st.session_state.car2_pos / 10}%; top: -70px; right: -100px; z-index: 25;">
+                     style="left:calc({st.session_state.car2_pos / 10}% + 10px); top: -50px; z-index: 25;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
