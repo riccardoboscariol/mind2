@@ -176,7 +176,7 @@ def main():
         top: -6px;  /* Adjust this value to move numbers up or down */
         right: 150px; /* Move numbers to the right */
         width: 22px;  /* Width of the number images */
-        z-index: 15;  /* Ensure numbers are above cars */
+        z-index: 100;  /* Ensure numbers are above cars */
         
         }
         .flag-image {
