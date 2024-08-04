@@ -170,11 +170,14 @@ def main():
             top: -80px;
             width: 150px;
         }
-        .number-image {
-            position: absolute;
-            top: -20px; /* Aggiustamento per posizionare il numero sopra l'auto */
-            width: 22px; /* Dimensione delle immagini numeriche */
-            right: 90px;
+
+            .number-image {
+         position: absolute;
+        top: -90px;  /* Adjust this value to move numbers up or down */
+        right: -30px; /* Move numbers to the right */
+        width: 22px;  /* Width of the number images */
+        z-index: 10;  /* Ensure numbers are above cars */
+        
         }
         .flag-image {
             position: absolute;
