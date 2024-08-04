@@ -159,7 +159,6 @@ def main():
             position: relative;
             height: 150px;
             margin-bottom: 50px;
-
         }
         .slider-container.first {
             margin-top: 50px;
@@ -169,21 +168,20 @@ def main():
             position: absolute;
             top: -80px;
             width: 150px;
+            z-index: 10;  /* Ensure cars are behind numbers */
         }
-
-            .number-image {
-         position: absolute;
-        top: -6px;  /* Adjust this value to move numbers up or down */
-        right: 150px; /* Move numbers to the right */
-        width: 22px;  /* Width of the number images */
-        z-index: 100;  /* Ensure numbers are above cars */
-        
+        .number-image {
+            position: absolute;
+            top: -60px;  /* Adjust this value to move numbers up or down */
+            right: -30px; /* Shift numbers to the right over the car */
+            width: 22px;  /* Width of the number images */
+            z-index: 15;  /* Ensure numbers are above cars */
         }
         .flag-image {
             position: absolute;
             top: -100px;
             width: 150px;
-            left: 96%;  /* Sposta la bandierina a destra, cambia il valore per regolare */
+            left: 96%;  /* Adjust this value to position the flag correctly */
         }
         .slider-container input[type=range] {
             width: 100%;
@@ -332,8 +330,11 @@ def main():
         """Mostra le macchine e le immagini delle cifre selezionate."""
         car_placeholder.markdown(f"""
             <div class="slider-container first">
+                <!-- Car image and position -->
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
-                <img src="data:image/png;base64,{red_car_number_base64}" class="number-image" style="left:{st.session_state.car_pos / 10 - 1.5}%">
+                <!-- Red car number image -->
+                <img src="data:image/png;base64,{red_car_number_base64}" class="number-image" 
+                     style="left:{st.session_state.car_pos / 10 - 1.5}%; top: -60px; right: -30px; z-index: 15;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -341,8 +342,11 @@ def main():
 
         car2_placeholder.markdown(f"""
             <div class="slider-container">
+                <!-- Green car image and position -->
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
-                <img src="data:image/png;base64,{green_car_number_base64}" class="number-image" style="left:{st.session_state.car2_pos / 10 - 1.5}%">
+                <!-- Green car number image -->
+                <img src="data:image/png;base64,{green_car_number_base64}" class="number-image" 
+                     style="left:{st.session_state.car2_pos / 10 - 1.5}%; top: -60px; right: -30px; z-index: 15;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
