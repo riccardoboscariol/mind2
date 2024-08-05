@@ -66,15 +66,6 @@ def image_to_base64(image):
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
 
-    # Removed app logo to simplify the UI
-    # logo_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "logo_A.png")
-    # logo_image = Image.open(logo_path).resize((125, 70))  # Logo resized to 125x70 pixels
-    # logo_link = "http://socrg.org/"
-    # st.markdown(
-    #     f'<a href="{logo_link}" target="_blank"><img src="data:image/png;base64,{image_to_base64(logo_image)}" alt="Logo" style="display: block; margin-left: auto; margin-right: auto; margin-top: -40px; margin-bottom: -40px;"/></a>',
-    #     unsafe_allow_html=True
-    # )
-
     if "language" not in st.session_state:
         st.session_state.language = "Italiano"
 
@@ -147,16 +138,15 @@ def main():
     st.markdown("""
         <style>
         .stSlider > div > div > div > div {
-            background: white;
+            background: white; /* Color of the progress bar */
+            height: 4px; /* Thickness of the progress bar */
+            margin-top: 8px; /* Position it nicely */
+            margin-bottom: 8px; /* Position it nicely */
         }
         .stSlider > div > div > div {
-            background: white;
+            background: none; /* Remove default track background */
         }
         .stSlider > div > div > div > div > div {
-            background: white;
-            border-radius: 50%;
-            height: 14px;
-            width: 14px;
             display: none; /* Remove the slider thumb */
         }
         .slider-container {
