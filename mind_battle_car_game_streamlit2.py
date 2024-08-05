@@ -172,7 +172,7 @@ def main():
         }
         .number-image {
             position: absolute;
-            top: -17px;  /* Adjust this value to move numbers up or down */
+            top: -14px;  /* Adjust this value to move numbers up or down */
             left: calc(50% - 3px); /* Start with centering the number images, then adjust left by 3px */
             transform: translateX(-50%); /* Adjust to perfectly center */
             width: 22px;  /* Width of the number images */
@@ -261,7 +261,8 @@ def main():
         download_button = st.button(download_data_text, key="download_button")
     reset_button = st.sidebar.button(reset_game_text, key="reset_button")
 
-    move_multiplier = st.sidebar.slider(move_multiplier_text, min_value=1, max_value=100, value=20, key="move_multiplier")
+    # Default move multiplier set to 50 instead of 20
+    move_multiplier = st.sidebar.slider(move_multiplier_text, min_value=1, max_value=100, value=50, key="move_multiplier")
 
     image_dir = os.path.abspath(os.path.dirname(__file__))
     car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Red car
@@ -335,7 +336,7 @@ def main():
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <!-- Red car number image -->
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image" 
-                     style="left:calc({st.session_state.car_pos / 10}% + 7.5%); top: -17px; z-index: 25;">
+                     style="left:calc({st.session_state.car_pos / 10}% + 7.5%); top: -14px; z-index: 25;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -347,7 +348,7 @@ def main():
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <!-- Green car number image -->
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image" 
-                     style="left:calc({st.session_state.car2_pos / 10}% + 7.5%); top: -17px; z-index: 25;">
+                     style="left:calc({st.session_state.car2_pos / 10}% + 7.5%); top: -14px; z-index: 25;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
