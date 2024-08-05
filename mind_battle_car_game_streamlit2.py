@@ -475,7 +475,7 @@ def main():
     except Exception as e:
         st.error(f"An error occurred: {e}")
 
-    if download_button
+    if download_button:
     def check_winner():
         """Check if there is a winner."""
         if st.session_state.car_pos >= 900:  # Shorten the track to leave room for the flag
