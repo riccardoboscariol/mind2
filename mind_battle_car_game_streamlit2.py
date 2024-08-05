@@ -66,14 +66,14 @@ def image_to_base64(image):
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
 
-    # App logo
-    logo_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "logo_A.png")
-    logo_image = Image.open(logo_path).resize((125, 70))  # Logo resized to 125x70 pixels
-    logo_link = "http://socrg.org/"
-    st.markdown(
-        f'<a href="{logo_link}" target="_blank"><img src="data:image/png;base64,{image_to_base64(logo_image)}" alt="Logo" style="display: block; margin-left: auto; margin-right: auto; margin-top: -40px; margin-bottom: -40px;"/></a>',
-        unsafe_allow_html=True
-    )
+    # Removed app logo to simplify the UI
+    # logo_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "logo_A.png")
+    # logo_image = Image.open(logo_path).resize((125, 70))  # Logo resized to 125x70 pixels
+    # logo_link = "http://socrg.org/"
+    # st.markdown(
+    #     f'<a href="{logo_link}" target="_blank"><img src="data:image/png;base64,{image_to_base64(logo_image)}" alt="Logo" style="display: block; margin-left: auto; margin-right: auto; margin-top: -40px; margin-bottom: -40px;"/></a>',
+    #     unsafe_allow_html=True
+    # )
 
     if "language" not in st.session_state:
         st.session_state.language = "Italiano"
@@ -157,6 +157,7 @@ def main():
             border-radius: 50%;
             height: 14px;
             width: 14px;
+            display: none; /* Remove the slider thumb */
         }
         .slider-container {
             position: relative;
@@ -190,6 +191,11 @@ def main():
         }
         .slider-container input[type=range] {
             width: 100%;
+            -webkit-appearance: none; /* Remove default slider styling */
+            background: none; /* Remove the slider track */
+        }
+        .slider-container input[type=range]:focus {
+            outline: none;
         }
         .stButton > button {
             display: inline-block;
