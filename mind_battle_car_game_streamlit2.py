@@ -167,10 +167,10 @@ def main():
         }
         .number-image {
             position: absolute;
-            top: -12px;  /* Adjust this value to move numbers up or down */
+            top: 0px;  /* Moved down by 10px */
             left: calc(50% - 14px); /* Start with centering the number images, then adjust left by 14px */
             transform: translateX(-50%); /* Adjust to perfectly center */
-            width: 22px;  /* Width of the number images */
+            width: 110px;  /* Increased width of the number images 5x */
             z-index: 25;  /* Ensure numbers are above cars */
             display: none; /* Initially hide numbers */
         }
@@ -272,10 +272,10 @@ def main():
     flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))  # Flag of the same size as the cars
 
     # Load images for numbers and resize further to 20x20 pixels
-    number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize((20, 20))
-    number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize((20, 20))
-    number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize((20, 20))
-    number_1_red_image = Image.open(os.path.join(image_dir, "1red.png")).resize((20, 20))
+    number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize((110, 110))  # Increased size 5x
+    number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize((110, 110))  # Increased size 5x
+    number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize((110, 110))  # Increased size 5x
+    number_1_red_image = Image.open(os.path.join(image_dir, "1red.png")).resize((110, 110))  # Increased size 5x
 
     st.write(choose_bit_text)
 
@@ -339,7 +339,7 @@ def main():
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <!-- Red car number image -->
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc({st.session_state.car_pos / 10}% + 7.3%); top: -12px; z-index: 25;">
+                     style="left:calc({st.session_state.car_pos / 10}% + 7.3%); top: 0px; z-index: 25;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -351,7 +351,7 @@ def main():
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <!-- Green car number image -->
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc({st.session_state.car2_pos / 10}% + 7.3%); top: -12px; z-index: 25;">
+                     style="left:calc({st.session_state.car2_pos / 10}% + 7.3%); top: 0px; z-index: 25;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -359,6 +359,123 @@ def main():
 
     display_cars()
 
+    def check_winner():
+        """Check if there is a winner."""
+        if st.session_state.car_pos >= 900:  # Shorten the track to leave room for the flag
+            return "Rossa"
+        elif st.session_state.car2_pos >= 900:  # Shorten the track to leave room for the flag
+            return "Verde"
+        return None
+
+    def end_race(winner):
+        """End the race and show the winner."""
+        st.session_state.running = False
+        st.session_state.show_end_buttons = True
+        st.success(win_message.format(winner))
+        show_end_buttons()
+
+    def reset_game():
+        """Reset the game state."""
+        st.session_state.car_pos = 50
+        st.session_state.car2_pos = 50
+        st.session_state.car1_moves = 0
+        st.session_state.car2_moves = 0
+        st.session_state.data_for_excel_1 = []
+        st.session_state.data_for_excel_2 = []
+        st.session_state.data_for_condition_1 = []
+        st.session_state.data_for_condition_2 = []
+        st.session_state.random_numbers_1 = []
+        st.session_state.random_numbers_2 = []
+        st.session_state.widget_key_counter += 1
+        st.session_state.player_choice = None
+        st.session_state.running = False
+        st.session_state.show_end_buttons = False
+        st.session_state.warned_random_org = False
+        st.write(reset_game_message)
+        display_cars()
+
+    def show_end_buttons():
+        """Show buttons for a new race or to end the game."""
+        key_suffix = st.session_state.widget_key_counter
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button(new_race_text, key=f"new_race_button_{key_suffix}"):
+                reset_game()
+        with col2:
+            if st.button(end_game_text, key=f"end_game_button_{key_suffix}"):
+                st.stop()
+
+    if start_button and st.session_state.player_choice is not None:
+        st.session_state.running = True
+        st.session_state.car_start_time = time.time()
+        st.session_state.show_end_buttons = False
+
+    if stop_button:
+        st.session_state.running = False
+
+    try:
+        while st.session_state.running:
+            start_time = time.time()
+
+            # Get random numbers from random.org
+            random_bits_1, random_org_success_1 = get_random_bits_from_random_org(1000, client)
+            random_bits_2, random_org_success_2 = get_random_bits_from_random_org(1000, client)
+
+            if not random_org_success_1 and not st.session_state.warned_random_org:
+                st.warning("Problems with the random.org server: a local pseudorandom generation method will be used.")
+                st.session_state.warned_random_org = True
+
+            st.session_state.random_numbers_1.extend(random_bits_1)
+            st.session_state.random_numbers_2.extend(random_bits_2)
+
+            st.session_state.data_for_excel_1.append(random_bits_1)
+            st.session_state.data_for_excel_2.append(random_bits_2)
+
+            entropy_score_1 = calculate_entropy(random_bits_1)
+            entropy_score_2 = calculate_entropy(random_bits_2)
+
+            st.session_state.data_for_condition_1.append(entropy_score_1)
+            st.session_state.data_for_condition_2.append(entropy_score_2)
+
+            percentile_5_1 = np.percentile(st.session_state.data_for_condition_1, 5)
+            percentile_5_2 = np.percentile(st.session_state.data_for_condition_2, 5)
+
+            count_1 = sum(random_bits_1)
+            count_0 = len(random_bits_1) - count_1
+
+            if entropy_score_1 < percentile_5_1:
+                if st.session_state.player_choice == 1 and count_1 > count_0:
+                    st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
+                    st.session_state.car1_moves += 1
+                elif st.session_state.player_choice == 0 and count_0 > count_1:
+                    st.session_state.car2_pos = move_car(st.session_state.car2_pos, move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)))
+                    st.session_state.car1_moves += 1
+
+            if entropy_score_2 < percentile_5_2:
+                if st.session_state.player_choice == 1 and count_0 > count_1:
+                    st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
+                    st.session_state.car2_moves += 1
+                elif st.session_state.player_choice == 0 and count_1 > count_0:
+                    st.session_state.car_pos = move_car(st.session_state.car_pos, move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)))
+                    st.session_state.car2_moves += 1
+
+            display_cars()
+
+            winner = check_winner()
+            if winner:
+                end_race(winner)
+                break
+
+            time_elapsed = time.time() - start_time
+            time.sleep(max(REQUEST_INTERVAL - time_elapsed, 0))
+
+        if st.session_state.show_end_buttons:
+            show_end_buttons()
+
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+
+    if download_button
     def check_winner():
         """Check if there is a winner."""
         if st.session_state.car_pos >= 900:  # Shorten the track to leave room for the flag
@@ -495,4 +612,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
