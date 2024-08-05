@@ -148,7 +148,7 @@ def main():
             background: #ccc; /* Color of the progress bar */
         }
         .stSlider > div > div > div > div > div {
-            display: none; /* Remove the slider thumb */
+            background: white; /* Change the slider thumb to white */
         }
         .slider-container {
             position: relative;
