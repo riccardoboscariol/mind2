@@ -156,12 +156,12 @@ def main():
             margin-bottom: 50px;
         }
         .slider-container.first {
-            margin-top: 50px;
+            margin-top: 150px; /* Increased margin-top by 100px */
             margin-bottom: 40px;
         }
         .car-image {
             position: absolute;
-            top: -80px;
+            top: 20px;  /* Increased top position by 100px */
             width: 150px;  /* Width of the car image */
             z-index: 10;  /* Ensure cars are behind numbers */
         }
@@ -176,7 +176,7 @@ def main():
         }
         .flag-image {
             position: absolute;
-            top: -100px;
+            top: -10px;  /* Increased top position by 100px */
             width: 150px;
             left: 96%;  /* Adjust this value to position the flag correctly */
         }
