@@ -78,6 +78,9 @@ def main():
     if "language" not in st.session_state:
         st.session_state.language = "Italiano"
 
+    if "api_key" not in st.session_state:
+        st.session_state.api_key = ""
+
     # Function to change language
     def toggle_language():
         if st.session_state.language == "Italiano":
@@ -247,11 +250,12 @@ def main():
     start_button = st.sidebar.button(start_race_text, key="start_button", disabled=st.session_state.player_choice is None)
     stop_button = st.sidebar.button(stop_race_text, key="stop_button")
 
-    api_key = st.sidebar.text_input(api_key_text, key="api_key", value="", type="password")  # Hide API key in input
+    # Persist API key in session state
+    st.session_state.api_key = st.sidebar.text_input(api_key_text, key="api_key_input", value=st.session_state.api_key, type="password")
 
     client = None
-    if api_key:
-        client = configure_random_org(api_key)
+    if st.session_state.api_key:
+        client = configure_random_org(st.session_state.api_key)
         if not client:
             st.warning("Invalid API key or random.org server not accessible.")
 
