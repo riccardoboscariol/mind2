@@ -173,7 +173,7 @@ def main():
         .number-image {
             position: absolute;
             top: -12px;  /* Adjust this value to move numbers up or down */
-            left: calc(50% - 9px); /* Start with centering the number images, then adjust left by 9px */
+            left: calc(50% - 12px); /* Start with centering the number images, then adjust left by 12px */
             transform: translateX(-50%); /* Adjust to perfectly center */
             width: 22px;  /* Width of the number images */
             z-index: 25;  /* Ensure numbers are above cars */
@@ -494,4 +494,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
