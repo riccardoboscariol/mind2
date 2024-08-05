@@ -137,14 +137,15 @@ def main():
 
     st.markdown("""
         <style>
-        .stSlider > div > div > div > div {
-            background: white; /* Color of the progress bar */
-            height: 4px; /* Thickness of the progress bar */
-            margin-top: 8px; /* Position it nicely */
-            margin-bottom: 8px; /* Position it nicely */
+        .stSlider > div > div {
+            padding: 0; /* Remove padding around the slider */
         }
         .stSlider > div > div > div {
-            background: none; /* Remove default track background */
+            background: none; /* Remove the default track background */
+            height: 4px; /* Set the height for the progress bar */
+        }
+        .stSlider > div > div > div > div {
+            background: #ccc; /* Color of the progress bar */
         }
         .stSlider > div > div > div > div > div {
             display: none; /* Remove the slider thumb */
@@ -494,3 +495,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
