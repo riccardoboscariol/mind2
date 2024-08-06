@@ -176,16 +176,16 @@ def main():
         }
         .number-image {
             position: absolute;
-            top: 47px;  /* Position for numbers, 1px lower */
-            left: calc(50% - 58px); /* Center numbers under cars, 3px left */
+            top: 45px;  /* Position for numbers, 2px higher */
+            left: calc(50% - 62px); /* Center numbers under cars, 4px left */
             transform: translateX(-50%); /* Adjust to perfectly center */
-            width: 110px;  /* Width of the number images 5x larger */
+            width: 120px;  /* Width of the number images slightly larger */
             z-index: 10;  /* Ensure numbers are below cars */
             display: none; /* Initially hide numbers */
         }
         .flag-image {
             position: absolute;
-            top: 25px;  /* Position for flag, 5px lower */
+            top: 27px;  /* Position for flag, 2px lower */
             width: 150px;
             left: 93%;  /* Move flag 3px left */
         }
@@ -290,19 +290,19 @@ def main():
         (150, 150)
     )  # Flag of the same size as the cars
 
-    # Load images for numbers and resize further to 110x110 pixels
+    # Load images for numbers and resize further to 120x120 pixels
     number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize(
-        (110, 110)
-    )  # Increased size 5x
+        (120, 120)
+    )  # Slightly larger
     number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize(
-        (110, 110)
-    )  # Increased size 5x
+        (120, 120)
+    )  # Slightly larger
     number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize(
-        (110, 110)
-    )  # Increased size 5x
+        (120, 120)
+    )  # Slightly larger
     number_1_red_image = Image.open(os.path.join(image_dir, "1red.png")).resize(
-        (110, 110)
-    )  # Increased size 5x
+        (120, 120)
+    )  # Slightly larger
 
     st.write(choose_bit_text)
 
@@ -371,7 +371,7 @@ def main():
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <!-- Red car number image -->
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc({st.session_state.car_pos / 10}% + 7.3%); top: 47px; z-index: 10;">
+                     style="left:calc({st.session_state.car_pos / 10}% + 6.9%); top: 45px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -386,7 +386,7 @@ def main():
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <!-- Green car number image -->
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc({st.session_state.car2_pos / 10}% + 7.3%); top: 47px; z-index: 10;">
+                     style="left:calc({st.session_state.car2_pos / 10}% + 6.9%); top: 45px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
