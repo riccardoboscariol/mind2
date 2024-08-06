@@ -157,7 +157,7 @@ def main():
             height: 0px;  /* Reduce slider thumb height */
             width: 0px;  /* Reduce slider thumb width */
             position: relative;
-            top: 0px; /* Correct slider thumb position */
+            top: -50px; /* Position slider thumb off-screen */
         }
         .slider-container {
             position: relative;
