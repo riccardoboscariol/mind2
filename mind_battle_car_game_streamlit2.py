@@ -145,18 +145,19 @@ def main():
     st.markdown(
         """
         <style>
-        .stSlider > div > div {
-            padding: 0; /* Remove padding around the slider */
+        .stSlider > div > div > div > div {
+            background: white;
         }
         .stSlider > div > div > div {
-            background: none; /* Remove the default track background */
-            height: 4px; /* Set the height for the progress bar */
-        }
-        .stSlider > div > div > div > div {
-            background: #ccc; /* Color of the progress bar */
+            background: #ccc; /* Color of the slider track */
         }
         .stSlider > div > div > div > div > div {
-            background: white; /* Change the slider thumb to white */
+            background: white; /* Color of the slider thumb */
+            border-radius: 50%;
+            height: 14px;
+            width: 14px;
+            position: relative;
+            top: 30px; /* Positioning slider thumb */
         }
         .slider-container {
             position: relative;
@@ -164,34 +165,32 @@ def main():
             margin-bottom: 50px;
         }
         .slider-container.first {
-            margin-top: 150px; /* Increased margin-top by 100px */
+            margin-top: 50px; /* Standard margin-top for slider */
             margin-bottom: 40px;
         }
         .car-image {
             position: absolute;
-            top: 20px;  /* Increased top position by 100px */
+            top: 20px;  /* Corrected position for car */
             width: 150px;  /* Width of the car image */
             z-index: 10;  /* Ensure cars are behind numbers */
         }
         .number-image {
             position: absolute;
-            top: 0px;  /* Moved down by 10px */
-            left: calc(50% - 14px); /* Start with centering the number images, then adjust left by 14px */
+            top: 10px;  /* Correct position for numbers */
+            left: calc(50% - 55px); /* Center numbers under cars */
             transform: translateX(-50%); /* Adjust to perfectly center */
-            width: 110px;  /* Increased width of the number images 5x */
+            width: 110px;  /* Width of the number images 5x larger */
             z-index: 25;  /* Ensure numbers are above cars */
             display: none; /* Initially hide numbers */
         }
         .flag-image {
             position: absolute;
-            top: -10px;  /* Increased top position by 100px */
+            top: -10px;  /* Corrected position for flag */
             width: 150px;
             left: 96%;  /* Adjust this value to position the flag correctly */
         }
         .slider-container input[type=range] {
             width: 100%;
-            -webkit-appearance: none; /* Remove default slider styling */
-            background: none; /* Remove the slider track */
         }
         .slider-container input[type=range]:focus {
             outline: none;
@@ -370,7 +369,7 @@ def main():
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <!-- Red car number image -->
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc({st.session_state.car_pos / 10}% + 7.3%); top: 0px; z-index: 25;">
+                     style="left:calc({st.session_state.car_pos / 10}% + 7.3%); top: 10px; z-index: 25;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -385,7 +384,7 @@ def main():
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <!-- Green car number image -->
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc({st.session_state.car2_pos / 10}% + 7.3%); top: 0px; z-index: 25;">
+                     style="left:calc({st.session_state.car2_pos / 10}% + 7.3%); top: 10px; z-index: 25;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
