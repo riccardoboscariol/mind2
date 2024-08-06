@@ -157,26 +157,26 @@ def main():
             height: 14px;
             width: 14px;
             position: relative;
-            top: 30px; /* Positioning slider thumb */
+            top: 0px; /* Correct slider thumb position */
         }
         .slider-container {
             position: relative;
-            height: 150px;
+            height: 250px; /* Increased height to fit sliders below cars */
             margin-bottom: 50px;
         }
         .slider-container.first {
-            margin-top: 50px; /* Standard margin-top for slider */
+            margin-top: 50px;
             margin-bottom: 40px;
         }
         .car-image {
             position: absolute;
-            top: 20px;  /* Corrected position for car */
+            top: 20px;  /* Position for car */
             width: 150px;  /* Width of the car image */
             z-index: 10;  /* Ensure cars are behind numbers */
         }
         .number-image {
             position: absolute;
-            top: 10px;  /* Correct position for numbers */
+            top: 10px;  /* Position for numbers */
             left: calc(50% - 55px); /* Center numbers under cars */
             transform: translateX(-50%); /* Adjust to perfectly center */
             width: 110px;  /* Width of the number images 5x larger */
@@ -185,12 +185,14 @@ def main():
         }
         .flag-image {
             position: absolute;
-            top: -10px;  /* Corrected position for flag */
+            top: -10px;  /* Position for flag */
             width: 150px;
             left: 96%;  /* Adjust this value to position the flag correctly */
         }
         .slider-container input[type=range] {
             width: 100%;
+            position: absolute;
+            top: 190px;  /* Position slider right below the cars */
         }
         .slider-container input[type=range]:focus {
             outline: none;
