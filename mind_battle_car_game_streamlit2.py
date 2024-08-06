@@ -161,7 +161,7 @@ def main():
         }
         .slider-container {
             position: relative;
-            height: 250px; /* Increased height to fit sliders below cars */
+            height: 250px; /* Height to fit sliders and cars */
             margin-bottom: 50px;
         }
         .slider-container.first {
@@ -170,17 +170,17 @@ def main():
         }
         .car-image {
             position: absolute;
-            top: 20px;  /* Position for car */
+            top: 60px;  /* Position for car */
             width: 150px;  /* Width of the car image */
-            z-index: 10;  /* Ensure cars are behind numbers */
+            z-index: 20;  /* Ensure cars are above numbers */
         }
         .number-image {
             position: absolute;
-            top: 10px;  /* Position for numbers */
+            top: 80px;  /* Position for numbers, 10px lower */
             left: calc(50% - 55px); /* Center numbers under cars */
             transform: translateX(-50%); /* Adjust to perfectly center */
             width: 110px;  /* Width of the number images 5x larger */
-            z-index: 25;  /* Ensure numbers are above cars */
+            z-index: 10;  /* Ensure numbers are below cars */
             display: none; /* Initially hide numbers */
         }
         .flag-image {
@@ -192,7 +192,7 @@ def main():
         .slider-container input[type=range] {
             width: 100%;
             position: absolute;
-            top: 190px;  /* Position slider right below the cars */
+            top: 160px;  /* Position slider closer to the cars */
         }
         .slider-container input[type=range]:focus {
             outline: none;
@@ -371,7 +371,7 @@ def main():
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <!-- Red car number image -->
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc({st.session_state.car_pos / 10}% + 7.3%); top: 10px; z-index: 25;">
+                     style="left:calc({st.session_state.car_pos / 10}% + 7.3%); top: 80px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -386,7 +386,7 @@ def main():
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <!-- Green car number image -->
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc({st.session_state.car2_pos / 10}% + 7.3%); top: 10px; z-index: 25;">
+                     style="left:calc({st.session_state.car2_pos / 10}% + 7.3%); top: 80px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -480,12 +480,8 @@ def main():
             st.session_state.data_for_condition_1.append(entropy_score_1)
             st.session_state.data_for_condition_2.append(entropy_score_2)
 
-            percentile_5_1 = np.percentile(
-                st.session_state.data_for_condition_1, 5
-            )
-            percentile_5_2 = np.percentile(
-                st.session_state.data_for_condition_2, 5
-            )
+            percentile_5_1 = np.percentile(st.session_state.data_for_condition_1, 5)
+            percentile_5_2 = np.percentile(st.session_state.data_for_condition_2, 5)
 
             count_1 = sum(random_bits_1)
             count_0 = len(random_bits_1) - count_1
@@ -567,3 +563,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
