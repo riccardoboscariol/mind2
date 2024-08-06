@@ -176,7 +176,7 @@ def main():
         }
         .number-image {
             position: absolute;
-            top: 80px;  /* Position for numbers, 10px lower */
+            top: 46px;  /* Position for numbers, 34px higher */
             left: calc(50% - 55px); /* Center numbers under cars */
             transform: translateX(-50%); /* Adjust to perfectly center */
             width: 110px;  /* Width of the number images 5x larger */
@@ -185,14 +185,14 @@ def main():
         }
         .flag-image {
             position: absolute;
-            top: -10px;  /* Position for flag */
+            top: 20px;  /* Position for flag, 30px lower */
             width: 150px;
             left: 96%;  /* Adjust this value to position the flag correctly */
         }
         .slider-container input[type=range] {
             width: 100%;
             position: absolute;
-            top: 160px;  /* Position slider closer to the cars */
+            top: 138px;  /* Slider 22px higher */
         }
         .slider-container input[type=range]:focus {
             outline: none;
@@ -371,7 +371,7 @@ def main():
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <!-- Red car number image -->
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc({st.session_state.car_pos / 10}% + 7.3%); top: 80px; z-index: 10;">
+                     style="left:calc({st.session_state.car_pos / 10}% + 7.3%); top: 46px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -386,7 +386,7 @@ def main():
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <!-- Green car number image -->
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc({st.session_state.car2_pos / 10}% + 7.3%); top: 80px; z-index: 10;">
+                     style="left:calc({st.session_state.car2_pos / 10}% + 7.3%); top: 46px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
