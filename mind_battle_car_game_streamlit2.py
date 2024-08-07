@@ -12,6 +12,7 @@ MAX_BATCH_SIZE = 1000  # Maximum batch size for requests to random.org
 RETRY_LIMIT = 3  # Number of retry attempts for random.org requests
 REQUEST_INTERVAL = 0.5  # Interval between requests (in seconds)
 
+
 def configure_random_org(api_key):
     """Configure the RANDOM.ORG client if the API key is valid."""
     try:
@@ -20,6 +21,7 @@ def configure_random_org(api_key):
     except Exception as e:
         st.error(f"Error configuring the random.org client: {e}")
         return None
+
 
 def get_random_bits_from_random_org(num_bits, client=None):
     """Get random bits from random.org or use a local pseudorandom generator."""
@@ -37,9 +39,11 @@ def get_random_bits_from_random_org(num_bits, client=None):
         random_bits = get_local_random_bits(num_bits)
         return random_bits, False
 
+
 def get_local_random_bits(num_bits):
     """Generate pseudorandom bits locally."""
     return list(np.random.randint(0, 2, size=num_bits))
+
 
 def calculate_entropy(bits):
     """Calculate entropy using Shannon's formula."""
@@ -50,6 +54,7 @@ def calculate_entropy(bits):
     entropy = -np.sum(p * np.log2(p))
     return entropy
 
+
 def move_car(car_pos, distance):
     """Move the car a certain distance."""
     car_pos += distance
@@ -57,11 +62,13 @@ def move_car(car_pos, distance):
         car_pos = 900
     return car_pos
 
+
 def image_to_base64(image):
     """Convert an image to base64."""
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
+
 
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
@@ -142,7 +149,7 @@ def main():
             background: white;
         }
         .stSlider > div > div > div {
-            background: #f0f0f0; /* Lighter color for the slider track */
+            background: #ccc; /* Color of the slider track */
         }
         .stSlider > div > div > div > div > div {
             background: transparent; /* Make slider thumb invisible */
@@ -163,15 +170,14 @@ def main():
         }
         .car-image {
             position: absolute;
-            top: 50px;  /* Move car 3px higher */
-            left: 0px;
+            top: 52px;  /* Move car 3px higher */
             width: 150px;  /* Width of the car image */
             z-index: 20;  /* Ensure cars are above numbers */
         }
         .number-image {
             position: absolute;
-            top: 43px;  /* Position for numbers, 4px higher */
-            left: 30px; /* Move numbers 30px to the right */
+            top: 38px;  /* Move number images 4px higher */
+            left: calc(-39px + 33px + 50%); /* Adjust for left offset and move right by 30px */
             transform: translateX(-50%); /* Adjust to perfectly center */
             width: 120px;  /* Width of the number images slightly larger */
             z-index: 10;  /* Ensure numbers are below cars */
@@ -179,7 +185,7 @@ def main():
         }
         .flag-image {
             position: absolute;
-            top: 27px;  /* Position for flag */
+            top: 24px;  /* Adjust flag position by 1px */
             width: 150px;
             left: 93%;  /* Move flag 3px left */
         }
@@ -188,7 +194,7 @@ def main():
             width: 100%;
             position: absolute;
             top: 138px;  /* Slider 22px higher */
-            background: #f0f0f0; /* Slider track color */
+            background: transparent;
         }
         .slider-container input[type=range]:focus {
             outline: none;
@@ -196,7 +202,7 @@ def main():
         .slider-container input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
             height: 8px;
-            background: #f0f0f0; /* Track color */
+            background: #ccc; /* Track color */
             border-radius: 5px;
             cursor: pointer;
         }
@@ -398,7 +404,7 @@ def main():
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car_pos / 10}%)">
                 <!-- Red car number image -->
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc(-39px + {st.session_state.car_pos / 10}%); top: 43px; z-index: 10;">
+                     style="left:calc(-36px + {st.session_state.car_pos / 10}% + 30px); top: 38px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -413,7 +419,7 @@ def main():
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car2_pos / 10}%)">
                 <!-- Green car number image -->
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc(-39px + {st.session_state.car2_pos / 10}%); top: 43px; z-index: 10;">
+                     style="left:calc(-36px + {st.session_state.car2_pos / 10}% + 30px); top: 38px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
