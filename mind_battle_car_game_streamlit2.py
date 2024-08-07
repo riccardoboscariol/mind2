@@ -154,8 +154,8 @@ def main():
         .stSlider > div > div > div > div > div {
             background: #fff; /* White color to make thumb invisible */
             border-radius: 50%;
-            height: 15px;  /* Size of the thumb */
-            width: 15px;  /* Size of the thumb */
+            height: 1px;  /* Size of the thumb */
+            width: 1px;  /* Size of the thumb */
             position: relative;
             top: 0px; /* Correct slider thumb position */
         }
