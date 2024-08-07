@@ -169,7 +169,7 @@ def main():
         }
         .number-image {
             position: absolute;
-            top: 24px;  /* Position for numbers, 4px higher */
+            top: 39px;  /* Position for numbers, 4px higher */
             left: -34.5px; /* Shift numbers left */
             transform: translateX(-50%); /* Adjust to perfectly center */
             width: 121px;  /* Width of the number images slightly larger */
