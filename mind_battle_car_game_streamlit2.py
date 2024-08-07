@@ -163,13 +163,13 @@ def main():
         }
         .car-image {
             position: absolute;
-            top: 53px;  /* Move car 3px higher */
+            top: 52px;  /* Move car 3px higher */
             width: 150px;  /* Width of the car image */
             z-index: 20;  /* Ensure cars are above numbers */
         }
         .number-image {
             position: absolute;
-            top: 36px;  /* Position for numbers, 4px higher */
+            top: 31px;  /* Position for numbers, 4px higher */
             left: calc(-36px + 1.5px); /* Shift numbers left */
             transform: translateX(-50%); /* Adjust to perfectly center */
             width: 120px;  /* Width of the number images slightly larger */
@@ -178,7 +178,7 @@ def main():
         }
         .flag-image {
             position: absolute;
-            top: 12px;  /* Position for flag */
+            top: 6px;  /* Position for flag */
             width: 150px;
             left: 93%;  /* Move flag 3px left */
         }
