@@ -12,7 +12,6 @@ MAX_BATCH_SIZE = 1000  # Maximum batch size for requests to random.org
 RETRY_LIMIT = 3  # Number of retry attempts for random.org requests
 REQUEST_INTERVAL = 0.5  # Interval between requests (in seconds)
 
-
 def configure_random_org(api_key):
     """Configure the RANDOM.ORG client if the API key is valid."""
     try:
@@ -21,7 +20,6 @@ def configure_random_org(api_key):
     except Exception as e:
         st.error(f"Error configuring the random.org client: {e}")
         return None
-
 
 def get_random_bits_from_random_org(num_bits, client=None):
     """Get random bits from random.org or use a local pseudorandom generator."""
@@ -39,11 +37,9 @@ def get_random_bits_from_random_org(num_bits, client=None):
         random_bits = get_local_random_bits(num_bits)
         return random_bits, False
 
-
 def get_local_random_bits(num_bits):
     """Generate pseudorandom bits locally."""
     return list(np.random.randint(0, 2, size=num_bits))
-
 
 def calculate_entropy(bits):
     """Calculate entropy using Shannon's formula."""
@@ -54,7 +50,6 @@ def calculate_entropy(bits):
     entropy = -np.sum(p * np.log2(p))
     return entropy
 
-
 def move_car(car_pos, distance):
     """Move the car a certain distance."""
     car_pos += distance
@@ -62,13 +57,11 @@ def move_car(car_pos, distance):
         car_pos = 900
     return car_pos
 
-
 def image_to_base64(image):
     """Convert an image to base64."""
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
-
 
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
@@ -142,97 +135,100 @@ def main():
 
     st.title(title_text)
 
+    # Generate a unique query string to prevent caching
+    import time
+    unique_query_string = f"?v={int(time.time())}"
+
     st.markdown(
-        """
+        f"""
         <style>
-        .stSlider > div > div > div > div {
+        .stSlider > div > div > div > div {{
             background: white;
-        }
-        .stSlider > div > div > div {
-            background: #ccc; /* Color of the slider track */
-        }
-        .stSlider > div > div > div > div > div {
+        }}
+        .stSlider > div > div > div {{
+            background: #f0f0f0; /* Lighter color for the slider track */
+        }}
+        .stSlider > div > div > div > div > div {{
             background: transparent; /* Make slider thumb invisible */
             border-radius: 50%;
             height: 0px;  /* Reduce slider thumb height */
             width: 0px;  /* Reduce slider thumb width */
             position: relative;
             top: 0px; /* Correct slider thumb position */
-        }
-        .slider-container {
+        }}
+        .slider-container {{
             position: relative;
             height: 250px; /* Height to fit sliders and cars */
             margin-bottom: 50px;
-        }
-        .slider-container.first {
+        }}
+        .slider-container.first {{
             margin-top: 50px;
             margin-bottom: 40px;
-        }
-        .car-image {
+        }}
+        .car-image {{
             position: absolute;
-            top: 54px;  /* Move car 1px higher */
+            top: 50px;  /* Move car 3px higher */
+            left: 0px;
             width: 150px;  /* Width of the car image */
             z-index: 20;  /* Ensure cars are above numbers */
-        }
-        .number-image {
+        }}
+        .number-image {{
             position: absolute;
-            top: 30px;  /* Position for numbers, 1px lower */
-            left: calc(50% - 60px); /* Center numbers under cars, 2px left */
+            top: 29px;  /* Move images 5px higher */
+            left: 90px; /* Move images 10px left */
             transform: translateX(-50%); /* Adjust to perfectly center */
             width: 120px;  /* Width of the number images slightly larger */
             z-index: 10;  /* Ensure numbers are below cars */
             display: none; /* Initially hide numbers */
-        }
-        .flag-image {
+        }}
+        .flag-image {{
             position: absolute;
-            top: 30px;  /* Position for flag */
+            top: 25px;  /* Position for flag */
             width: 150px;
             left: 93%;  /* Move flag 3px left */
-        }
-        .slider-container input[type=range] {
+        }}
+        .slider-container input[type=range] {{
             -webkit-appearance: none;
             width: 100%;
             position: absolute;
             top: 138px;  /* Slider 22px higher */
-            background: transparent;
-        }
-        .slider-container input[type=range]:focus {
+            background: #f0f0f0; /* Slider track color */
+        }}
+        .slider-container input[type=range]:focus {{
             outline: none;
-        }
-        .slider-container input[type=range]::-webkit-slider-runnable-track {
+        }}
+        .slider-container input[type=range]::-webkit-slider-runnable-track {{
             width: 100%;
             height: 8px;
-            background: #ccc; /* Track color */
+            background: #f0f0f0; /* Track color */
             border-radius: 5px;
             cursor: pointer;
-        }
-        .slider-container input[type=range]::-webkit-slider-thumb {
+        }}
+        .slider-container input[type=range]::-webkit-slider-thumb {{
             -webkit-appearance: none;
             appearance: none;
-            width: 0px; /* Hides the thumb */
-            height: 0px; /* Hides the thumb */
-            background: transparent; /* Hides the thumb */
+            width: 10px; /* Thumb width */
+            height: 20px; /* Thumb height */
+            background: transparent; /* Make thumb invisible */
             cursor: pointer;
-            position: relative;
-            top: 0px; /* Keeps thumb out of view */
-        }
-        .slider-container input[type=range]::-moz-range-thumb {
-            width: 0px; /* Hides the thumb */
-            height: 0px; /* Hides the thumb */
-            background: transparent; /* Hides the thumb */
+            margin-top: -6px; /* Adjust thumb position to align with the track */
+            visibility: hidden; /* Hide the thumb */
+        }}
+        .slider-container input[type=range]::-moz-range-thumb {{
+            width: 10px; /* Thumb width */
+            height: 20px; /* Thumb height */
+            background: transparent; /* Make thumb invisible */
             cursor: pointer;
-            position: relative;
-            top: 0px; /* Keeps thumb out of view */
-        }
-        .slider-container input[type=range]::-ms-thumb {
-            width: 0px; /* Hides the thumb */
-            height: 0px; /* Hides the thumb */
-            background: transparent; /* Hides the thumb */
+            visibility: hidden; /* Hide the thumb */
+        }}
+        .slider-container input[type=range]::-ms-thumb {{
+            width: 10px; /* Thumb width */
+            height: 20px; /* Thumb height */
+            background: transparent; /* Make thumb invisible */
             cursor: pointer;
-            position: relative;
-            top: 0px; /* Keeps thumb out of view */
-        }
-        .stButton > button {
+            visibility: hidden; /* Hide the thumb */
+        }}
+        .stButton > button {{
             display: inline-block;
             margin: 5px; /* Margin between buttons */
             padding: 0.5em 2em; /* Padding adjustment for buttons */
@@ -242,11 +238,11 @@ def main():
             border: 1px solid #ccc;
             font-size: 16px; /* Text size */
             cursor: pointer;
-        }
-        .stButton > button:focus {
+        }}
+        .stButton > button:focus {{
             outline: none;
             background-color: #ddd; /* Color when selected */
-        }
+        }}
         </style>
         """,
         unsafe_allow_html=True,
@@ -403,10 +399,10 @@ def main():
             f"""
             <div class="slider-container first">
                 <!-- Car image and position -->
-                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
+                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car_pos / 10}%)">
                 <!-- Red car number image -->
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc({st.session_state.car_pos / 10}% + 6.8%); top: 40px; z-index: 10;">
+                     style="left:calc(-36px + {st.session_state.car_pos / 10}%); top: 39px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -418,10 +414,10 @@ def main():
             f"""
             <div class="slider-container">
                 <!-- Green car image and position -->
-                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
+                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car2_pos / 10}%)">
                 <!-- Green car number image -->
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc({st.session_state.car2_pos / 10}% + 6.8%); top: 40px; z-index: 10;">
+                     style="left:calc(-36px + {st.session_state.car2_pos / 10}%); top: 39px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
