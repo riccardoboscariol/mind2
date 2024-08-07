@@ -5,7 +5,6 @@ requests
 scipy
 Pillow
 pyserial
-playsound
 pygame
 pydub
 openpyxl
