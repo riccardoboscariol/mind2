@@ -199,6 +199,13 @@ def main():
         .slider-container input[type=range]:focus {
             outline: none;
         }
+        .slider-container input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            background: #ccc; /* Track color */
+            border-radius: 5px;
+            cursor: pointer;
+        }
         .slider-container input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -207,7 +214,7 @@ def main():
             background: transparent; /* Hides the thumb */
             cursor: pointer;
             position: relative;
-            top: -100px; /* Move thumb out of view */
+            top: 0px; /* Keeps thumb out of view */
         }
         .slider-container input[type=range]::-moz-range-thumb {
             width: 0px; /* Hides the thumb */
@@ -215,7 +222,7 @@ def main():
             background: transparent; /* Hides the thumb */
             cursor: pointer;
             position: relative;
-            top: -100px; /* Move thumb out of view */
+            top: 0px; /* Keeps thumb out of view */
         }
         .slider-container input[type=range]::-ms-thumb {
             width: 0px; /* Hides the thumb */
@@ -223,7 +230,7 @@ def main():
             background: transparent; /* Hides the thumb */
             cursor: pointer;
             position: relative;
-            top: -100px; /* Move thumb out of view */
+            top: 0px; /* Keeps thumb out of view */
         }
         .stButton > button {
             display: inline-block;
