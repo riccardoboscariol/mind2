@@ -157,7 +157,7 @@ def main():
             height: 0px;  /* Reduce slider thumb height */
             width: 0px;  /* Reduce slider thumb width */
             position: relative;
-            top: -50px; /* Position slider thumb off-screen */
+            top: -1000px; /* Move slider thumb far above the screen */
         }
         .slider-container {
             position: relative;
@@ -280,7 +280,7 @@ def main():
 
     # Default move multiplier set to 50 instead of 20
     move_multiplier = st.sidebar.slider(
-        move_multiplier_text, min_value=1, max_value=100, value=50, key="move_multiplier"
+        move_multiplier_text, min_value=1, max_value=100, value=50, key="move_multiplier", label_visibility="visible"
     )
 
     image_dir = os.path.abspath(os.path.dirname(__file__))
