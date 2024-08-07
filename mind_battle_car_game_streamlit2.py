@@ -12,7 +12,6 @@ MAX_BATCH_SIZE = 1000  # Maximum batch size for requests to random.org
 RETRY_LIMIT = 3  # Number of retry attempts for random.org requests
 REQUEST_INTERVAL = 0.5  # Interval between requests (in seconds)
 
-
 def configure_random_org(api_key):
     """Configure the RANDOM.ORG client if the API key is valid."""
     try:
@@ -21,7 +20,6 @@ def configure_random_org(api_key):
     except Exception as e:
         st.error(f"Error configuring the random.org client: {e}")
         return None
-
 
 def get_random_bits_from_random_org(num_bits, client=None):
     """Get random bits from random.org or use a local pseudorandom generator."""
@@ -39,11 +37,9 @@ def get_random_bits_from_random_org(num_bits, client=None):
         random_bits = get_local_random_bits(num_bits)
         return random_bits, False
 
-
 def get_local_random_bits(num_bits):
     """Generate pseudorandom bits locally."""
     return list(np.random.randint(0, 2, size=num_bits))
-
 
 def calculate_entropy(bits):
     """Calculate entropy using Shannon's formula."""
@@ -54,7 +50,6 @@ def calculate_entropy(bits):
     entropy = -np.sum(p * np.log2(p))
     return entropy
 
-
 def move_car(car_pos, distance):
     """Move the car a certain distance."""
     car_pos += distance
@@ -62,13 +57,11 @@ def move_car(car_pos, distance):
         car_pos = 900
     return car_pos
 
-
 def image_to_base64(image):
     """Convert an image to base64."""
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
-
 
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
@@ -170,15 +163,14 @@ def main():
         }
         .car-image {
             position: absolute;
-            top: 51px;  /* Move car 3px higher */
-            left: calc(-72px + {st.session_state.car_pos / 10}%); /* 2px left */
+            top: 55px;  /* Move car 1px higher */
             width: 150px;  /* Width of the car image */
             z-index: 20;  /* Ensure cars are above numbers */
         }
         .number-image {
             position: absolute;
-            top: 39.5px;  /* Position for numbers, 0.5px higher */
-            left: calc(-71px + {st.session_state.car_pos / 10}% + 6.8%); /* 3px left */
+            top: 45.5px;  /* Position for numbers, 5px higher */
+            left: calc(50% - 71px); /* Center numbers under cars, 1px left */
             transform: translateX(-50%); /* Adjust to perfectly center */
             width: 120px;  /* Width of the number images slightly larger */
             z-index: 10;  /* Ensure numbers are below cars */
@@ -186,7 +178,7 @@ def main():
         }
         .flag-image {
             position: absolute;
-            top: 29px;  /* Position for flag */
+            top: 25px;  /* Position for flag 2px higher */
             width: 150px;
             left: 93%;  /* Move flag 3px left */
         }
@@ -402,10 +394,10 @@ def main():
             f"""
             <div class="slider-container first">
                 <!-- Car image and position -->
-                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:calc(-72px + {st.session_state.car_pos / 10}%)">
+                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car_pos / 10}%)">
                 <!-- Red car number image -->
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc(-71px + {st.session_state.car_pos / 10}% + 6.8%); top: 39.5px; z-index: 10;">
+                     style="left:calc(-71px + {st.session_state.car_pos / 10}%); top: 45.5px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -417,10 +409,10 @@ def main():
             f"""
             <div class="slider-container">
                 <!-- Green car image and position -->
-                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:calc(-72px + {st.session_state.car2_pos / 10}%)">
+                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car2_pos / 10}%)">
                 <!-- Green car number image -->
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc(-71px + {st.session_state.car2_pos / 10}% + 6.8%); top: 39.5px; z-index: 10;">
+                     style="left:calc(-71px + {st.session_state.car2_pos / 10}%); top: 45.5px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -597,4 +589,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
