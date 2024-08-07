@@ -190,45 +190,26 @@ def main():
             left: 93%;  /* Move flag 3px left */
         }
         .slider-container input[type=range] {
-            -webkit-appearance: none;
             width: 100%;
             position: absolute;
             top: 138px;  /* Slider 22px higher */
-            background: transparent;
         }
         .slider-container input[type=range]:focus {
             outline: none;
         }
-        .slider-container input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 8px;
-            background: #ccc; /* Track color */
-            border-radius: 5px;
-            cursor: pointer;
-        }
         .slider-container input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 10px; /* Thumb width */
-            height: 20px; /* Thumb height */
-            background: transparent; /* Make thumb invisible */
-            cursor: pointer;
-            margin-top: -6px; /* Adjust thumb position to align with the track */
-            visibility: hidden; /* Hide the thumb */
+            width: 0px;  /* Thumb width set to 0 to hide it */
+            height: 0px;  /* Thumb height set to 0 to hide it */
+            background: transparent; /* Transparent thumb */
         }
-        .slider-container input[type=range]::-moz-range-thumb {
-            width: 10px; /* Thumb width */
-            height: 20px; /* Thumb height */
-            background: transparent; /* Make thumb invisible */
+        .slider-container input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px; /* Adjusted height for visibility */
+            background: #ccc; /* Color of the track */
+            border-radius: 5px;
             cursor: pointer;
-            visibility: hidden; /* Hide the thumb */
-        }
-        .slider-container input[type=range]::-ms-thumb {
-            width: 10px; /* Thumb width */
-            height: 20px; /* Thumb height */
-            background: transparent; /* Make thumb invisible */
-            cursor: pointer;
-            visibility: hidden; /* Hide the thumb */
         }
         .stButton > button {
             display: inline-block;
