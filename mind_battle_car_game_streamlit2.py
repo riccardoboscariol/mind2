@@ -152,10 +152,10 @@ def main():
             background: #ccc; /* Color of the slider track */
         }
         .stSlider > div > div > div > div > div {
-            background: transparent; /* Make slider thumb invisible */
+            background: #fff; /* White color to make thumb invisible */
             border-radius: 50%;
-            height: 0px;  /* Reduce slider thumb height */
-            width: 0px;  /* Reduce slider thumb width */
+            height: 15px;  /* Size of the thumb */
+            width: 15px;  /* Size of the thumb */
             position: relative;
             top: 0px; /* Correct slider thumb position */
         }
@@ -190,31 +190,12 @@ def main():
             left: 93%;  /* Move flag 3px left */
         }
         .slider-container input[type=range] {
-            -webkit-appearance: none;
-            appearance: none;
             width: 100%;
             position: absolute;
             top: 138px;  /* Slider 22px higher */
         }
-        .slider-container input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 0px;
-            height: 0px;
-            background: transparent;
-            cursor: pointer;
-        }
-        .slider-container input[type=range]::-moz-range-thumb {
-            width: 0px;
-            height: 0px;
-            background: transparent;
-            cursor: pointer;
-        }
-        .slider-container input[type=range]::-ms-thumb {
-            width: 0px;
-            height: 0px;
-            background: transparent;
-            cursor: pointer;
+        .slider-container input[type=range]:focus {
+            outline: none;
         }
         .stButton > button {
             display: inline-block;
@@ -582,4 +563,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
