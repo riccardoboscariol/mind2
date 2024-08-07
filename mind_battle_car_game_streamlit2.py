@@ -198,18 +198,15 @@ def main():
             outline: none;
         }
         .slider-container input[type=range]::-webkit-slider-thumb {
+            width: 0; /* Hide the thumb */
+            height: 0; /* Hide the thumb */
             -webkit-appearance: none;
             appearance: none;
-            width: 0px;  /* Thumb width set to 0 to hide it */
-            height: 0px;  /* Thumb height set to 0 to hide it */
-            background: transparent; /* Transparent thumb */
         }
-        .slider-container input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 8px; /* Adjusted height for visibility */
-            background: #ccc; /* Color of the track */
-            border-radius: 5px;
-            cursor: pointer;
+        .slider-container input[type=range]::-moz-range-thumb {
+            width: 0; /* Hide the thumb */
+            height: 0; /* Hide the thumb */
+            appearance: none;
         }
         .stButton > button {
             display: inline-block;
@@ -577,4 +574,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
