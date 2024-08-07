@@ -174,7 +174,7 @@ def main():
         }}
         .number-image {{
             position: absolute;
-            top: 29px;  /* Move images 5px higher */
+            top: 24px;  /* Move images 5px higher */
             left: 90px; /* Move images 10px left */
             transform: translateX(-50%); /* Adjust to perfectly center */
             width: 120px;  /* Width of the number images slightly larger */
