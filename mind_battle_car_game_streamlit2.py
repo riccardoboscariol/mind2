@@ -152,10 +152,10 @@ def main():
             background: #ccc; /* Color of the slider track */
         }
         .stSlider > div > div > div > div > div {
-            background: transparent; /* Make slider thumb invisible */
+            background: #fff; /* White color to make thumb invisible */
             border-radius: 50%;
-            height: 0px;  /* Reduce slider thumb height */
-            width: 0px;  /* Reduce slider thumb width */
+            height: 15px;  /* Size of the thumb */
+            width: 15px;  /* Size of the thumb */
             position: relative;
             top: 0px; /* Correct slider thumb position */
         }
@@ -196,17 +196,6 @@ def main():
         }
         .slider-container input[type=range]:focus {
             outline: none;
-        }
-        .slider-container input[type=range]::-webkit-slider-thumb {
-            width: 0; /* Hide the thumb */
-            height: 0; /* Hide the thumb */
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        .slider-container input[type=range]::-moz-range-thumb {
-            width: 0; /* Hide the thumb */
-            height: 0; /* Hide the thumb */
-            appearance: none;
         }
         .stButton > button {
             display: inline-block;
