@@ -1,4 +1,3 @@
-
 import streamlit as st
 import time
 import numpy as np
@@ -13,7 +12,6 @@ MAX_BATCH_SIZE = 1000  # Maximum batch size for requests to random.org
 RETRY_LIMIT = 3  # Number of retry attempts for random.org requests
 REQUEST_INTERVAL = 0.5  # Interval between requests (in seconds)
 
-
 def configure_random_org(api_key):
     """Configure the RANDOM.ORG client if the API key is valid."""
     try:
@@ -22,7 +20,6 @@ def configure_random_org(api_key):
     except Exception as e:
         st.error(f"Error configuring the random.org client: {e}")
         return None
-
 
 def get_random_bits_from_random_org(num_bits, client=None):
     """Get random bits from random.org or use a local pseudorandom generator."""
@@ -40,11 +37,9 @@ def get_random_bits_from_random_org(num_bits, client=None):
         random_bits = get_local_random_bits(num_bits)
         return random_bits, False
 
-
 def get_local_random_bits(num_bits):
     """Generate pseudorandom bits locally."""
     return list(np.random.randint(0, 2, size=num_bits))
-
 
 def calculate_entropy(bits):
     """Calculate entropy using Shannon's formula."""
@@ -55,7 +50,6 @@ def calculate_entropy(bits):
     entropy = -np.sum(p * np.log2(p))
     return entropy
 
-
 def move_car(car_pos, distance):
     """Move the car a certain distance."""
     car_pos += distance
@@ -63,13 +57,11 @@ def move_car(car_pos, distance):
         car_pos = 900
     return car_pos
 
-
 def image_to_base64(image):
     """Convert an image to base64."""
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
-
 
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
@@ -146,16 +138,18 @@ def main():
     st.markdown(
         """
         <style>
-        .stSlider > div > div > div > div {
+        .stSlider > div > div {
+            padding: 0px 0px 0px 0px; /* Remove padding */
+        }
+        .stSlider > div > div > div {
             background: #ccc; /* Color of the slider track */
         }
-        .stSlider > div > div > div > div > div {
-            background: transparent; /* Make slider thumb invisible */
-            border-radius: 50%;
-            height: 0px;  /* Reduce slider thumb height */
-            width: 0px;  /* Reduce slider thumb width */
+        .stSlider > div > div > div > div {
             position: absolute;
-            top: -1000px; /* Move the slider thumb off-screen */
+            top: -1000px; /* Move the slider thumb out of view */
+            background: transparent; /* Ensure thumb is invisible */
+            height: 0px;  /* Hide the slider thumb */
+            width: 0px;  /* Hide the slider thumb */
         }
         .slider-container {
             position: relative;
@@ -558,6 +552,6 @@ def main():
     if reset_button:
         reset_game()
 
-
 if __name__ == "__main__":
     main()
+
