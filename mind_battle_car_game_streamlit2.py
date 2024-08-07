@@ -142,7 +142,7 @@ def main():
             background: white;
         }
         .stSlider > div > div > div {
-            background: #ddd; /* Color of the slider track */
+            background: #f0f0f0; /* Lighter color for the slider track */
         }
         .stSlider > div > div > div > div > div {
             background: transparent; /* Make slider thumb invisible */
@@ -164,21 +164,22 @@ def main():
         .car-image {
             position: absolute;
             top: 50px;  /* Move car 3px higher */
+            left: 0px;
             width: 150px;  /* Width of the car image */
             z-index: 20;  /* Ensure cars are above numbers */
         }
         .number-image {
             position: absolute;
-            top: 39px;  /* Position for numbers, 4px higher */
-            left: -34.5px; /* Shift numbers left */
+            top: 43px;  /* Position for numbers, 4px higher */
+            left: 30px; /* Move numbers 30px to the right */
             transform: translateX(-50%); /* Adjust to perfectly center */
-            width: 121px;  /* Width of the number images slightly larger */
+            width: 120px;  /* Width of the number images slightly larger */
             z-index: 10;  /* Ensure numbers are below cars */
             display: none; /* Initially hide numbers */
         }
         .flag-image {
             position: absolute;
-            top: 24px;  /* Position for flag */
+            top: 27px;  /* Position for flag */
             width: 150px;
             left: 93%;  /* Move flag 3px left */
         }
@@ -187,7 +188,7 @@ def main():
             width: 100%;
             position: absolute;
             top: 138px;  /* Slider 22px higher */
-            background: transparent;
+            background: #f0f0f0; /* Slider track color */
         }
         .slider-container input[type=range]:focus {
             outline: none;
@@ -195,7 +196,7 @@ def main():
         .slider-container input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
             height: 8px;
-            background: #ddd; /* Track color */
+            background: #f0f0f0; /* Track color */
             border-radius: 5px;
             cursor: pointer;
         }
@@ -397,7 +398,7 @@ def main():
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car_pos / 10}%)">
                 <!-- Red car number image -->
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc(-36px + {st.session_state.car_pos / 10}% + 30px + 1.5px); top: 43px; z-index: 10;">
+                     style="left:calc(-39px + {st.session_state.car_pos / 10}%); top: 43px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -412,7 +413,7 @@ def main():
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car2_pos / 10}%)">
                 <!-- Green car number image -->
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc(-36px + {st.session_state.car2_pos / 10}% + 30px + 1.5px); top: 43px; z-index: 10;">
+                     style="left:calc(-39px + {st.session_state.car2_pos / 10}%); top: 43px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
