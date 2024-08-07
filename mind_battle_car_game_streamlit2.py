@@ -156,8 +156,8 @@ def main():
             border-radius: 50%;
             height: 0px;  /* Reduce slider thumb height */
             width: 0px;  /* Reduce slider thumb width */
-            position: absolute;
-            top: -1000px; /* Move slider thumb way above view */
+            position: relative;
+            top: 0px; /* Correct slider thumb position */
         }
         .slider-container {
             position: relative;
@@ -190,12 +190,34 @@ def main():
             left: 93%;  /* Move flag 3px left */
         }
         .slider-container input[type=range] {
+            -webkit-appearance: none; /* Override default appearance */
             width: 100%;
             position: absolute;
             top: 138px;  /* Slider 22px higher */
+            background: transparent; /* Remove default background */
         }
         .slider-container input[type=range]:focus {
             outline: none;
+        }
+        .slider-container input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 0px; /* Remove thumb */
+            height: 0px;
+            background: transparent;
+            cursor: pointer;
+        }
+        .slider-container input[type=range]::-moz-range-thumb {
+            width: 0px; /* Remove thumb */
+            height: 0px;
+            background: transparent;
+            cursor: pointer;
+        }
+        .slider-container input[type=range]::-ms-thumb {
+            width: 0px; /* Remove thumb */
+            height: 0px;
+            background: transparent;
+            cursor: pointer;
         }
         .stButton > button {
             display: inline-block;
