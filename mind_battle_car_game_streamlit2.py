@@ -170,8 +170,8 @@ def main():
         }
         .number-image {
             position: absolute;
-            top: 38px;  /* Position for numbers, 4px higher */
-            left: 40px; /* Move numbers 30px to the right */
+            top: 32px;  /* Position for numbers, 4px higher */
+            left: 70px; /* Move numbers 30px to the right */
             transform: translateX(-50%); /* Adjust to perfectly center */
             width: 120px;  /* Width of the number images slightly larger */
             z-index: 10;  /* Ensure numbers are below cars */
