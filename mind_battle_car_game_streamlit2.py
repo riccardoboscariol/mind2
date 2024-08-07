@@ -149,7 +149,7 @@ def main():
             background: white;
         }
         .stSlider > div > div > div {
-            background: #ccc; /* Color of the slider track */
+            background: #e0e0e0; /* Lighter color for the slider track */
         }
         .stSlider > div > div > div > div > div {
             background: transparent; /* Make slider thumb invisible */
@@ -170,13 +170,13 @@ def main():
         }
         .car-image {
             position: absolute;
-            top: 54px;  /* Move car 1px higher */
+            top: 52px;  /* Move car 2px higher */
             width: 150px;  /* Width of the car image */
             z-index: 20;  /* Ensure cars are above numbers */
         }
         .number-image {
             position: absolute;
-            top: 40px;  /* Position for numbers, 1px lower */
+            top: 38px;  /* Position for numbers, 2px higher */
             left: calc(50% - 67px); /* Center numbers under cars, 2px left */
             transform: translateX(-50%); /* Adjust to perfectly center */
             width: 120px;  /* Width of the number images slightly larger */
@@ -185,7 +185,7 @@ def main():
         }
         .flag-image {
             position: absolute;
-            top: 30px;  /* Position for flag */
+            top: 28px;  /* Position for flag 2px higher */
             width: 150px;
             left: 93%;  /* Move flag 3px left */
         }
@@ -202,7 +202,7 @@ def main():
         .slider-container input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
             height: 8px;
-            background: #ccc; /* Track color */
+            background: #e0e0e0; /* Lighter Track color */
             border-radius: 5px;
             cursor: pointer;
         }
@@ -301,8 +301,9 @@ def main():
     client = None
     if st.session_state.api_key:
         client = configure_random_org(st.session_state.api_key)
-        if not client:
+        if not client and not st.session_state.warned_random_org:
             st.warning("Invalid API key or random.org server not accessible.")
+            st.session_state.warned_random_org = True
 
     st.sidebar.markdown(api_description_text)
 
@@ -404,7 +405,7 @@ def main():
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <!-- Red car number image -->
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc({st.session_state.car_pos / 10}% + 6.8%); top: 40px; z-index: 10;">
+                     style="left:calc({st.session_state.car_pos / 10}% + 6.8%); top: 38px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -419,7 +420,7 @@ def main():
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <!-- Green car number image -->
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc({st.session_state.car2_pos / 10}% + 6.8%); top: 40px; z-index: 10;">
+                     style="left:calc({st.session_state.car2_pos / 10}% + 6.8%); top: 38px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
