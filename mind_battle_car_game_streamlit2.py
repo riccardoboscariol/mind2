@@ -209,28 +209,26 @@ def main():
         .slider-container input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 0px; /* Hides the thumb */
-            height: 0px; /* Hides the thumb */
-            background: transparent; /* Hides the thumb */
+            width: 10px; /* Thumb width */
+            height: 20px; /* Thumb height */
+            background: transparent; /* Make thumb invisible */
             cursor: pointer;
-            position: relative;
-            top: 0px; /* Keeps thumb out of view */
+            margin-top: -6px; /* Adjust thumb position to align with the track */
+            visibility: hidden; /* Hide the thumb */
         }
         .slider-container input[type=range]::-moz-range-thumb {
-            width: 0px; /* Hides the thumb */
-            height: 0px; /* Hides the thumb */
-            background: transparent; /* Hides the thumb */
+            width: 10px; /* Thumb width */
+            height: 20px; /* Thumb height */
+            background: transparent; /* Make thumb invisible */
             cursor: pointer;
-            position: relative;
-            top: 0px; /* Keeps thumb out of view */
+            visibility: hidden; /* Hide the thumb */
         }
         .slider-container input[type=range]::-ms-thumb {
-            width: 0px; /* Hides the thumb */
-            height: 0px; /* Hides the thumb */
-            background: transparent; /* Hides the thumb */
+            width: 10px; /* Thumb width */
+            height: 20px; /* Thumb height */
+            background: transparent; /* Make thumb invisible */
             cursor: pointer;
-            position: relative;
-            top: 0px; /* Keeps thumb out of view */
+            visibility: hidden; /* Hide the thumb */
         }
         .stButton > button {
             display: inline-block;
@@ -598,3 +596,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
