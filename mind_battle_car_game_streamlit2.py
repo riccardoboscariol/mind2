@@ -145,13 +145,19 @@ def main():
     st.markdown(
         """
         <style>
-        .stSlider > div > div {
-            height: 2px; /* Height of the slider track */
-            top: 18px; /* Position of the track */
-            background: #ccc; /* Color of the slider track */
+        .stSlider > div > div > div > div {
+            background: white;
         }
         .stSlider > div > div > div {
-            display: none; /* Hide the slider thumb */
+            background: #ccc; /* Color of the slider track */
+        }
+        .stSlider > div > div > div > div > div {
+            background: white; /* Make slider thumb invisible */
+            border-radius: 50%;
+            height: 0px;  /* Reduce slider thumb height */
+            width: 0px;  /* Reduce slider thumb width */
+            position: relative;
+            top: -1000px; /* Move thumb up out of view */
         }
         .slider-container {
             position: relative;
@@ -187,18 +193,9 @@ def main():
             width: 100%;
             position: absolute;
             top: 138px;  /* Slider 22px higher */
-            -webkit-appearance: none;
-            background: transparent; /* Hide default slider appearance */
         }
-        .slider-container input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 0px; /* Make the thumb invisible */
-            height: 0px; /* Make the thumb invisible */
-            background: white; /* Ensure thumb is not visible */
-            cursor: pointer;
-            position: relative;
-            top: -1000px; /* Move thumb up out of view */
+        .slider-container input[type=range]:focus {
+            outline: none;
         }
         .stButton > button {
             display: inline-block;
