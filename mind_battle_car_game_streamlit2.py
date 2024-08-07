@@ -12,7 +12,6 @@ MAX_BATCH_SIZE = 1000  # Maximum batch size for requests to random.org
 RETRY_LIMIT = 3  # Number of retry attempts for random.org requests
 REQUEST_INTERVAL = 0.5  # Interval between requests (in seconds)
 
-
 def configure_random_org(api_key):
     """Configure the RANDOM.ORG client if the API key is valid."""
     try:
@@ -21,7 +20,6 @@ def configure_random_org(api_key):
     except Exception as e:
         st.error(f"Error configuring the random.org client: {e}")
         return None
-
 
 def get_random_bits_from_random_org(num_bits, client=None):
     """Get random bits from random.org or use a local pseudorandom generator."""
@@ -39,11 +37,9 @@ def get_random_bits_from_random_org(num_bits, client=None):
         random_bits = get_local_random_bits(num_bits)
         return random_bits, False
 
-
 def get_local_random_bits(num_bits):
     """Generate pseudorandom bits locally."""
     return list(np.random.randint(0, 2, size=num_bits))
-
 
 def calculate_entropy(bits):
     """Calculate entropy using Shannon's formula."""
@@ -54,7 +50,6 @@ def calculate_entropy(bits):
     entropy = -np.sum(p * np.log2(p))
     return entropy
 
-
 def move_car(car_pos, distance):
     """Move the car a certain distance."""
     car_pos += distance
@@ -62,13 +57,11 @@ def move_car(car_pos, distance):
         car_pos = 900
     return car_pos
 
-
 def image_to_base64(image):
     """Convert an image to base64."""
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
-
 
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
@@ -145,19 +138,14 @@ def main():
     st.markdown(
         """
         <style>
-        .stSlider > div > div > div > div {
-            background: white;
-        }
         .stSlider > div > div > div {
             background: #ccc; /* Color of the slider track */
-        }
-        .stSlider > div > div > div > div > div {
-            background: white; /* Make slider thumb white */
-            border-radius: 50%;
-            height: 0px;  /* Reduce slider thumb height */
-            width: 0px;  /* Reduce slider thumb width */
+            height: 3px; /* Height of the track */
             position: relative;
-            top: -100px; /* Move slider thumb above the view */
+            top: 1px; /* Adjusted to center the track vertically */
+        }
+        .stSlider > div > div > div > div {
+            display: none; /* Hide the slider thumb */
         }
         .slider-container {
             position: relative;
@@ -211,6 +199,9 @@ def main():
         .stButton > button:focus {
             outline: none;
             background-color: #ddd; /* Color when selected */
+        }
+        .stMarkdown {
+            margin-bottom: -20px; /* Adjusting space before sliders */
         }
         </style>
         """,
@@ -280,8 +271,7 @@ def main():
 
     # Default move multiplier set to 50 instead of 20
     move_multiplier = st.sidebar.slider(
-        move_multiplier_text, min_value=1, max_value=100, value=50, key="move_multiplier",
-        label_visibility="visible",
+        move_multiplier_text, min_value=1, max_value=100, value=50, key="move_multiplier"
     )
 
     image_dir = os.path.abspath(os.path.dirname(__file__))
