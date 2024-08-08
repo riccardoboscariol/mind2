@@ -136,7 +136,6 @@ def main():
     st.title(title_text)
 
     # Generate a unique query string to prevent caching
-    import time
     unique_query_string = f"?v={int(time.time())}"
 
     st.markdown(
@@ -174,8 +173,8 @@ def main():
         }}
         .number-image {{
             position: absolute;
-            top: 28px;  /* Move images 1px lower */
-            left: 70px; /* Move images 7px left */
+            top: 40px;  /* Move images 1px lower */
+            left: calc(50% - 67px); /* Center numbers under cars, 7px to the left */
             transform: translateX(-50%); /* Adjust to perfectly center */
             width: 120px;  /* Width of the number images slightly larger */
             z-index: 10;  /* Ensure numbers are below cars */
@@ -183,7 +182,7 @@ def main():
         }}
         .flag-image {{
             position: absolute;
-            top: 25px;  /* Position for flag */
+            top: 30px;  /* Position for flag */
             width: 150px;
             left: 93%;  /* Move flag 3px left */
         }}
@@ -244,6 +243,7 @@ def main():
             background-color: #ddd; /* Color when selected */
         }}
         </style>
+        <link rel="stylesheet" href="{unique_query_string}">
         """,
         unsafe_allow_html=True,
     )
@@ -399,10 +399,10 @@ def main():
             f"""
             <div class="slider-container first">
                 <!-- Car image and position -->
-                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car_pos / 10}%)">
+                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:{st.session_state.car_pos / 10}%">
                 <!-- Red car number image -->
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc(-43px + {st.session_state.car_pos / 10}%); top: 34px; z-index: 10;">
+                     style="left:calc({st.session_state.car_pos / 10}% + 6.8%); top: 41px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
@@ -414,10 +414,10 @@ def main():
             f"""
             <div class="slider-container">
                 <!-- Green car image and position -->
-                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car2_pos / 10}%)">
+                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:{st.session_state.car2_pos / 10}%">
                 <!-- Green car number image -->
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                     style="left:calc(-43px + {st.session_state.car2_pos / 10}%); top: 34px; z-index: 10;">
+                     style="left:calc({st.session_state.car2_pos / 10}% + 6.8%); top: 41px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
