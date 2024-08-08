@@ -174,10 +174,10 @@ def main():
         }}
         .number-image {{
             position: absolute;
-            top: 29px;  /* Move images 1px lower */
-            left: 73px; /* Move images 7px left */
-            transform: translateX(-50%); /* Adjust to perfectly center */
-            width: 120px;  /* Width of the number images slightly larger */
+            top: calc(30px - 1px);  /* Adjust position: 1px lower */
+            left: calc(80px - 7px); /* Adjust position: 7px to the left */
+            transform: translateX(-50%); /* Center horizontally */
+            width: calc(110px + 10px);  /* Width of the number images slightly larger */
             z-index: 10;  /* Ensure numbers are below cars */
             display: none; /* Initially hide numbers */
         }}
