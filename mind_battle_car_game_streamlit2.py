@@ -171,7 +171,7 @@ def main():
         .number-image {
             position: absolute;
             top: 30px;  /* Adjust position: 1px lower */
-            left: 73px; /* Adjust position: 7px to the left */
+            left: 66px; /* Adjust position: 7px to the left */
             transform: translateX(-50%); /* Center horizontally */
             width: 120px;  /* Width of the number images slightly larger */
             z-index: 10;  /* Ensure numbers are below cars */
