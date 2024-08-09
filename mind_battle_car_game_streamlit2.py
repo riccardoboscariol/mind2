@@ -66,11 +66,48 @@ def image_to_base64(image):
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
 
+    # Initialize session state variables if not already done
     if "language" not in st.session_state:
         st.session_state.language = "Italiano"
 
     if "api_key" not in st.session_state:
         st.session_state.api_key = ""
+
+    if "warned_random_org" not in st.session_state:
+        st.session_state.warned_random_org = False
+
+    if "player_choice" not in st.session_state:
+        st.session_state.player_choice = None
+    if "car_pos" not in st.session_state:
+        st.session_state.car_pos = 50
+    if "car2_pos" not in st.session_state:
+        st.session_state.car2_pos = 50
+    if "car1_moves" not in st.session_state:
+        st.session_state.car1_moves = 0
+    if "car2_moves" not in st.session_state:
+        st.session_state.car2_moves = 0
+    if "random_numbers_1" not in st.session_state:
+        st.session_state.random_numbers_1 = []
+    if "random_numbers_2" not in st.session_state:
+        st.session_state.random_numbers_2 = []
+    if "data_for_excel_1" not in st.session_state:
+        st.session_state.data_for_excel_1 = []
+    if "data_for_excel_2" not in st.session_state:
+        st.session_state.data_for_excel_2 = []
+    if "data_for_condition_1" not in st.session_state:
+        st.session_state.data_for_condition_1 = []
+    if "data_for_condition_2" not in st.session_state:
+        st.session_state.data_for_condition_2 = []
+    if "car_start_time" not in st.session_state:
+        st.session_state.car_start_time = None
+    if "best_time" not in st.session_state:
+        st.session_state.best_time = None
+    if "running" not in st.session_state:
+        st.session_state.running = False
+    if "widget_key_counter" not in st.session_state:
+        st.session_state.widget_key_counter = 0
+    if "show_end_buttons" not in st.session_state:
+        st.session_state.show_end_buttons = False
 
     # Function to change language
     def toggle_language():
@@ -103,7 +140,6 @@ def main():
         new_race_text = "Nuova Gara"
         end_game_text = "Termina Gioco"
         reset_game_message = "Gioco resettato!"
-        error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
         api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
         move_multiplier_text = "Moltiplicatore di Movimento"
@@ -128,7 +164,6 @@ def main():
         new_race_text = "New Race"
         end_game_text = "End Game"
         reset_game_message = "Game reset!"
-        error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
         move_multiplier_text = "Movement Multiplier"
@@ -249,39 +284,6 @@ def main():
     )
 
     st.markdown(instruction_text)
-
-    if "player_choice" not in st.session_state:
-        st.session_state.player_choice = None
-    if "car_pos" not in st.session_state:
-        st.session_state.car_pos = 50
-    if "car2_pos" not in st.session_state:
-        st.session_state.car2_pos = 50
-    if "car1_moves" not in st.session_state:
-        st.session_state.car1_moves = 0
-    if "car2_moves" not in st.session_state:
-        st.session_state.car2_moves = 0
-    if "random_numbers_1" not in st.session_state:
-        st.session_state.random_numbers_1 = []
-    if "random_numbers_2" not in st.session_state:
-        st.session_state.random_numbers_2 = []
-    if "data_for_excel_1" not in st.session_state:
-        st.session_state.data_for_excel_1 = []
-    if "data_for_excel_2" not in st.session_state:
-        st.session_state.data_for_excel_2 = []
-    if "data_for_condition_1" not in st.session_state:
-        st.session_state.data_for_condition_1 = []
-    if "data_for_condition_2" not in st.session_state:
-        st.session_state.data_for_condition_2 = []
-    if "car_start_time" not in st.session_state:
-        st.session_state.car_start_time = None
-    if "best_time" not in st.session_state:
-        st.session_state.best_time = None
-    if "running" not in st.session_state:
-        st.session_state.running = False
-    if "widget_key_counter" not in st.session_state:
-        st.session_state.widget_key_counter = 0
-    if "show_end_buttons" not in st.session_state:
-        st.session_state.show_end_buttons = False
 
     st.sidebar.title("Menu")
     start_button = st.sidebar.button(
@@ -454,6 +456,7 @@ def main():
         st.session_state.player_choice = None
         st.session_state.running = False
         st.session_state.show_end_buttons = False
+        st.session_state.warned_random_org = False
         st.write(reset_game_message)
         display_cars()
 
