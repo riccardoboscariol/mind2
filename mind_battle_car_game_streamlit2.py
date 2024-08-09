@@ -72,6 +72,9 @@ def main():
     if "api_key" not in st.session_state:
         st.session_state.api_key = ""
 
+    if "warned_random_org" not in st.session_state:
+        st.session_state.warned_random_org = False
+
     # Function to change language
     def toggle_language():
         if st.session_state.language == "Italiano":
@@ -421,6 +424,8 @@ def main():
             unsafe_allow_html=True,
         )
 
+    display_cars()
+
     def check_winner():
         """Check if there is a winner."""
         if st.session_state.car_pos >= 900:  # Shorten the track to leave room for the flag
@@ -461,14 +466,13 @@ def main():
         key_suffix = st.session_state.widget_key_counter
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            if st.button(new_race_text, key=f"new_race_button_{key_suffix}"):
-                reset_game()
-            if st.button(end_game_text, key=f"end_game_button_{key_suffix}"):
-                st.stop()
-
-    # Position buttons above the green car's progress bar
-    with st.container():
-        show_end_buttons()
+            col_a, col_b = st.columns(2)
+            with col_a:
+                if st.button(new_race_text, key=f"new_race_button_{key_suffix}"):
+                    reset_game()
+            with col_b:
+                if st.button(end_game_text, key=f"end_game_button_{key_suffix}"):
+                    st.stop()
 
     if start_button and st.session_state.player_choice is not None:
         st.session_state.running = True
@@ -492,7 +496,7 @@ def main():
 
             if not random_org_success_1 and not random_org_success_2:
                 # Only show warning once if random.org fails
-                if not st.session_state.get("warned_random_org", False):
+                if not st.session_state.warned_random_org:
                     st.session_state.warned_random_org = True
 
             st.session_state.random_numbers_1.extend(random_bits_1)
@@ -587,5 +591,7 @@ def main():
     if reset_button:
         reset_game()
 
+
 if __name__ == "__main__":
     main()
+
