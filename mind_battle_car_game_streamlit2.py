@@ -135,6 +135,10 @@ def main():
 
     st.title(title_text)
 
+    # Generate a unique query string to prevent caching
+    import time
+    unique_query_string = f"?v={int(time.time())}"
+
     st.markdown(
         f"""
         <style>
@@ -278,8 +282,6 @@ def main():
         st.session_state.widget_key_counter = 0
     if "show_end_buttons" not in st.session_state:
         st.session_state.show_end_buttons = False
-    if "warned_random_org" not in st.session_state:
-        st.session_state.warned_random_org = False
 
     st.sidebar.title("Menu")
     start_button = st.sidebar.button(
@@ -452,14 +454,14 @@ def main():
         st.session_state.player_choice = None
         st.session_state.running = False
         st.session_state.show_end_buttons = False
-        st.session_state.warned_random_org = False
         st.write(reset_game_message)
         display_cars()
 
     def show_end_buttons():
         """Show buttons for a new race or to end the game."""
+        st.session_state.widget_key_counter += 1
         key_suffix = st.session_state.widget_key_counter
-        col1, col2, col3 = st.columns([2, 1, 2])
+        col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
             if st.button(new_race_text, key=f"new_race_button_{key_suffix}"):
                 reset_game()
@@ -485,6 +487,11 @@ def main():
             random_bits_2, random_org_success_2 = get_random_bits_from_random_org(
                 1000, client
             )
+
+            if not random_org_success_1 and not random_org_success_2:
+                # Only show warning once if random.org fails
+                if not st.session_state.warned_random_org:
+                    st.session_state.warned_random_org = True
 
             st.session_state.random_numbers_1.extend(random_bits_1)
             st.session_state.random_numbers_2.extend(random_bits_2)
