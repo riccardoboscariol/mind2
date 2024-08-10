@@ -63,25 +63,6 @@ def image_to_base64(image):
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
 
-def reset_game():
-    """Reset the game state."""
-    st.session_state.car_pos = 50
-    st.session_state.car2_pos = 50
-    st.session_state.car1_moves = 0
-    st.session_state.car2_moves = 0
-    st.session_state.data_for_excel_1 = []
-    st.session_state.data_for_excel_2 = []
-    st.session_state.data_for_condition_1 = []
-    st.session_state.data_for_condition_2 = []
-    st.session_state.random_numbers_1 = []
-    st.session_state.random_numbers_2 = []
-    st.session_state.widget_key_counter += 1
-    st.session_state.player_choice = None
-    st.session_state.running = False
-    st.session_state.show_end_buttons = False
-    st.write(st.session_state.reset_game_message)
-    display_cars()
-
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
 
@@ -93,9 +74,6 @@ def main():
 
     if "warned_random_org" not in st.session_state:
         st.session_state.warned_random_org = False
-
-    if "widget_key_counter" not in st.session_state:
-        st.session_state.widget_key_counter = 0
 
     # Function to change language
     def toggle_language():
@@ -160,6 +138,119 @@ def main():
 
     st.title(title_text)
 
+    # Generate a unique query string to prevent caching
+    import time
+    unique_query_string = f"?v={int(time.time())}"
+
+    st.markdown(
+        f"""
+        <style>
+        .stSlider > div > div > div > div {{
+            background: white;
+        }}
+        .stSlider > div > div > div {{
+            background: #f0f0f0; /* Lighter color for the slider track */
+        }}
+        .stSlider > div > div > div > div > div {{
+            background: transparent; /* Make slider thumb invisible */
+            border-radius: 50%;
+            height: 0px;  /* Reduce slider thumb height */
+            width: 0px;  /* Reduce slider thumb width */
+            position: relative;
+            top: 0px; /* Correct slider thumb position */
+        }}
+        .slider-container {{
+            position: relative;
+            height: 250px; /* Height to fit sliders and cars */
+            margin-bottom: 50px;
+        }}
+        .slider-container.first {{
+            margin-top: 50px;
+            margin-bottom: 40px;
+        }}
+        .car-image {{
+            position: absolute;
+            top: 50px;  /* Move car 3px higher */
+            left: 0px;
+            width: 150px;  /* Width of the car image */
+            z-index: 20;  /* Ensure cars are above numbers */
+        }}
+        .number-image {{
+            position: absolute;
+            top: calc(28px - 1px);  /* Adjust position: 1px lower */
+            left: calc(80px - 7px); /* Adjust position: 7px to the left */
+            transform: translateX(-50%); /* Center horizontally */
+            width: calc(110px + 10px);  /* Width of the number images slightly larger */
+            z-index: 10;  /* Ensure numbers are below cars */
+            display: none; /* Initially hide numbers */
+        }}
+        .flag-image {{
+            position: absolute;
+            top: 25px;  /* Position for flag */
+            width: 150px;
+            left: 93%;  /* Move flag 3px left */
+        }}
+        .slider-container input[type=range] {{
+            -webkit-appearance: none;
+            width: 100%;
+            position: absolute;
+            top: 138px;  /* Slider 22px higher */
+            background: #f0f0f0; /* Slider track color */
+        }}
+        .slider-container input[type=range]:focus {{
+            outline: none;
+        }}
+        .slider-container input[type=range]::-webkit-slider-runnable-track {{
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0; /* Track color */
+            border-radius: 5px;
+            cursor: pointer;
+        }}
+        .slider-container input[type=range]::-webkit-slider-thumb {{
+            -webkit-appearance: none;
+            appearance: none;
+            width: 10px; /* Thumb width */
+            height: 20px; /* Thumb height */
+            background: transparent; /* Make thumb invisible */
+            cursor: pointer;
+            margin-top: -6px; /* Adjust thumb position to align with the track */
+            visibility: hidden; /* Hide the thumb */
+        }}
+        .slider-container input[type=range]::-moz-range-thumb {{
+            width: 10px; /* Thumb width */
+            height: 20px; /* Thumb height */
+            background: transparent; /* Make thumb invisible */
+            cursor: pointer;
+            visibility: hidden; /* Hide the thumb */
+        }}
+        .slider-container input[type=range]::-ms-thumb {{
+            width: 10px; /* Thumb width */
+            height: 20px; /* Thumb height */
+            background: transparent; /* Make thumb invisible */
+            cursor: pointer;
+            visibility: hidden; /* Hide the thumb */
+        }}
+        .stButton > button {{
+            display: inline-block;
+            margin: 5px; /* Margin between buttons */
+            padding: 0.5em 2em; /* Padding adjustment for buttons */
+            border-radius: 12px; /* Rounded border */
+            background-color: #f0f0f0; /* Initial background color */
+            color: black;
+            border: 1px solid #ccc;
+            font-size: 16px; /* Text size */
+            cursor: pointer;
+        }}
+        .stButton > button:focus {{
+            outline: none;
+            background-color: #ddd; /* Color when selected */
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
     st.markdown(instruction_text)
 
     if "player_choice" not in st.session_state:
@@ -190,6 +281,8 @@ def main():
         st.session_state.best_time = None
     if "running" not in st.session_state:
         st.session_state.running = False
+    if "widget_key_counter" not in st.session_state:
+        st.session_state.widget_key_counter = 0
     if "show_end_buttons" not in st.session_state:
         st.session_state.show_end_buttons = False
 
@@ -348,6 +441,25 @@ def main():
         st.success(win_message.format(winner))
         show_end_buttons()
 
+    def reset_game():
+        """Reset the game state."""
+        st.session_state.car_pos = 50
+        st.session_state.car2_pos = 50
+        st.session_state.car1_moves = 0
+        st.session_state.car2_moves = 0
+        st.session_state.data_for_excel_1 = []
+        st.session_state.data_for_excel_2 = []
+        st.session_state.data_for_condition_1 = []
+        st.session_state.data_for_condition_2 = []
+        st.session_state.random_numbers_1 = []
+        st.session_state.random_numbers_2 = []
+        st.session_state.widget_key_counter += 1
+        st.session_state.player_choice = None
+        st.session_state.running = False
+        st.session_state.show_end_buttons = False
+        st.write(reset_game_message)
+        display_cars()
+
     def show_end_buttons():
         """Show buttons for a new race or to end the game."""
         st.session_state.widget_key_counter += 1
@@ -478,6 +590,10 @@ def main():
 
     if reset_button:
         reset_game()
+
+
+if __name__ == "__main__":
+    main()
 
 
 if __name__ == "__main__":
