@@ -63,6 +63,23 @@ def image_to_base64(image):
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
 
+def reset_game():
+    """Reset the game state."""
+    st.session_state.car_pos = 50
+    st.session_state.car2_pos = 50
+    st.session_state.car1_moves = 0
+    st.session_state.car2_moves = 0
+    st.session_state.data_for_excel_1 = []
+    st.session_state.data_for_excel_2 = []
+    st.session_state.data_for_condition_1 = []
+    st.session_state.data_for_condition_2 = []
+    st.session_state.random_numbers_1 = []
+    st.session_state.random_numbers_2 = []
+    st.session_state.player_choice = None
+    st.session_state.running = False
+    st.session_state.show_end_buttons = False
+    st.session_state.widget_key_counter += 1
+
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
 
@@ -74,6 +91,9 @@ def main():
 
     if "warned_random_org" not in st.session_state:
         st.session_state.warned_random_org = False
+
+    if "car_pos" not in st.session_state:
+        reset_game()
 
     # Function to change language
     def toggle_language():
@@ -139,7 +159,6 @@ def main():
     st.title(title_text)
 
     # Generate a unique query string to prevent caching
-    import time
     unique_query_string = f"?v={int(time.time())}"
 
     st.markdown(
@@ -255,36 +274,6 @@ def main():
 
     if "player_choice" not in st.session_state:
         st.session_state.player_choice = None
-    if "car_pos" not in st.session_state:
-        st.session_state.car_pos = 50
-    if "car2_pos" not in st.session_state:
-        st.session_state.car2_pos = 50
-    if "car1_moves" not in st.session_state:
-        st.session_state.car1_moves = 0
-    if "car2_moves" not in st.session_state:
-        st.session_state.car2_moves = 0
-    if "random_numbers_1" not in st.session_state:
-        st.session_state.random_numbers_1 = []
-    if "random_numbers_2" not in st.session_state:
-        st.session_state.random_numbers_2 = []
-    if "data_for_excel_1" not in st.session_state:
-        st.session_state.data_for_excel_1 = []
-    if "data_for_excel_2" not in st.session_state:
-        st.session_state.data_for_excel_2 = []
-    if "data_for_condition_1" not in st.session_state:
-        st.session_state.data_for_condition_1 = []
-    if "data_for_condition_2" not in st.session_state:
-        st.session_state.data_for_condition_2 = []
-    if "car_start_time" not in st.session_state:
-        st.session_state.car_start_time = None
-    if "best_time" not in st.session_state:
-        st.session_state.best_time = None
-    if "running" not in st.session_state:
-        st.session_state.running = False
-    if "widget_key_counter" not in st.session_state:
-        st.session_state.widget_key_counter = 0
-    if "show_end_buttons" not in st.session_state:
-        st.session_state.show_end_buttons = False
 
     st.sidebar.title("Menu")
     start_button = st.sidebar.button(
@@ -306,7 +295,7 @@ def main():
     download_menu = st.sidebar.expander("Download")
     with download_menu:
         download_button = st.button(download_data_text, key="download_button")
-    reset_button = st.sidebar.button(reset_game_text, key="reset_button")
+    reset_button = st.sidebar.button(reset_game_text, key="reset_button", on_click=reset_game)
 
     # Default move multiplier set to 50 instead of 20
     move_multiplier = st.sidebar.slider(
@@ -440,25 +429,6 @@ def main():
         st.session_state.show_end_buttons = True
         st.success(win_message.format(winner))
         show_end_buttons()
-
-    def reset_game():
-        """Reset the game state."""
-        st.session_state.car_pos = 50
-        st.session_state.car2_pos = 50
-        st.session_state.car1_moves = 0
-        st.session_state.car2_moves = 0
-        st.session_state.data_for_excel_1 = []
-        st.session_state.data_for_excel_2 = []
-        st.session_state.data_for_condition_1 = []
-        st.session_state.data_for_condition_2 = []
-        st.session_state.random_numbers_1 = []
-        st.session_state.random_numbers_2 = []
-        st.session_state.widget_key_counter += 1
-        st.session_state.player_choice = None
-        st.session_state.running = False
-        st.session_state.show_end_buttons = False
-        st.write(reset_game_message)
-        display_cars()
 
     def show_end_buttons():
         """Show buttons for a new race or to end the game."""
@@ -594,4 +564,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
