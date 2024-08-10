@@ -12,6 +12,9 @@ MAX_BATCH_SIZE = 1000  # Maximum batch size for requests to random.org
 RETRY_LIMIT = 3  # Number of retry attempts for random.org requests
 REQUEST_INTERVAL = 0.5  # Interval between requests (in seconds)
 
+# Imposta la configurazione della pagina
+st.set_page_config(page_title="Car Mind Race", layout="wide")
+
 def configure_random_org(api_key):
     """Configure the RANDOM.ORG client if the API key is valid."""
     try:
@@ -64,8 +67,6 @@ def image_to_base64(image):
     return base64.b64encode(buffered.getvalue()).decode()
 
 def main():
-    st.set_page_config(page_title="Car Mind Race", layout="wide")
-
     if "language" not in st.session_state:
         st.session_state.language = "Italiano"
 
@@ -590,10 +591,6 @@ def main():
 
     if reset_button:
         reset_game()
-
-
-if __name__ == "__main__":
-    main()
 
 
 if __name__ == "__main__":
