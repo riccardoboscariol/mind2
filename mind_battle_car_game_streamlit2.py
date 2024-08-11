@@ -104,7 +104,6 @@ def main():
         download_data_text = "Scarica Dati"
         api_key_text = "Inserisci API Key per random.org"
         new_race_text = "Nuova Gara"
-        end_game_text = "Termina Gioco"
         reset_game_message = "Gioco resettato!"
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
@@ -129,7 +128,6 @@ def main():
         download_data_text = "Download Data"
         api_key_text = "Enter API Key for random.org"
         new_race_text = "New Race"
-        end_game_text = "End Game"
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
@@ -453,7 +451,6 @@ def main():
         st.session_state.data_for_condition_2 = []
         st.session_state.random_numbers_1 = []
         st.session_state.random_numbers_2 = []
-        st.session_state.widget_key_counter += 1
         st.session_state.player_choice = None
         st.session_state.running = False
         st.session_state.show_end_buttons = False
