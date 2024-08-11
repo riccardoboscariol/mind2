@@ -104,6 +104,7 @@ def main():
         download_data_text = "Scarica Dati"
         api_key_text = "Inserisci API Key per random.org"
         new_race_text = "Nuova Gara"
+        end_game_text = "Termina Gioco"
         reset_game_message = "Gioco resettato!"
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
@@ -128,6 +129,7 @@ def main():
         download_data_text = "Download Data"
         api_key_text = "Enter API Key for random.org"
         new_race_text = "New Race"
+        end_game_text = "End Game"
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
@@ -135,6 +137,10 @@ def main():
         move_multiplier_text = "Movement Multiplier"
 
     st.title(title_text)
+
+    # Generate a unique query string to prevent caching
+    import time
+    unique_query_string = f"?v={int(time.time())}"
 
     st.markdown(
         f"""
@@ -433,7 +439,7 @@ def main():
         st.session_state.running = False
         st.session_state.show_end_buttons = True
         st.success(win_message.format(winner))
-        show_end_buttons()
+        show_end_button()
 
     def reset_game():
         """Reset the game state."""
@@ -451,16 +457,16 @@ def main():
         st.session_state.player_choice = None
         st.session_state.running = False
         st.session_state.show_end_buttons = False
+        st.write(reset_game_message)
         display_cars()
 
-    def show_end_buttons():
+    def show_end_button():
         """Show button for a new race."""
         st.session_state.widget_key_counter += 1
         key_suffix = st.session_state.widget_key_counter
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            if st.button(new_race_text, key=f"new_race_button_{key_suffix}"):
-                reset_game()
+        col2 = st.columns([1])[0]
+        if col2.button(new_race_text, key=f"new_race_button_{key_suffix}"):
+            reset_game()
 
     if start_button and st.session_state.player_choice is not None:
         st.session_state.running = True
@@ -548,7 +554,7 @@ def main():
             time.sleep(max(REQUEST_INTERVAL - time_elapsed, 0))
 
         if st.session_state.show_end_buttons:
-            show_end_buttons()
+            show_end_button()
 
     except Exception as e:
         st.error(f"An error occurred: {e}")
