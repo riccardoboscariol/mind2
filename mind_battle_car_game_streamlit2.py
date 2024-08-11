@@ -127,7 +127,7 @@ def main():
         reset_game_text = "Reset Game"
         download_data_text = "Download Data"
         api_key_text = "Enter API Key for random.org"
-        retry_text = "New Game"
+        retry_text = "New Race"
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
@@ -143,7 +143,6 @@ def main():
     st.markdown(
         f"""
         <style>
-        .stException {{"color: white; background-color: white;"}}
         .stSlider > div > div > div > div {{
             background: white;
         }}
@@ -343,11 +342,11 @@ def main():
     col1, col2 = st.columns([1, 1])
     with col1:
         button1 = st.button(
-            "Scegli 1", key="button1", use_container_width=True, help="Scegli il bit 1"
+            "Scegli 1", key=f"button1_{st.session_state.widget_key_counter}", use_container_width=True, help="Scegli il bit 1"
         )
     with col2:
         button0 = st.button(
-            "Scegli 0", key="button0", use_container_width=True, help="Scegli il bit 0"
+            "Scegli 0", key=f"button0_{st.session_state.widget_key_counter}", use_container_width=True, help="Scegli il bit 0"
         )
 
     if button1:
@@ -462,7 +461,8 @@ def main():
     def show_retry_popup():
         """Show popup asking if the user wants to retry."""
         if st.session_state.show_retry_popup:
-            if st.button(retry_text, key=f"retry_button_{st.session_state.widget_key_counter}"):
+            key_suffix = st.session_state.widget_key_counter
+            if st.button(retry_text, key=f"retry_button_{key_suffix}"):
                 reset_game()
 
     if start_button and st.session_state.player_choice is not None:
