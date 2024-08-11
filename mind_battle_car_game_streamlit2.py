@@ -103,7 +103,8 @@ def main():
         reset_game_text = "Resetta Gioco"
         download_data_text = "Scarica Dati"
         api_key_text = "Inserisci API Key per random.org"
-        retry_text = "Vuoi riprovare?"
+        retry_text = "Nuova Gara"
+        end_game_text = "Termina Gioco"
         reset_game_message = "Gioco resettato!"
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
@@ -127,7 +128,8 @@ def main():
         reset_game_text = "Reset Game"
         download_data_text = "Download Data"
         api_key_text = "Enter API Key for random.org"
-        retry_text = "Do you want to retry?"
+        retry_text = "New Race"
+        end_game_text = "End Game"
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
@@ -459,10 +461,11 @@ def main():
         display_cars()
 
     def show_retry_popup():
-        """Show popup asking if the user wants to retry."""
-        if st.session_state.show_retry_popup:
-            if st.button(retry_text):
-                reset_game()
+        """Show the retry popup with a unique key."""
+        st.session_state.widget_key_counter += 1
+        key_suffix = st.session_state.widget_key_counter
+        if st.button(retry_text, key=f"retry_button_{key_suffix}"):
+            reset_game()
 
     if start_button and st.session_state.player_choice is not None:
         st.session_state.running = True
