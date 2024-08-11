@@ -103,7 +103,7 @@ def main():
         reset_game_text = "Resetta Gioco"
         download_data_text = "Scarica Dati"
         api_key_text = "Inserisci API Key per random.org"
-        retry_text = "Nuova Gara"
+        retry_text = "Vuoi riprovare?"
         reset_game_message = "Gioco resettato!"
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
@@ -127,7 +127,7 @@ def main():
         reset_game_text = "Reset Game"
         download_data_text = "Download Data"
         api_key_text = "Enter API Key for random.org"
-        retry_text = "Retry"
+        retry_text = "Do you want to retry?"
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
@@ -244,10 +244,10 @@ def main():
             outline: none;
             background-color: #ddd; /* Color when selected */
         }}
-        .stError > div {{
-            color: white;
-            background-color: white;
-            border: 1px solid white;
+        .stException {{
+            background-color: #ffffff !important; /* Change background to white */
+            color: #ffffff !important; /* Change text to white */
+            border-color: #ffffff !important; /* Change border to white */
         }}
         </style>
         """,
