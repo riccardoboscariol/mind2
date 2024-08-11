@@ -245,9 +245,7 @@ def main():
             background-color: #ddd; /* Color when selected */
         }}
         .stException {{
-            background-color: #ffffff !important; /* Change background to white */
-            color: #ffffff !important; /* Change text to white */
-            border-color: #ffffff !important; /* Change border to white */
+            display: none;  /* Nascondi errori */
         }}
         </style>
         """,
@@ -558,7 +556,8 @@ def main():
             show_retry_popup()
 
     except Exception as e:
-        st.error(f"An error occurred: {e}")
+        # Silenziare l'errore per evitare che compaia nel frontend
+        pass
 
     if download_button:
         # Create DataFrame with "Green Car" and "Red Car" columns
