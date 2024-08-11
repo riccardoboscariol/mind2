@@ -63,61 +63,9 @@ def image_to_base64(image):
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
 
-def display_cars():
-    """Display the cars and the images of the selected numbers."""
-    car_placeholder.markdown(
-        f"""
-        <div class="slider-container first">
-            <!-- Car image and position -->
-            <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car_pos / 10}%)">
-            <!-- Red car number image -->
-            <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                 style="left:calc(-43px + {st.session_state.car_pos / 10}%); top: 34px; z-index: 10;">
-            <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
-            <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
-        </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-    car2_placeholder.markdown(
-        f"""
-        <div class="slider-container">
-            <!-- Green car image and position -->
-            <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car2_pos / 10}%)">
-            <!-- Green car number image -->
-            <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
-                 style="left:calc(-43px + {st.session_state.car2_pos / 10}%); top: 34px; z-index: 10;">
-            <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
-            <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
-        </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-def reset_game():
-    """Reset the game state."""
-    st.session_state.car_pos = 50
-    st.session_state.car2_pos = 50
-    st.session_state.car1_moves = 0
-    st.session_state.car2_moves = 0
-    st.session_state.data_for_excel_1 = []
-    st.session_state.data_for_excel_2 = []
-    st.session_state.data_for_condition_1 = []
-    st.session_state.data_for_condition_2 = []
-    st.session_state.random_numbers_1 = []
-    st.session_state.random_numbers_2 = []
-    st.session_state.player_choice = None
-    st.session_state.running = False
-    st.session_state.show_end_button = False
-    st.write(reset_game_message)
-    display_cars()
-
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
 
-    global car_placeholder, car2_placeholder, car_image_base64, car2_image_base64, flag_image_base64, red_car_number_base64, green_car_number_base64
-    
     if "language" not in st.session_state:
         st.session_state.language = "Italiano"
 
@@ -156,6 +104,7 @@ def main():
         download_data_text = "Scarica Dati"
         api_key_text = "Inserisci API Key per random.org"
         new_race_text = "Nuova Gara"
+        end_game_text = "Termina Gioco"
         reset_game_message = "Gioco resettato!"
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
@@ -180,6 +129,7 @@ def main():
         download_data_text = "Download Data"
         api_key_text = "Enter API Key for random.org"
         new_race_text = "New Race"
+        end_game_text = "End Game"
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
@@ -329,6 +279,38 @@ def main():
     car_placeholder = st.empty()
     car2_placeholder = st.empty()
 
+    def display_cars():
+        """Display the cars and the images of the selected numbers."""
+        car_placeholder.markdown(
+            f"""
+            <div class="slider-container first">
+                <!-- Car image and position -->
+                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car_pos / 10}%)">
+                <!-- Red car number image -->
+                <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
+                     style="left:calc(-43px + {st.session_state.car_pos / 10}%); top: 34px; z-index: 10;">
+                <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
+            </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+        car2_placeholder.markdown(
+            f"""
+            <div class="slider-container">
+                <!-- Green car image and position -->
+                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car2_pos / 10}%)">
+                <!-- Green car number image -->
+                <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
+                     style="left:calc(-43px + {st.session_state.car2_pos / 10}%); top: 34px; z-index: 10;">
+                <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
+            </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
     display_cars()
 
     def check_winner():
@@ -346,12 +328,33 @@ def main():
         st.success(win_message.format(winner))
         show_end_button()
 
+    def reset_game():
+        """Reset the game state."""
+        st.session_state.car_pos = 50
+        st.session_state.car2_pos = 50
+        st.session_state.car1_moves = 0
+        st.session_state.car2_moves = 0
+        st.session_state.data_for_excel_1 = []
+        st.session_state.data_for_excel_2 = []
+        st.session_state.data_for_condition_1 = []
+        st.session_state.data_for_condition_2 = []
+        st.session_state.random_numbers_1 = []
+        st.session_state.random_numbers_2 = []
+        st.session_state.widget_key_counter += 1
+        st.session_state.player_choice = None
+        st.session_state.running = False
+        st.session_state.show_end_button = False
+        st.write(reset_game_message)
+        display_cars()
+
     def show_end_button():
-        """Show button for a new race."""
+        """Show the button for a new race."""
         st.session_state.widget_key_counter += 1
         key_suffix = st.session_state.widget_key_counter
-        if st.button(new_race_text, key=f"new_race_button_{key_suffix}"):
-            reset_game()
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button(new_race_text, key=f"new_race_button_{key_suffix}"):
+                reset_game()
 
     if start_button and st.session_state.player_choice is not None:
         st.session_state.running = True
@@ -470,5 +473,7 @@ def main():
     if reset_button:
         reset_game()
 
+
 if __name__ == "__main__":
     main()
+
