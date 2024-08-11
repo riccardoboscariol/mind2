@@ -342,11 +342,11 @@ def main():
     col1, col2 = st.columns([1, 1])
     with col1:
         button1 = st.button(
-            "Scegli 1", key=f"button1_{st.session_state.widget_key_counter}", use_container_width=True, help="Scegli il bit 1"
+            "Scegli 1", key="button1", use_container_width=True, help="Scegli il bit 1"
         )
     with col2:
         button0 = st.button(
-            "Scegli 0", key=f"button0_{st.session_state.widget_key_counter}", use_container_width=True, help="Scegli il bit 0"
+            "Scegli 0", key="button0", use_container_width=True, help="Scegli il bit 0"
         )
 
     if button1:
@@ -461,6 +461,7 @@ def main():
     def show_retry_popup():
         """Show popup asking if the user wants to retry."""
         if st.session_state.show_retry_popup:
+            st.session_state.widget_key_counter += 1
             key_suffix = st.session_state.widget_key_counter
             if st.button(retry_text, key=f"retry_button_{key_suffix}"):
                 reset_game()
