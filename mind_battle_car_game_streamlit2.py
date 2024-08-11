@@ -127,7 +127,7 @@ def main():
         reset_game_text = "Reset Game"
         download_data_text = "Download Data"
         api_key_text = "Enter API Key for random.org"
-        retry_text = "New Race"
+        retry_text = "New Game"
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
@@ -143,10 +143,7 @@ def main():
     st.markdown(
         f"""
         <style>
-        .stException {{
-            color: white;
-            background-color: white;
-        }}
+        .stException {{"color: white; background-color: white;"}}
         .stSlider > div > div > div > div {{
             background: white;
         }}
@@ -588,4 +585,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
