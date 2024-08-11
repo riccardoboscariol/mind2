@@ -127,7 +127,7 @@ def main():
         reset_game_text = "Reset Game"
         download_data_text = "Download Data"
         api_key_text = "Enter API Key for random.org"
-        retry_text = "New Race"
+        retry_text = "Retry"
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
@@ -243,6 +243,11 @@ def main():
         .stButton > button:focus {{
             outline: none;
             background-color: #ddd; /* Color when selected */
+        }}
+        .stError > div {{
+            color: white;
+            background-color: white;
+            border: 1px solid white;
         }}
         </style>
         """,
@@ -461,9 +466,7 @@ def main():
     def show_retry_popup():
         """Show popup asking if the user wants to retry."""
         if st.session_state.show_retry_popup:
-            st.session_state.widget_key_counter += 1
-            key_suffix = st.session_state.widget_key_counter
-            if st.button(retry_text, key=f"retry_button_{key_suffix}"):
+            if st.button(retry_text, key=f"retry_button_{st.session_state.widget_key_counter}"):
                 reset_game()
 
     if start_button and st.session_state.player_choice is not None:
