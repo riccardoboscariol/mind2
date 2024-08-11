@@ -461,7 +461,7 @@ def main():
         display_cars()
 
     def show_end_button():
-        """Show button for a new race."""
+        """Show the button for a new race."""
         st.session_state.widget_key_counter += 1
         key_suffix = st.session_state.widget_key_counter
         col1, col2, col3 = st.columns([1, 2, 1])
@@ -589,4 +589,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
