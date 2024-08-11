@@ -464,11 +464,11 @@ def main():
         display_cars()
 
     def show_retry_popup():
-    """Show popup asking if the user wants to retry."""
-    if st.session_state.show_retry_popup:
-        if st.button(retry_text):
-            # Ricarica la pagina
-            st.experimental_rerun()
+        """Show popup asking if the user wants to retry."""
+        if st.session_state.show_retry_popup:
+            if st.button("Nuova Gara"):
+                # Ricarica la pagina
+                st.experimental_rerun()
 
     if start_button and st.session_state.player_choice is not None:
         st.session_state.running = True
