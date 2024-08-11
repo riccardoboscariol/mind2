@@ -143,6 +143,10 @@ def main():
     st.markdown(
         f"""
         <style>
+        .stException {{
+            color: white;
+            background-color: white;
+        }}
         .stSlider > div > div > div > div {{
             background: white;
         }}
@@ -461,8 +465,7 @@ def main():
     def show_retry_popup():
         """Show popup asking if the user wants to retry."""
         if st.session_state.show_retry_popup:
-            key_suffix = st.session_state.widget_key_counter
-            if st.button(retry_text, key=f"retry_button_{key_suffix}"):
+            if st.button(retry_text, key=f"retry_button_{st.session_state.widget_key_counter}"):
                 reset_game()
 
     if start_button and st.session_state.player_choice is not None:
@@ -585,3 +588,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
