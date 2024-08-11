@@ -283,8 +283,8 @@ def main():
         st.session_state.running = False
     if "widget_key_counter" not in st.session_state:
         st.session_state.widget_key_counter = 0
-    if "show_end_buttons" not in st.session_state:
-        st.session_state.show_end_buttons = False
+    if "show_end_button" not in st.session_state:
+        st.session_state.show_end_button = False
 
     st.sidebar.title("Menu")
     start_button = st.sidebar.button(
@@ -437,7 +437,7 @@ def main():
     def end_race(winner):
         """End the race and show the winner."""
         st.session_state.running = False
-        st.session_state.show_end_buttons = True
+        st.session_state.show_end_button = True
         st.success(win_message.format(winner))
         show_end_button()
 
@@ -456,7 +456,7 @@ def main():
         st.session_state.widget_key_counter += 1
         st.session_state.player_choice = None
         st.session_state.running = False
-        st.session_state.show_end_buttons = False
+        st.session_state.show_end_button = False
         st.write(reset_game_message)
         display_cars()
 
@@ -464,14 +464,15 @@ def main():
         """Show button for a new race."""
         st.session_state.widget_key_counter += 1
         key_suffix = st.session_state.widget_key_counter
-        col2 = st.columns([1])[0]
-        if col2.button(new_race_text, key=f"new_race_button_{key_suffix}"):
-            reset_game()
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button(new_race_text, key=f"new_race_button_{key_suffix}"):
+                reset_game()
 
     if start_button and st.session_state.player_choice is not None:
         st.session_state.running = True
         st.session_state.car_start_time = time.time()
-        st.session_state.show_end_buttons = False
+        st.session_state.show_end_button = False
 
     if stop_button:
         st.session_state.running = False
@@ -553,7 +554,7 @@ def main():
             time_elapsed = time.time() - start_time
             time.sleep(max(REQUEST_INTERVAL - time_elapsed, 0))
 
-        if st.session_state.show_end_buttons:
+        if st.session_state.show_end_button:
             show_end_button()
 
     except Exception as e:
@@ -588,3 +589,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
