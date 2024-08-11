@@ -136,10 +136,6 @@ def main():
 
     st.title(title_text)
 
-    # Generate a unique query string to prevent caching
-    import time
-    unique_query_string = f"?v={int(time.time())}"
-
     st.markdown(
         f"""
         <style>
@@ -451,14 +447,14 @@ def main():
         st.session_state.data_for_condition_2 = []
         st.session_state.random_numbers_1 = []
         st.session_state.random_numbers_2 = []
+        st.session_state.widget_key_counter += 1
         st.session_state.player_choice = None
         st.session_state.running = False
         st.session_state.show_end_buttons = False
-        st.write(reset_game_message)
         display_cars()
 
     def show_end_buttons():
-        """Show buttons for a new race or to end the game."""
+        """Show button for a new race."""
         st.session_state.widget_key_counter += 1
         key_suffix = st.session_state.widget_key_counter
         col1, col2, col3 = st.columns([1, 2, 1])
