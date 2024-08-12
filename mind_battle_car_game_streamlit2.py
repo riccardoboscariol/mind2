@@ -289,7 +289,7 @@ def main():
 
     st.sidebar.title("Menu")
     start_button = st.sidebar.button(
-        start_race_text, key="start_button", disabled=st.session_state.player_choice is None
+        start_race_text, key="start_button", disabled=st.session_state.player_choice is None or st.session_state.running
     )
     stop_button = st.sidebar.button(stop_race_text, key="stop_button")
 
