@@ -7,6 +7,9 @@ import base64
 import io
 import os
 from rdoclient import RandomOrgClient
+import json
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 MAX_BATCH_SIZE = 1000  # Maximum batch size for requests to random.org
 RETRY_LIMIT = 3  # Number of retry attempts for random.org requests
@@ -63,6 +66,23 @@ def image_to_base64(image):
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
 
+def configure_google_sheets(sheet_name):
+    """Configure Google Sheets using credentials from Streamlit Secrets."""
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    credentials_info = json.loads(st.secrets["google_sheets"]["credentials_json"])
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_info, scope)
+    client = gspread.authorize(credentials)
+    sheet = client.open(sheet_name)
+    sheet1 = sheet.sheet1  # First sheet
+    return sheet1
+
+def save_race_data(sheet, race_data):
+    """Save race data to Google Sheets."""
+    try:
+        sheet.append_row(race_data)
+    except Exception as e:
+        st.error(f"Error saving data to Google Sheets: {e}")
+
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
 
@@ -74,6 +94,9 @@ def main():
 
     if "warned_random_org" not in st.session_state:
         st.session_state.warned_random_org = False
+
+    if "consent_given" not in st.session_state:
+        st.session_state.consent_given = False
 
     # Function to change language
     def toggle_language():
@@ -87,6 +110,12 @@ def main():
 
     if st.session_state.language == "Italiano":
         title_text = "Car Mind Race"
+        consent_text = """
+        **Informativa e Consenso all'Utilizzo dei Dati**
+
+        I dati raccolti saranno utilizzati esclusivamente per scopi di ricerca scientifica, in conformità con le leggi vigenti sulla privacy.
+        """
+        accept_text = "[ ] Accetto e desidero procedere con la gara."
         instruction_text = """
             Il primo giocatore sceglie la macchina verde e la cifra che vuole influenzare.
             L'altro giocatore (o il PC) avrà la macchina rossa e l'altra cifra.
@@ -109,8 +138,15 @@ def main():
         win_message = "Vince l'auto {}, complimenti!"
         api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
         move_multiplier_text = "Moltiplicatore di Movimento"
+        email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
     else:
         title_text = "Car Mind Race"
+        consent_text = """
+        **Data Usage and Consent**
+
+        The data collected will be used exclusively for scientific research purposes, in accordance with current privacy laws.
+        """
+        accept_text = "[ ] I accept and wish to proceed with the race."
         instruction_text = """
             The first player chooses the green car and the digit they want to influence.
             The other player (or the PC) will have the red car and the other digit.
@@ -133,11 +169,22 @@ def main():
         win_message = "The {} car wins, congratulations!"
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
         move_multiplier_text = "Movement Multiplier"
+        email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
 
-    st.title(title_text)
+    # Mantieni il titolo con dimensioni maggiori
+    st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
+
+    # Consent Form
+    if not st.session_state.consent_given:
+        st.markdown(consent_text)
+        consent_checkbox = st.checkbox(accept_text)
+
+        if consent_checkbox:
+            st.session_state.consent_given = True
+        else:
+            st.stop()  # Stop the app until consent is given
 
     # Generate a unique query string to prevent caching
-    import time
     unique_query_string = f"?v={int(time.time())}"
 
     st.markdown(
@@ -314,6 +361,9 @@ def main():
         move_multiplier_text, min_value=1, max_value=100, value=50, key="move_multiplier"
     )
 
+    # Add email reference at the bottom of the sidebar
+    st.sidebar.markdown(f"### {email_ref_text}")
+
     image_dir = os.path.abspath(os.path.dirname(__file__))
     car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Red car
     car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Green car
@@ -345,11 +395,17 @@ def main():
     col1, col2 = st.columns([1, 1])
     with col1:
         button1 = st.button(
-            "Scegli 1", key="button1", use_container_width=True, help="Scegli il bit 1"
+            "Scegli 1" if st.session_state.language == "Italiano" else "Choose 1", 
+            key="button1", 
+            use_container_width=True, 
+            help="Scegli il bit 1" if st.session_state.language == "Italiano" else "Choose bit 1"
         )
     with col2:
         button0 = st.button(
-            "Scegli 0", key="button0", use_container_width=True, help="Scegli il bit 0"
+            "Scegli 0" if st.session_state.language == "Italiano" else "Choose 0", 
+            key="button0", 
+            use_container_width=True, 
+            help="Scegli il bit 0" if st.session_state.language == "Italiano" else "Choose bit 0"
         )
 
     if button1:
@@ -430,9 +486,9 @@ def main():
     def check_winner():
         """Check if there is a winner."""
         if st.session_state.car_pos >= 900:  # Shorten the track to leave room for the flag
-            return "Rossa"
+            return "Rossa" if st.session_state.language == "Italiano" else "Red"
         elif st.session_state.car2_pos >= 900:  # Shorten the track to leave room for the flag
-            return "Verde"
+            return "Verde" if st.session_state.language == "Italiano" else "Green"
         return None
 
     def end_race(winner):
@@ -441,6 +497,31 @@ def main():
         st.session_state.show_retry_popup = True
         st.success(win_message.format(winner))
         show_retry_popup()
+
+        # Calculate the sums for red and green car
+        red_car_0s = st.session_state.random_numbers_1.count(0)
+        red_car_1s = st.session_state.random_numbers_1.count(1)
+        green_car_0s = st.session_state.random_numbers_2.count(0)
+        green_car_1s = st.session_state.random_numbers_2.count(1)
+
+        # Save race data to Google Sheets
+        race_data = [
+            "Italian" if st.session_state.language == "Italiano" else "English",
+            st.session_state.player_choice,
+            st.session_state.car_pos,
+            st.session_state.car2_pos,
+            winner,
+            time.time() - st.session_state.car_start_time,
+            st.session_state.api_key != "",
+            st.session_state.move_multiplier,  # Save the movement multiplier value
+            red_car_0s,
+            red_car_1s,
+            green_car_0s,
+            green_car_1s,
+            st.session_state.car1_moves,  # Number of moves by red car
+            st.session_state.car2_moves  # Number of moves by green car
+        ]
+        save_race_data(sheet1, race_data)
 
     def reset_game():
         """Reset the game state."""
@@ -464,8 +545,14 @@ def main():
     def show_retry_popup():
         """Show popup asking if the user wants to retry."""
         if st.session_state.show_retry_popup:
-            if st.button(retry_text, key=f"retry_button_{st.session_state.widget_key_counter}"):
-                reset_game()
+            try:
+                if st.button(retry_text, key=f"retry_button_{st.session_state.widget_key_counter}"):
+                    reset_game()
+            except Exception:
+                pass  # Silence the duplicate widget key exception
+
+    # Connect to Google Sheets
+    sheet1 = configure_google_sheets("test")
 
     if start_button and st.session_state.player_choice is not None:
         st.session_state.running = True
@@ -514,14 +601,14 @@ def main():
                 if st.session_state.player_choice == 1 and count_1 > count_0:
                     st.session_state.car2_pos = move_car(
                         st.session_state.car2_pos,
-                        move_multiplier
+                        st.session_state.move_multiplier
                         * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)),
                     )
                     st.session_state.car1_moves += 1
                 elif st.session_state.player_choice == 0 and count_0 > count_1:
                     st.session_state.car2_pos = move_car(
                         st.session_state.car2_pos,
-                        move_multiplier
+                        st.session_state.move_multiplier
                         * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)),
                     )
                     st.session_state.car1_moves += 1
@@ -530,14 +617,14 @@ def main():
                 if st.session_state.player_choice == 1 and count_0 > count_1:
                     st.session_state.car_pos = move_car(
                         st.session_state.car_pos,
-                        move_multiplier
+                        st.session_state.move_multiplier
                         * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)),
                     )
                     st.session_state.car2_moves += 1
                 elif st.session_state.player_choice == 0 and count_1 > count_0:
                     st.session_state.car_pos = move_car(
                         st.session_state.car_pos,
-                        move_multiplier
+                        st.session_state.move_multiplier
                         * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)),
                     )
                     st.session_state.car2_moves += 1
@@ -556,18 +643,17 @@ def main():
             show_retry_popup()
 
     except Exception as e:
-        # Silenziare l'errore per evitare che compaia nel frontend
-        pass
+        pass  # Silence any other errors
 
     if download_button:
         # Create DataFrame with "Green Car" and "Red Car" columns
         df = pd.DataFrame(
             {
-                "Macchina verde": [
+                "Green Car": [
                     "".join(map(str, row))
                     for row in st.session_state.data_for_excel_1
                 ],
-                "Macchina rossa": [
+                "Red Car": [
                     "".join(map(str, row))
                     for row in st.session_state.data_for_excel_2
                 ],
@@ -584,7 +670,6 @@ def main():
 
     if reset_button:
         reset_game()
-
 
 if __name__ == "__main__":
     main()
