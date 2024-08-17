@@ -9,3 +9,6 @@ pygame
 pydub
 openpyxl
 rdoclient
+gspread
+oauth2client
+rdoclient
