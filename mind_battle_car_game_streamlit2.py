@@ -110,12 +110,6 @@ def main():
 
     if st.session_state.language == "Italiano":
         title_text = "Car Mind Race"
-        consent_text = """
-        **Informativa e Consenso all'Utilizzo dei Dati**
-
-        I dati raccolti saranno utilizzati esclusivamente per scopi di ricerca scientifica, in conformità con le leggi vigenti sulla privacy.
-        """
-        accept_text = "[ ] Accetto e desidero procedere con la gara."
         instruction_text = """
             Il primo giocatore sceglie la macchina verde e la cifra che vuole influenzare.
             L'altro giocatore (o il PC) avrà la macchina rossa e l'altra cifra.
@@ -141,12 +135,6 @@ def main():
         email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
     else:
         title_text = "Car Mind Race"
-        consent_text = """
-        **Data Usage and Consent**
-
-        The data collected will be used exclusively for scientific research purposes, in accordance with current privacy laws.
-        """
-        accept_text = "[ ] I accept and wish to proceed with the race."
         instruction_text = """
             The first player chooses the green car and the digit they want to influence.
             The other player (or the PC) will have the red car and the other digit.
@@ -173,16 +161,6 @@ def main():
 
     # Mantieni il titolo con dimensioni maggiori
     st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
-
-    # Consent Form
-    if not st.session_state.consent_given:
-        st.markdown(consent_text)
-        consent_checkbox = st.checkbox(accept_text)
-
-        if consent_checkbox:
-            st.session_state.consent_given = True
-        else:
-            st.stop()  # Stop the app until consent is given
 
     # Generate a unique query string to prevent caching
     unique_query_string = f"?v={int(time.time())}"
@@ -504,24 +482,38 @@ def main():
         green_car_0s = st.session_state.random_numbers_2.count(0)
         green_car_1s = st.session_state.random_numbers_2.count(1)
 
-        # Save race data to Google Sheets
-        race_data = [
-            "Italian" if st.session_state.language == "Italiano" else "English",
-            st.session_state.player_choice,
-            st.session_state.car_pos,
-            st.session_state.car2_pos,
-            winner,
-            time.time() - st.session_state.car_start_time,
-            st.session_state.api_key != "",
-            st.session_state.move_multiplier,  # Save the movement multiplier value
-            red_car_0s,
-            red_car_1s,
-            green_car_0s,
-            green_car_1s,
-            st.session_state.car1_moves,  # Number of moves by red car
-            st.session_state.car2_moves  # Number of moves by green car
-        ]
-        save_race_data(sheet1, race_data)
+        # Calculate the total race time and car speeds
+        total_time = time.time() - st.session_state.car_start_time
+        red_car_speed = st.session_state.car_pos / total_time
+        green_car_speed = st.session_state.car2_pos / total_time
+
+        # Ask the user if they want to save the race data
+        if st.session_state.language == "Italiano":
+            save_data = st.radio("Vuoi salvare i dati?", ("Sì", "No"))
+        else:
+            save_data = st.radio("Do you want to save the data?", ("Yes", "No"))
+
+        if save_data == "Sì" or save_data == "Yes":
+            # Save race data to Google Sheets
+            race_data = [
+                "Italian" if st.session_state.language == "Italiano" else "English",
+                st.session_state.player_choice,
+                st.session_state.car_pos,
+                st.session_state.car2_pos,
+                winner,
+                total_time,
+                st.session_state.api_key != "",
+                st.session_state.move_multiplier,  # Save the movement multiplier value
+                red_car_0s,
+                red_car_1s,
+                green_car_0s,
+                green_car_1s,
+                st.session_state.car1_moves,  # Number of moves by red car
+                st.session_state.car2_moves,  # Number of moves by green car
+                red_car_speed,  # Speed of the red car
+                green_car_speed  # Speed of the green car
+            ]
+            save_race_data(sheet1, race_data)
 
     def reset_game():
         """Reset the game state."""
@@ -673,3 +665,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
