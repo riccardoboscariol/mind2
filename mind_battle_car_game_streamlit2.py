@@ -98,15 +98,12 @@ def main():
     if "consent_given" not in st.session_state:
         st.session_state.consent_given = False
 
-    # Function to change language
-    def toggle_language():
-        if st.session_state.language == "Italiano":
-            st.session_state.language = "English"
-        else:
-            st.session_state.language = "Italiano"
-
-    # Button to change language
-    st.sidebar.button("Change Language", on_click=toggle_language)
+    # Pulsanti per cambiare lingua
+    col1, col2 = st.sidebar.columns(2)
+    if col1.button("Italiano"):
+        st.session_state.language = "Italiano"
+    if col2.button("English"):
+        st.session_state.language = "English"
 
     if st.session_state.language == "Italiano":
         title_text = "Car Mind Race"
@@ -130,7 +127,10 @@ def main():
         reset_game_message = "Gioco resettato!"
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
-        api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
+        save_data_text = "Vuoi inviare i dati per motivi di ricerca?"
+        save_data_info = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy."
+        yes_option = "Sì"
+        no_option = "No"
         move_multiplier_text = "Moltiplicatore di Movimento"
         email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
     else:
@@ -155,7 +155,10 @@ def main():
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
-        api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
+        save_data_text = "Do you want to send the data for research purposes?"
+        save_data_info = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws."
+        yes_option = "Yes"
+        no_option = "No"
         move_multiplier_text = "Movement Multiplier"
         email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
 
@@ -488,12 +491,10 @@ def main():
         green_car_speed = st.session_state.car2_pos / total_time
 
         # Ask the user if they want to save the race data
-        if st.session_state.language == "Italiano":
-            save_data = st.radio("Vuoi salvare i dati?", ("Sì", "No"))
-        else:
-            save_data = st.radio("Do you want to save the data?", ("Yes", "No"))
+        save_data = st.radio(save_data_text, (no_option, yes_option), index=0)
+        st.write(save_data_info)
 
-        if save_data == "Sì" or save_data == "Yes":
+        if save_data == yes_option:
             # Save race data to Google Sheets
             race_data = [
                 "Italian" if st.session_state.language == "Italiano" else "English",
@@ -638,17 +639,19 @@ def main():
         pass  # Silence any other errors
 
     if download_button:
-        # Create DataFrame with "Green Car" and "Red Car" columns
+        # Create DataFrame with "Green Car" and "Red Car" columns and include the chosen bits
         df = pd.DataFrame(
             {
                 "Green Car": [
                     "".join(map(str, row))
-                    for row in st.session_state.data_for_excel_1
+                    for row in st.session_state.data_for_excel_2
                 ],
                 "Red Car": [
                     "".join(map(str, row))
-                    for row in st.session_state.data_for_excel_2
+                    for row in st.session_state.data_for_excel_1
                 ],
+                "Green Car Bit Chosen": [st.session_state.player_choice] * len(st.session_state.data_for_excel_2),
+                "Red Car Bit Chosen": [1 - st.session_state.player_choice] * len(st.session_state.data_for_excel_1)
             }
         )
         df.to_excel("random_numbers.xlsx", index=False)
@@ -665,4 +668,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
