@@ -98,12 +98,15 @@ def main():
     if "consent_given" not in st.session_state:
         st.session_state.consent_given = False
 
-    # Pulsanti per cambiare lingua
-    col1, col2 = st.sidebar.columns(2)
-    if col1.button("Italiano"):
-        st.session_state.language = "Italiano"
-    if col2.button("English"):
-        st.session_state.language = "English"
+    # Function to change language
+    def toggle_language():
+        if st.session_state.language == "Italiano":
+            st.session_state.language = "English"
+        else:
+            st.session_state.language = "Italiano"
+
+    # Button to change language
+    st.sidebar.button("Change Language", on_click=toggle_language)
 
     if st.session_state.language == "Italiano":
         title_text = "Car Mind Race"
@@ -378,7 +381,7 @@ def main():
         green_car_speed = st.session_state.car2_pos / total_time
 
         # Ask the user if they want to save the race data
-        save_data = st.radio(save_data_text, (no_option, yes_option), index=-1)
+        save_data = st.radio(save_data_text, (yes_option, no_option), index=-1)
         st.write(save_data_info)
 
         if save_data == yes_option:
