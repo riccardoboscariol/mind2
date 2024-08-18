@@ -96,7 +96,7 @@ def main():
         st.session_state.warned_random_org = False
 
     if "consent_given" not in st.session_state:
-        st.session_state.consent_given = False
+        st.session_state.consent_given = None  # Initial state is None
 
     # Function to change language
     def toggle_language():
@@ -132,11 +132,11 @@ def main():
         reset_game_message = "Gioco resettato!"
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
+        privacy_info_text = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy."
         consent_text = "Vuoi salvare i dati?"
         move_multiplier_text = "Moltiplicatore di Movimento"
         email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
         api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
-        privacy_info_text = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy."
     else:
         title_text = "Car Mind Race"
         instruction_text = """
@@ -158,12 +158,11 @@ def main():
         retry_text = "I want to retry"
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
-        win_message = "The {} car wins, congratulations!"
+        privacy_info_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws."
         consent_text = "Do you want to save the data?"
         move_multiplier_text = "Movement Multiplier"
         email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
-        privacy_info_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws."
 
     # Mantieni il titolo con dimensioni maggiori
     st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
@@ -493,31 +492,32 @@ def main():
         red_car_speed = st.session_state.car_pos / total_time
         green_car_speed = st.session_state.car2_pos / total_time
 
-        # Display consent options
+        # Ask the user if they want to save the race data
         st.write(privacy_info_text)
-        save_data = st.radio(consent_text, ("No", "Sì"))
+        save_data = st.radio(consent_text, options=["", "Sì", "No"], index=0)
 
-        # Save race data to Google Sheets based on user choice
-        race_data = [
-            "Italian" if st.session_state.language == "Italiano" else "English",
-            st.session_state.player_choice,
-            st.session_state.car_pos,
-            st.session_state.car2_pos,
-            winner,
-            total_time,
-            st.session_state.api_key != "",
-            st.session_state.move_multiplier,  # Save the movement multiplier value
-            red_car_0s,
-            red_car_1s,
-            green_car_0s,
-            green_car_1s,
-            st.session_state.car1_moves,  # Number of moves by red car
-            st.session_state.car2_moves,  # Number of moves by green car
-            red_car_speed,  # Speed of the red car
-            green_car_speed,  # Speed of the green car
-            save_data  # Save user choice
-        ]
-        save_race_data(sheet1, race_data)
+        if save_data == "Sì" or save_data == "No":
+            # Save race data to Google Sheets with consent info
+            race_data = [
+                "Italian" if st.session_state.language == "Italiano" else "English",
+                st.session_state.player_choice,
+                st.session_state.car_pos,
+                st.session_state.car2_pos,
+                winner,
+                total_time,
+                st.session_state.api_key != "",
+                st.session_state.move_multiplier,  # Save the movement multiplier value
+                red_car_0s,
+                red_car_1s,
+                green_car_0s,
+                green_car_1s,
+                st.session_state.car1_moves,  # Number of moves by red car
+                st.session_state.car2_moves,  # Number of moves by green car
+                red_car_speed,  # Speed of the red car
+                green_car_speed,  # Speed of the green car
+                save_data  # "Sì" or "No"
+            ]
+            save_race_data(sheet1, race_data)
 
     def reset_game():
         """Reset the game state."""
