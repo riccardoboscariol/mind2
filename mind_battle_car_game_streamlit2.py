@@ -496,10 +496,10 @@ def main():
         green_car_speed = st.session_state.car2_pos / total_time
 
         # Ask the user if they want to save the race data
-        save_data = st.radio(save_data_text, (yes_option, no_option))
-        st.write(save_data_info)
+        save_data = st.radio(save_data_text, (yes_option, no_option), index=0)
+        consent_checkbox = st.checkbox(save_data_info)
 
-        if save_data == yes_option:
+        if save_data == yes_option and consent_checkbox:
             # Save race data to Google Sheets
             race_data = [
                 "Italian" if st.session_state.language == "Italiano" else "English",
