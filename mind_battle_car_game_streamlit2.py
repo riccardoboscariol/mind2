@@ -130,11 +130,7 @@ def main():
         reset_game_message = "Gioco resettato!"
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
-        save_data_text = "Vuoi inviare i dati per motivi di ricerca?"
-        save_data_info = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy."
-        yes_option = "Sì"
-        no_option = "No"
-        move_multiplier_text = "Moltiplicatore di Movimento"
+        consent_text = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy. Clicca per acconsentire e inviare i dati."
         email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
         api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
     else:
@@ -159,11 +155,7 @@ def main():
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
-        save_data_text = "Do you want to send the data for research purposes?"
-        save_data_info = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws."
-        yes_option = "Yes"
-        no_option = "No"
-        move_multiplier_text = "Movement Multiplier"
+        consent_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws. Click to consent and send data."
         email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
 
@@ -495,11 +487,10 @@ def main():
         red_car_speed = st.session_state.car_pos / total_time
         green_car_speed = st.session_state.car2_pos / total_time
 
-        # Ask the user if they want to save the race data
-        save_data = st.radio(save_data_text, (yes_option, no_option), index=0)
-        consent_checkbox = st.checkbox(save_data_info)
+        # Ask the user for consent to save the race data
+        consent_given = st.checkbox(consent_text)
 
-        if save_data == yes_option and consent_checkbox:
+        if consent_given:
             # Save race data to Google Sheets
             race_data = [
                 "Italian" if st.session_state.language == "Italiano" else "English",
