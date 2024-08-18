@@ -98,15 +98,12 @@ def main():
     if "consent_given" not in st.session_state:
         st.session_state.consent_given = False
 
-    # Function to change language
-    def toggle_language():
-        if st.session_state.language == "Italiano":
-            st.session_state.language = "English"
-        else:
-            st.session_state.language = "Italiano"
-
-    # Button to change language
-    st.sidebar.button("Change Language", on_click=toggle_language)
+    # Pulsanti per cambiare lingua
+    col1, col2 = st.sidebar.columns(2)
+    if col1.button("Italiano"):
+        st.session_state.language = "Italiano"
+    if col2.button("English"):
+        st.session_state.language = "English"
 
     if st.session_state.language == "Italiano":
         title_text = "Car Mind Race"
@@ -328,7 +325,7 @@ def main():
                 <!-- Car image and position -->
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car_pos / 10}%)">
                 <!-- Red car number image -->
-                <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
+                <img src="data:image/png;base64,{red_car_number_base64}" class="number-image show" 
                      style="left:calc(-43px + {st.session_state.car_pos / 10}%); top: 34px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
@@ -343,7 +340,7 @@ def main():
                 <!-- Green car image and position -->
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car2_pos / 10}%)">
                 <!-- Green car number image -->
-                <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
+                <img src="data:image/png;base64,{green_car_number_base64}" class="number-image show" 
                      style="left:calc(-43px + {st.session_state.car2_pos / 10}%); top: 34px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
                 <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
@@ -381,7 +378,7 @@ def main():
         green_car_speed = st.session_state.car2_pos / total_time
 
         # Ask the user if they want to save the race data
-        save_data = st.radio(save_data_text, options=(yes_option, no_option))
+        save_data = st.radio(save_data_text, (no_option, yes_option), index=-1)
         st.write(save_data_info)
 
         if save_data == yes_option:
