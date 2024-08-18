@@ -95,11 +95,8 @@ def main():
     if "warned_random_org" not in st.session_state:
         st.session_state.warned_random_org = False
 
-    if "consent_given" not in st.session_state:
-        st.session_state.consent_given = False
-
-    if "last_saved_row" not in st.session_state:
-        st.session_state.last_saved_row = None
+    if "consent_answer" not in st.session_state:
+        st.session_state.consent_answer = None
 
     # Language buttons
     col1, col2 = st.sidebar.columns(2)
@@ -163,6 +160,9 @@ def main():
 
     # Mantieni il titolo con dimensioni maggiori
     st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
+
+    # Generate a unique query string to prevent caching
+    unique_query_string = f"?v={int(time.time())}"
 
     st.markdown(
         f"""
@@ -490,15 +490,10 @@ def main():
 
         # Display consent radio buttons and privacy info
         st.markdown(privacy_info_text)
-        consent_answer = st.radio(consent_text, ("Sì", "No"), index=-1, key="consent_radio")
+        consent_answer = st.radio(consent_text, ("Sì", "No"), index=-1)
 
-        if consent_answer is not None:
-            st.session_state.consent_answer = consent_answer
-            st.session_state.show_send_button = True
-        else:
-            st.session_state.show_send_button = False
-
-        if st.session_state.show_send_button:
+        if consent_answer:
+            # Show the submit button if a selection is made
             if st.button("Invia i dati"):
                 # Save race data to Google Sheets if consent is given
                 race_data = [
@@ -518,10 +513,9 @@ def main():
                     st.session_state.car2_moves,  # Number of moves by green car
                     red_car_speed,  # Speed of the red car
                     green_car_speed,  # Speed of the green car
-                    st.session_state.consent_answer  # Save "Sì" or "No" based on consent answer
+                    consent_answer  # Save "Sì" or "No" based on consent answer
                 ]
                 save_race_data(sheet1, race_data)
-                st.session_state.show_send_button = False  # Disable the button after sending data
 
     def reset_game():
         """Reset the game state."""
@@ -539,8 +533,6 @@ def main():
         st.session_state.player_choice = None
         st.session_state.running = False
         st.session_state.show_retry_popup = False
-        st.session_state.show_send_button = False
-        st.session_state.consent_answer = None
         st.write(reset_game_message)
         display_cars()
 
