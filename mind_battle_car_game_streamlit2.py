@@ -158,7 +158,6 @@ def main():
         retry_text = "I want to retry"
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
-        win_message = "The {} car wins, congratulations!"
         consent_text = "Do you want to save the data?"
         privacy_info_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws."
         move_multiplier_text = "Movement Multiplier"
@@ -493,32 +492,35 @@ def main():
         red_car_speed = st.session_state.car_pos / total_time
         green_car_speed = st.session_state.car2_pos / total_time
 
-        # Display consent question
         st.write(privacy_info_text)
-        save_data = st.radio(consent_text, ('Sì', 'No'), index=-1, key="consent_radio")
+        save_data = st.radio(consent_text, options=["Sì", "No"], index=-1, key="consent")
 
-        if save_data:
-            # Save race data to Google Sheets
-            race_data = [
-                "Italian" if st.session_state.language == "Italiano" else "English",
-                st.session_state.player_choice,
-                st.session_state.car_pos,
-                st.session_state.car2_pos,
-                winner,
-                total_time,
-                st.session_state.api_key != "",
-                st.session_state.move_multiplier,  # Save the movement multiplier value
-                red_car_0s,
-                red_car_1s,
-                green_car_0s,
-                green_car_1s,
-                st.session_state.car1_moves,  # Number of moves by red car
-                st.session_state.car2_moves,  # Number of moves by green car
-                red_car_speed,  # Speed of the red car
-                green_car_speed,  # Speed of the green car
-                save_data  # Save consent decision
-            ]
-            save_race_data(sheet1, race_data)
+        if save_data == "Sì":
+            consent_value = "Sì"
+        else:
+            consent_value = "No"
+
+        # Save race data to Google Sheets
+        race_data = [
+            "Italian" if st.session_state.language == "Italiano" else "English",
+            st.session_state.player_choice,
+            st.session_state.car_pos,
+            st.session_state.car2_pos,
+            winner,
+            total_time,
+            st.session_state.api_key != "",
+            st.session_state.move_multiplier,  # Save the movement multiplier value
+            red_car_0s,
+            red_car_1s,
+            green_car_0s,
+            green_car_1s,
+            st.session_state.car1_moves,  # Number of moves by red car
+            st.session_state.car2_moves,  # Number of moves by green car
+            red_car_speed,  # Speed of the red car
+            green_car_speed,  # Speed of the green car
+            consent_value  # Consent value
+        ]
+        save_race_data(sheet1, race_data)
 
     def reset_game():
         """Reset the game state."""
