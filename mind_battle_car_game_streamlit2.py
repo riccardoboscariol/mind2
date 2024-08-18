@@ -381,7 +381,7 @@ def main():
         green_car_speed = st.session_state.car2_pos / total_time
 
         # Ask the user if they want to save the race data
-        save_data = st.radio(save_data_text, (yes_option, no_option), index=-1)
+        save_data = st.radio(save_data_text, options=(yes_option, no_option))
         st.write(save_data_info)
 
         if save_data == yes_option:
