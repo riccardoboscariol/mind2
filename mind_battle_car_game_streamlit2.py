@@ -130,6 +130,7 @@ def main():
         move_multiplier_text = "Moltiplicatore di Movimento"
         email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
         api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
+        submit_button_text = "Invia i dati"
     else:
         title_text = "Car Mind Race"
         instruction_text = """
@@ -157,12 +158,9 @@ def main():
         move_multiplier_text = "Movement Multiplier"
         email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
+        submit_button_text = "Submit Data"
 
-    # Mantieni il titolo con dimensioni maggiori
     st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
-
-    # Generate a unique query string to prevent caching
-    unique_query_string = f"?v={int(time.time())}"
 
     st.markdown(
         f"""
@@ -494,7 +492,7 @@ def main():
 
         if consent_answer:
             # Show the submit button if a selection is made
-            if st.button("Invia i dati"):
+            if st.button(submit_button_text):
                 # Save race data to Google Sheets if consent is given
                 race_data = [
                     "Italian" if st.session_state.language == "Italiano" else "English",
@@ -669,3 +667,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
