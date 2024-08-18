@@ -79,9 +79,8 @@ def configure_google_sheets(sheet_name):
 def save_race_data(sheet, race_data):
     """Save race data to Google Sheets."""
     try:
-        st.write("Saving data to Google Sheets...")  # Log message for debugging
         sheet.append_row(race_data)
-        st.write("Data saved successfully.")  # Log message for debugging
+        st.success("Dati inviati correttamente su Google Sheets!")
     except Exception as e:
         st.error(f"Error saving data to Google Sheets: {e}")
 
