@@ -242,16 +242,16 @@ def main():
     # Load images for numbers and resize further to 120x120 pixels
     number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize(
         (120, 120)
-    )  # Slightly larger
+    )
     number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize(
         (120, 120)
-    )  # Slightly larger
+    )
     number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize(
         (120, 120)
-    )  # Slightly larger
+    )
     number_1_red_image = Image.open(os.path.join(image_dir, "1red.png")).resize(
         (120, 120)
-    )  # Slightly larger
+    )
 
     st.write(choose_bit_text)
 
@@ -321,14 +321,13 @@ def main():
         """Display the cars and the images of the selected numbers."""
         car_placeholder.markdown(
             f"""
-            <div class="slider-container first">
+            <div style="position: relative; height: 200px;">
                 <!-- Car image and position -->
-                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car_pos / 10}%)">
+                <img src="data:image/png;base64,{car_image_base64}" style="position: absolute; top: 50%; left:calc({st.session_state.car_pos / 10}%); transform: translate(-50%, -50%); width: 150px;">
                 <!-- Red car number image -->
-                <img src="data:image/png;base64,{red_car_number_base64}" class="number-image show" 
-                     style="left:calc(-43px + {st.session_state.car_pos / 10}%); top: 34px; z-index: 10;">
-                <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
-                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
+                <img src="data:image/png;base64,{red_car_number_base64}" style="position: absolute; top: 20%; left:calc({st.session_state.car_pos / 10}%); transform: translate(-50%, -50%); width: 120px;">
+                <!-- Flag -->
+                <img src="data:image/png;base64,{flag_image_base64}" style="position: absolute; top: 50%; right: 0; transform: translate(0, -50%); width: 150px;">
             </div>
         """,
             unsafe_allow_html=True,
@@ -336,14 +335,11 @@ def main():
 
         car2_placeholder.markdown(
             f"""
-            <div class="slider-container">
+            <div style="position: relative; height: 200px;">
                 <!-- Green car image and position -->
-                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car2_pos / 10}%)">
+                <img src="data:image/png;base64,{car2_image_base64}" style="position: absolute; top: 50%; left:calc({st.session_state.car2_pos / 10}%); transform: translate(-50%, -50%); width: 150px;">
                 <!-- Green car number image -->
-                <img src="data:image/png;base64,{green_car_number_base64}" class="number-image show" 
-                     style="left:calc(-43px + {st.session_state.car2_pos / 10}%); top: 34px; z-index: 10;">
-                <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
-                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
+                <img src="data:image/png;base64,{green_car_number_base64}" style="position: absolute; top: 20%; left:calc({st.session_state.car2_pos / 10}%); transform: translate(-50%, -50%); width: 120px;">
             </div>
         """,
             unsafe_allow_html=True,
