@@ -107,6 +107,12 @@ def main():
 
     if st.session_state.language == "Italiano":
         title_text = "Car Mind Race"
+        consent_text = """
+        **Informativa e Consenso all'Utilizzo dei Dati**
+
+        I dati raccolti saranno utilizzati esclusivamente per scopi di ricerca scientifica, in conformità con le leggi vigenti sulla privacy.
+        """
+        accept_text = "[ ] Accetto e desidero procedere con la gara."
         instruction_text = """
             Il primo giocatore sceglie la macchina verde e la cifra che vuole influenzare.
             L'altro giocatore (o il PC) avrà la macchina rossa e l'altra cifra.
@@ -127,15 +133,20 @@ def main():
         reset_game_message = "Gioco resettato!"
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
+        move_multiplier_text = "Moltiplicatore di Movimento"
+        email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
         save_data_text = "Vuoi inviare i dati per motivi di ricerca?"
         save_data_info = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy."
         yes_option = "Sì"
         no_option = "No"
-        move_multiplier_text = "Moltiplicatore di Movimento"
-        email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
-        api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
     else:
         title_text = "Car Mind Race"
+        consent_text = """
+        **Data Usage and Consent**
+
+        The data collected will be used exclusively for scientific research purposes, in accordance with current privacy laws.
+        """
+        accept_text = "[ ] I accept and wish to proceed with the race."
         instruction_text = """
             The first player chooses the green car and the digit they want to influence.
             The other player (or the PC) will have the red car and the other digit.
@@ -156,16 +167,28 @@ def main():
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
+        move_multiplier_text = "Movement Multiplier"
+        email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
         save_data_text = "Do you want to send the data for research purposes?"
         save_data_info = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws."
         yes_option = "Yes"
         no_option = "No"
-        move_multiplier_text = "Movement Multiplier"
-        email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
-        api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
 
     # Mantieni il titolo con dimensioni maggiori
     st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
+
+    # Consent Form
+    if not st.session_state.consent_given:
+        st.markdown(consent_text)
+        consent_checkbox = st.checkbox(accept_text)
+
+        if consent_checkbox:
+            st.session_state.consent_given = True
+        else:
+            st.stop()  # Stop the app until consent is given
+
+    # Generate a unique query string to prevent caching
+    unique_query_string = f"?v={int(time.time())}"
 
     st.markdown(instruction_text)
 
@@ -217,8 +240,6 @@ def main():
     if st.session_state.api_key:
         client = configure_random_org(st.session_state.api_key)
 
-    st.sidebar.markdown(api_description_text)
-
     download_menu = st.sidebar.expander("Download")
     with download_menu:
         download_button = st.button(download_data_text, key="download_button")
@@ -242,16 +263,16 @@ def main():
     # Load images for numbers and resize further to 120x120 pixels
     number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize(
         (120, 120)
-    )
+    )  # Slightly larger
     number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize(
         (120, 120)
-    )
+    )  # Slightly larger
     number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize(
         (120, 120)
-    )
+    )  # Slightly larger
     number_1_red_image = Image.open(os.path.join(image_dir, "1red.png")).resize(
         (120, 120)
-    )
+    )  # Slightly larger
 
     st.write(choose_bit_text)
 
@@ -321,13 +342,14 @@ def main():
         """Display the cars and the images of the selected numbers."""
         car_placeholder.markdown(
             f"""
-            <div style="position: relative; height: 200px; background-color: #f0f0f0;">
+            <div class="slider-container first">
                 <!-- Car image and position -->
-                <img src="data:image/png;base64,{car_image_base64}" style="position: absolute; top: 50%; left:calc({st.session_state.car_pos / 10}%); transform: translate(-50%, -50%); width: 150px;">
+                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car_pos / 10}%)">
                 <!-- Red car number image -->
-                <img src="data:image/png;base64,{red_car_number_base64}" style="position: absolute; top: 20%; left:calc({st.session_state.car_pos / 10}%); transform: translate(-50%, -50%); width: 120px;">
-                <!-- Flag -->
-                <img src="data:image/png;base64,{flag_image_base64}" style="position: absolute; top: 50%; right: 0; transform: translate(0, -50%); width: 150px;">
+                <img src="data:image/png;base64,{red_car_number_base64}" class="number-image show" 
+                     style="left:calc(-43px + {st.session_state.car_pos / 10}%); top: 34px; z-index: 10;">
+                <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
         """,
             unsafe_allow_html=True,
@@ -335,11 +357,14 @@ def main():
 
         car2_placeholder.markdown(
             f"""
-            <div style="position: relative; height: 200px; background-color: #f0f0f0;">
+            <div class="slider-container">
                 <!-- Green car image and position -->
-                <img src="data:image/png;base64,{car2_image_base64}" style="position: absolute; top: 50%; left:calc({st.session_state.car2_pos / 10}%); transform: translate(-50%, -50%); width: 150px;">
+                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car2_pos / 10}%)">
                 <!-- Green car number image -->
-                <img src="data:image/png;base64,{green_car_number_base64}" style="position: absolute; top: 20%; left:calc({st.session_state.car2_pos / 10}%); transform: translate(-50%, -50%); width: 120px;">
+                <img src="data:image/png;base64,{green_car_number_base64}" class="number-image show" 
+                     style="left:calc(-43px + {st.session_state.car2_pos / 10}%); top: 34px; z-index: 10;">
+                <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
             </div>
         """,
             unsafe_allow_html=True,
@@ -522,19 +547,17 @@ def main():
         pass  # Silence any other errors
 
     if download_button:
-        # Create DataFrame with "Green Car" and "Red Car" columns and include the chosen bits
+        # Create DataFrame with "Green Car" and "Red Car" columns
         df = pd.DataFrame(
             {
                 "Green Car": [
                     "".join(map(str, row))
-                    for row in st.session_state.data_for_excel_2
+                    for row in st.session_state.data_for_excel_1
                 ],
                 "Red Car": [
                     "".join(map(str, row))
-                    for row in st.session_state.data_for_excel_1
+                    for row in st.session_state.data_for_excel_2
                 ],
-                "Green Car Bit Chosen": [st.session_state.player_choice] * len(st.session_state.data_for_excel_2),
-                "Red Car Bit Chosen": [1 - st.session_state.player_choice] * len(st.session_state.data_for_excel_1)
             }
         )
         df.to_excel("random_numbers.xlsx", index=False)
