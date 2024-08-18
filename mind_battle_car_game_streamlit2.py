@@ -321,7 +321,7 @@ def main():
         """Display the cars and the images of the selected numbers."""
         car_placeholder.markdown(
             f"""
-            <div style="position: relative; height: 200px;">
+            <div style="position: relative; height: 200px; background-color: #f0f0f0;">
                 <!-- Car image and position -->
                 <img src="data:image/png;base64,{car_image_base64}" style="position: absolute; top: 50%; left:calc({st.session_state.car_pos / 10}%); transform: translate(-50%, -50%); width: 150px;">
                 <!-- Red car number image -->
@@ -335,7 +335,7 @@ def main():
 
         car2_placeholder.markdown(
             f"""
-            <div style="position: relative; height: 200px;">
+            <div style="position: relative; height: 200px; background-color: #f0f0f0;">
                 <!-- Green car image and position -->
                 <img src="data:image/png;base64,{car2_image_base64}" style="position: absolute; top: 50%; left:calc({st.session_state.car2_pos / 10}%); transform: translate(-50%, -50%); width: 150px;">
                 <!-- Green car number image -->
