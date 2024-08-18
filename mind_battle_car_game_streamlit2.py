@@ -28,15 +28,12 @@ def get_random_bits_from_random_org(num_bits, client=None):
     """Get random bits from random.org or use a local pseudorandom generator."""
     try:
         if client:
-            # Use RANDOM.ORG
             random_bits = client.generate_integers(num_bits, 0, 1)
             return random_bits, True
         else:
-            # Use a local pseudorandom generator
             random_bits = get_local_random_bits(num_bits)
             return random_bits, False
     except Exception:
-        # In case of error, use a local pseudorandom generator
         random_bits = get_local_random_bits(num_bits)
         return random_bits, False
 
@@ -56,7 +53,7 @@ def calculate_entropy(bits):
 def move_car(car_pos, distance):
     """Move the car a certain distance."""
     car_pos += distance
-    if car_pos > 900:  # Shorten the track to leave room for the flag
+    if car_pos > 900:
         car_pos = 900
     return car_pos
 
@@ -73,7 +70,7 @@ def configure_google_sheets(sheet_name):
     credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_info, scope)
     client = gspread.authorize(credentials)
     sheet = client.open(sheet_name)
-    sheet1 = sheet.sheet1  # First sheet
+    sheet1 = sheet.sheet1
     return sheet1
 
 def save_race_data(sheet, race_data):
@@ -107,12 +104,6 @@ def main():
 
     if st.session_state.language == "Italiano":
         title_text = "Car Mind Race"
-        consent_text = """
-        **Informativa e Consenso all'Utilizzo dei Dati**
-
-        I dati raccolti saranno utilizzati esclusivamente per scopi di ricerca scientifica, in conformità con le leggi vigenti sulla privacy.
-        """
-        accept_text = "[ ] Accetto e desidero procedere con la gara."
         instruction_text = """
             Il primo giocatore sceglie la macchina verde e la cifra che vuole influenzare.
             L'altro giocatore (o il PC) avrà la macchina rossa e l'altra cifra.
@@ -133,20 +124,15 @@ def main():
         reset_game_message = "Gioco resettato!"
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
-        move_multiplier_text = "Moltiplicatore di Movimento"
-        email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
         save_data_text = "Vuoi inviare i dati per motivi di ricerca?"
         save_data_info = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy."
         yes_option = "Sì"
         no_option = "No"
+        move_multiplier_text = "Moltiplicatore di Movimento"
+        email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
+        api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
     else:
         title_text = "Car Mind Race"
-        consent_text = """
-        **Data Usage and Consent**
-
-        The data collected will be used exclusively for scientific research purposes, in accordance with current privacy laws.
-        """
-        accept_text = "[ ] I accept and wish to proceed with the race."
         instruction_text = """
             The first player chooses the green car and the digit they want to influence.
             The other player (or the PC) will have the red car and the other digit.
@@ -167,28 +153,16 @@ def main():
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
-        move_multiplier_text = "Movement Multiplier"
-        email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
         save_data_text = "Do you want to send the data for research purposes?"
         save_data_info = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws."
         yes_option = "Yes"
         no_option = "No"
+        move_multiplier_text = "Movement Multiplier"
+        email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
+        api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
 
     # Mantieni il titolo con dimensioni maggiori
     st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
-
-    # Consent Form
-    if not st.session_state.consent_given:
-        st.markdown(consent_text)
-        consent_checkbox = st.checkbox(accept_text)
-
-        if consent_checkbox:
-            st.session_state.consent_given = True
-        else:
-            st.stop()  # Stop the app until consent is given
-
-    # Generate a unique query string to prevent caching
-    unique_query_string = f"?v={int(time.time())}"
 
     st.markdown(instruction_text)
 
@@ -231,7 +205,6 @@ def main():
     )
     stop_button = st.sidebar.button(stop_race_text, key="stop_button")
 
-    # Persist API key in session state
     st.session_state.api_key = st.sidebar.text_input(
         api_key_text, key="api_key_input", value=st.session_state.api_key, type="password"
     )
@@ -240,47 +213,34 @@ def main():
     if st.session_state.api_key:
         client = configure_random_org(st.session_state.api_key)
 
+    st.sidebar.markdown(api_description_text)
+
     download_menu = st.sidebar.expander("Download")
     with download_menu:
         download_button = st.button(download_data_text, key="download_button")
     reset_button = st.sidebar.button(reset_game_text, key="reset_button")
 
-    # Default move multiplier set to 50 instead of 20
     move_multiplier = st.sidebar.slider(
         move_multiplier_text, min_value=1, max_value=100, value=50, key="move_multiplier"
     )
 
-    # Add email reference at the bottom of the sidebar
     st.sidebar.markdown(f"### {email_ref_text}")
 
     image_dir = os.path.abspath(os.path.dirname(__file__))
-    car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Red car
-    car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Green car
-    flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize(
-        (150, 150)
-    )  # Flag of the same size as the cars
+    car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))
+    car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))
+    flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize((150, 150))
 
-    # Load images for numbers and resize further to 120x120 pixels
-    number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize(
-        (120, 120)
-    )  # Slightly larger
-    number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize(
-        (120, 120)
-    )  # Slightly larger
-    number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize(
-        (120, 120)
-    )  # Slightly larger
-    number_1_red_image = Image.open(os.path.join(image_dir, "1red.png")).resize(
-        (120, 120)
-    )  # Slightly larger
+    number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize((120, 120))
+    number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize((120, 120))
+    number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize((120, 120))
+    number_1_red_image = Image.open(os.path.join(image_dir, "1red.png")).resize((120, 120))
 
     st.write(choose_bit_text)
 
-    # Initialize number images with default values
     green_car_number_image = number_0_green_image
     red_car_number_image = number_1_red_image
 
-    # Determine which number image to display for each car
     col1, col2 = st.columns([1, 1])
     with col1:
         button1 = st.button(
@@ -311,12 +271,10 @@ def main():
         st.session_state.button0_active = True
         st.session_state.button1_active = False
 
-    # Assign the chosen images if a choice has been made
     if st.session_state.player_choice is not None:
         green_car_number_image = st.session_state.green_car_number_image
         red_car_number_image = st.session_state.red_car_number_image
 
-    # Active button style
     active_button_style = """
     <style>
     div.stButton > button[title="Scegli il bit 1"] { background-color: #90EE90; }
@@ -339,13 +297,10 @@ def main():
     car2_placeholder = st.empty()
 
     def display_cars():
-        """Display the cars and the images of the selected numbers."""
         car_placeholder.markdown(
             f"""
             <div class="slider-container first">
-                <!-- Car image and position -->
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car_pos / 10}%)">
-                <!-- Red car number image -->
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image show" 
                      style="left:calc(-43px + {st.session_state.car_pos / 10}%); top: 34px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
@@ -358,9 +313,7 @@ def main():
         car2_placeholder.markdown(
             f"""
             <div class="slider-container">
-                <!-- Green car image and position -->
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car2_pos / 10}%)">
-                <!-- Green car number image -->
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image show" 
                      style="left:calc(-43px + {st.session_state.car2_pos / 10}%); top: 34px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
@@ -373,37 +326,31 @@ def main():
     display_cars()
 
     def check_winner():
-        """Check if there is a winner."""
-        if st.session_state.car_pos >= 900:  # Shorten the track to leave room for the flag
+        if st.session_state.car_pos >= 900:
             return "Rossa" if st.session_state.language == "Italiano" else "Red"
-        elif st.session_state.car2_pos >= 900:  # Shorten the track to leave room for the flag
+        elif st.session_state.car2_pos >= 900:
             return "Verde" if st.session_state.language == "Italiano" else "Green"
         return None
 
     def end_race(winner):
-        """End the race and show the winner."""
         st.session_state.running = False
         st.session_state.show_retry_popup = True
         st.success(win_message.format(winner))
         show_retry_popup()
 
-        # Calculate the sums for red and green car
         red_car_0s = st.session_state.random_numbers_1.count(0)
         red_car_1s = st.session_state.random_numbers_1.count(1)
         green_car_0s = st.session_state.random_numbers_2.count(0)
         green_car_1s = st.session_state.random_numbers_2.count(1)
 
-        # Calculate the total race time and car speeds
         total_time = time.time() - st.session_state.car_start_time
         red_car_speed = st.session_state.car_pos / total_time
         green_car_speed = st.session_state.car2_pos / total_time
 
-        # Ask the user if they want to save the race data
         save_data = st.radio(save_data_text, (no_option, yes_option), index=0)
         st.write(save_data_info)
 
         if save_data == yes_option:
-            # Save race data to Google Sheets
             race_data = [
                 "Italian" if st.session_state.language == "Italiano" else "English",
                 st.session_state.player_choice,
@@ -412,20 +359,19 @@ def main():
                 winner,
                 total_time,
                 st.session_state.api_key != "",
-                st.session_state.move_multiplier,  # Save the movement multiplier value
+                st.session_state.move_multiplier,
                 red_car_0s,
                 red_car_1s,
                 green_car_0s,
                 green_car_1s,
-                st.session_state.car1_moves,  # Number of moves by red car
-                st.session_state.car2_moves,  # Number of moves by green car
-                red_car_speed,  # Speed of the red car
-                green_car_speed  # Speed of the green car
+                st.session_state.car1_moves,
+                st.session_state.car2_moves,
+                red_car_speed,
+                green_car_speed
             ]
             save_race_data(sheet1, race_data)
 
     def reset_game():
-        """Reset the game state."""
         st.session_state.car_pos = 50
         st.session_state.car2_pos = 50
         st.session_state.car1_moves = 0
@@ -444,15 +390,13 @@ def main():
         display_cars()
 
     def show_retry_popup():
-        """Show popup asking if the user wants to retry."""
         if st.session_state.show_retry_popup:
             try:
                 if st.button(retry_text, key=f"retry_button_{st.session_state.widget_key_counter}"):
                     reset_game()
             except Exception:
-                pass  # Silence the duplicate widget key exception
+                pass
 
-    # Connect to Google Sheets
     sheet1 = configure_google_sheets("test")
 
     if start_button and st.session_state.player_choice is not None:
@@ -467,16 +411,10 @@ def main():
         while st.session_state.running:
             start_time = time.time()
 
-            # Get random numbers from random.org
-            random_bits_1, random_org_success_1 = get_random_bits_from_random_org(
-                1000, client
-            )
-            random_bits_2, random_org_success_2 = get_random_bits_from_random_org(
-                1000, client
-            )
+            random_bits_1, random_org_success_1 = get_random_bits_from_random_org(1000, client)
+            random_bits_2, random_org_success_2 = get_random_bits_from_random_org(1000, client)
 
             if not random_org_success_1 and not random_org_success_2:
-                # Only show warning once if random.org fails
                 if not st.session_state.warned_random_org:
                     st.session_state.warned_random_org = True
 
@@ -502,15 +440,13 @@ def main():
                 if st.session_state.player_choice == 1 and count_1 > count_0:
                     st.session_state.car2_pos = move_car(
                         st.session_state.car2_pos,
-                        st.session_state.move_multiplier
-                        * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)),
+                        st.session_state.move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)),
                     )
                     st.session_state.car1_moves += 1
                 elif st.session_state.player_choice == 0 and count_0 > count_1:
                     st.session_state.car2_pos = move_car(
                         st.session_state.car2_pos,
-                        st.session_state.move_multiplier
-                        * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)),
+                        st.session_state.move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)),
                     )
                     st.session_state.car1_moves += 1
 
@@ -518,15 +454,13 @@ def main():
                 if st.session_state.player_choice == 1 and count_0 > count_1:
                     st.session_state.car_pos = move_car(
                         st.session_state.car_pos,
-                        st.session_state.move_multiplier
-                        * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)),
+                        st.session_state.move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)),
                     )
                     st.session_state.car2_moves += 1
                 elif st.session_state.player_choice == 0 and count_1 > count_0:
                     st.session_state.car_pos = move_car(
                         st.session_state.car_pos,
-                        st.session_state.move_multiplier
-                        * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)),
+                        st.session_state.move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)),
                     )
                     st.session_state.car2_moves += 1
 
@@ -544,20 +478,21 @@ def main():
             show_retry_popup()
 
     except Exception as e:
-        pass  # Silence any other errors
+        pass
 
     if download_button:
-        # Create DataFrame with "Green Car" and "Red Car" columns
         df = pd.DataFrame(
             {
                 "Green Car": [
                     "".join(map(str, row))
-                    for row in st.session_state.data_for_excel_1
+                    for row in st.session_state.data_for_excel_2
                 ],
                 "Red Car": [
                     "".join(map(str, row))
-                    for row in st.session_state.data_for_excel_2
+                    for row in st.session_state.data_for_excel_1
                 ],
+                "Green Car Bit Chosen": [st.session_state.player_choice] * len(st.session_state.data_for_excel_2),
+                "Red Car Bit Chosen": [1 - st.session_state.player_choice] * len(st.session_state.data_for_excel_1)
             }
         )
         df.to_excel("random_numbers.xlsx", index=False)
