@@ -98,9 +98,6 @@ def main():
     if "consent_given" not in st.session_state:
         st.session_state.consent_given = False
 
-    if "consent_answer" not in st.session_state:
-        st.session_state.consent_answer = None
-
     # Language buttons
     col1, col2 = st.sidebar.columns(2)
     col1.button("Italiano", on_click=lambda: st.session_state.update({"language": "Italiano"}))
@@ -478,24 +475,23 @@ def main():
         st.session_state.running = False
         st.session_state.show_retry_popup = True
         st.success(win_message.format(winner))
-        show_retry_popup()
-
-        # Calculate the sums for red and green car
-        red_car_0s = st.session_state.random_numbers_1.count(0)
-        red_car_1s = st.session_state.random_numbers_1.count(1)
-        green_car_0s = st.session_state.random_numbers_2.count(0)
-        green_car_1s = st.session_state.random_numbers_2.count(1)
-
-        # Calculate the total race time and car speeds
-        total_time = time.time() - st.session_state.car_start_time
-        red_car_speed = st.session_state.car_pos / total_time
-        green_car_speed = st.session_state.car2_pos / total_time
-
+        
         # Display consent radio buttons and privacy info
         st.markdown(privacy_info_text)
-        consent_answer = st.radio(consent_text, ("Sì", "No"), index=-1)
+        consent_answer = st.radio(consent_text, ("Sì", "No"))
 
         if consent_answer:
+            # Calculate the sums for red and green car
+            red_car_0s = st.session_state.random_numbers_1.count(0)
+            red_car_1s = st.session_state.random_numbers_1.count(1)
+            green_car_0s = st.session_state.random_numbers_2.count(0)
+            green_car_1s = st.session_state.random_numbers_2.count(1)
+
+            # Calculate the total race time and car speeds
+            total_time = time.time() - st.session_state.car_start_time
+            red_car_speed = st.session_state.car_pos / total_time
+            green_car_speed = st.session_state.car2_pos / total_time
+
             # Save race data to Google Sheets if consent is given
             race_data = [
                 "Italian" if st.session_state.language == "Italiano" else "English",
@@ -517,6 +513,8 @@ def main():
                 consent_answer  # Save "Sì" or "No" based on consent answer
             ]
             save_race_data(sheet1, race_data)
+
+        show_retry_popup()
 
     def reset_game():
         """Reset the game state."""
