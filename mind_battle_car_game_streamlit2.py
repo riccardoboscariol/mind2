@@ -98,6 +98,9 @@ def main():
     if "consent_given" not in st.session_state:
         st.session_state.consent_given = False
 
+    if "consent_answer" not in st.session_state:
+        st.session_state.consent_answer = None
+
     # Language buttons
     col1, col2 = st.sidebar.columns(2)
     col1.button("Italiano", on_click=lambda: st.session_state.update({"language": "Italiano"}))
