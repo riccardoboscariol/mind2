@@ -126,11 +126,11 @@ def main():
         reset_game_text = "Resetta Gioco"
         download_data_text = "Scarica Dati"
         api_key_text = "Inserisci API Key per random.org"
-        retry_text = "Voglio riprovare"
         reset_game_message = "Gioco resettato!"
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
         consent_text = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy. Clicca per acconsentire e inviare i dati."
+        move_multiplier_text = "Moltiplicatore di Movimento"
         email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
         api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
     else:
@@ -151,11 +151,11 @@ def main():
         reset_game_text = "Reset Game"
         download_data_text = "Download Data"
         api_key_text = "Enter API Key for random.org"
-        retry_text = "I want to retry"
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
-        consent_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws. Click to consent and send data."
+        consent_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws. Click to consent and submit your data."
+        move_multiplier_text = "Movement Multiplier"
         email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
 
@@ -487,10 +487,10 @@ def main():
         red_car_speed = st.session_state.car_pos / total_time
         green_car_speed = st.session_state.car2_pos / total_time
 
-        # Ask the user for consent to save the race data
-        consent_given = st.checkbox(consent_text)
+        # Checkbox for consent
+        consent_checkbox = st.checkbox(consent_text)
 
-        if consent_given:
+        if consent_checkbox:
             # Save race data to Google Sheets
             race_data = [
                 "Italian" if st.session_state.language == "Italiano" else "English",
@@ -535,7 +535,7 @@ def main():
         """Show popup asking if the user wants to retry."""
         if st.session_state.show_retry_popup:
             try:
-                if st.button(retry_text, key=f"retry_button_{st.session_state.widget_key_counter}"):
+                if st.button(reset_game_text, key=f"retry_button_{st.session_state.widget_key_counter}"):
                     reset_game()
             except Exception:
                 pass  # Silence the duplicate widget key exception
