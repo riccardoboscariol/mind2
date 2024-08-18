@@ -68,18 +68,23 @@ def image_to_base64(image):
 
 def configure_google_sheets(sheet_name):
     """Configure Google Sheets using credentials from Streamlit Secrets."""
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    credentials_info = json.loads(st.secrets["google_sheets"]["credentials_json"])
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_info, scope)
-    client = gspread.authorize(credentials)
-    sheet = client.open(sheet_name)
-    sheet1 = sheet.sheet1  # First sheet
-    return sheet1
+    try:
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        credentials_info = json.loads(st.secrets["google_sheets"]["credentials_json"])
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_info, scope)
+        client = gspread.authorize(credentials)
+        sheet = client.open(sheet_name)
+        sheet1 = sheet.sheet1  # First sheet
+        return sheet1
+    except Exception as e:
+        st.error(f"Error configuring Google Sheets: {e}")
+        return None
 
 def save_race_data(sheet, race_data):
     """Save race data to Google Sheets."""
     try:
         sheet.append_row(race_data)
+        st.success("Dati inviati correttamente a Google Sheets!")
     except Exception as e:
         st.error(f"Error saving data to Google Sheets: {e}")
 
@@ -98,17 +103,12 @@ def main():
     if "consent_given" not in st.session_state:
         st.session_state.consent_given = False
 
-    # Function to change language
-    def toggle_language():
-        if st.session_state.language == "Italiano":
-            st.session_state.language = "English"
-        else:
-            st.session_state.language = "Italiano"
-
-    # Language buttons
+    # Button to change language
     col1, col2 = st.sidebar.columns(2)
-    col1.button("Italiano", on_click=lambda: st.session_state.update({"language": "Italiano"}))
-    col2.button("English", on_click=lambda: st.session_state.update({"language": "English"}))
+    if col1.button("Italiano"):
+        st.session_state.language = "Italiano"
+    if col2.button("English"):
+        st.session_state.language = "English"
 
     if st.session_state.language == "Italiano":
         title_text = "Car Mind Race"
@@ -132,7 +132,7 @@ def main():
         reset_game_message = "Gioco resettato!"
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
-        consent_text = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy. Clicca per acconsentire l'informativa e inviare i dati."
+        consent_text = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy. Clicca per acconsentire e inviare i dati."
         move_multiplier_text = "Moltiplicatore di Movimento"
         email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
         api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
@@ -158,128 +158,13 @@ def main():
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
-        consent_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws. Click to consent and submit your data."
+        consent_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws. Click to consent and submit data."
         move_multiplier_text = "Movement Multiplier"
         email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
 
     # Mantieni il titolo con dimensioni maggiori
     st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
-
-    # Generate a unique query string to prevent caching
-    unique_query_string = f"?v={int(time.time())}"
-
-    st.markdown(
-        f"""
-        <style>
-        .stSlider > div > div > div > div {{
-            background: white;
-        }}
-        .stSlider > div > div > div {{
-            background: #f0f0f0; /* Lighter color for the slider track */
-        }}
-        .stSlider > div > div > div > div > div {{
-            background: transparent; /* Make slider thumb invisible */
-            border-radius: 50%;
-            height: 0px;  /* Reduce slider thumb height */
-            width: 0px;  /* Reduce slider thumb width */
-            position: relative;
-            top: 0px; /* Correct slider thumb position */
-        }}
-        .slider-container {{
-            position: relative;
-            height: 250px; /* Height to fit sliders and cars */
-            margin-bottom: 50px;
-        }}
-        .slider-container.first {{
-            margin-top: 50px;
-            margin-bottom: 40px;
-        }}
-        .car-image {{
-            position: absolute;
-            top: 50px;  /* Move car 3px higher */
-            left: 0px;
-            width: 150px;  /* Width of the car image */
-            z-index: 20;  /* Ensure cars are above numbers */
-        }}
-        .number-image {{
-            position: absolute;
-            top: calc(28px - 1px);  /* Adjust position: 1px lower */
-            left: calc(80px - 7px); /* Adjust position: 7px to the left */
-            transform: translateX(-50%); /* Center horizontally */
-            width: calc(110px + 10px);  /* Width of the number images slightly larger */
-            z-index: 10;  /* Ensure numbers are below cars */
-            display: none; /* Initially hide numbers */
-        }}
-        .flag-image {{
-            position: absolute;
-            top: 25px;  /* Position for flag */
-            width: 150px;
-            left: 93%;  /* Move flag 3px left */
-        }}
-        .slider-container input[type=range] {{
-            -webkit-appearance: none;
-            width: 100%;
-            position: absolute;
-            top: 138px;  /* Slider 22px higher */
-            background: #f0f0f0; /* Slider track color */
-        }}
-        .slider-container input[type=range]:focus {{
-            outline: none;
-        }}
-        .slider-container input[type=range]::-webkit-slider-runnable-track {{
-            width: 100%;
-            height: 8px;
-            background: #f0f0f0; /* Track color */
-            border-radius: 5px;
-            cursor: pointer;
-        }}
-        .slider-container input[type=range]::-webkit-slider-thumb {{
-            -webkit-appearance: none;
-            appearance: none;
-            width: 10px; /* Thumb width */
-            height: 20px; /* Thumb height */
-            background: transparent; /* Make thumb invisible */
-            cursor: pointer;
-            margin-top: -6px; /* Adjust thumb position to align with the track */
-            visibility: hidden; /* Hide the thumb */
-        }}
-        .slider-container input[type=range]::-moz-range-thumb {{
-            width: 10px; /* Thumb width */
-            height: 20px; /* Thumb height */
-            background: transparent; /* Make thumb invisible */
-            cursor: pointer;
-            visibility: hidden; /* Hide the thumb */
-        }}
-        .slider-container input[type=range]::-ms-thumb {{
-            width: 10px; /* Thumb width */
-            height: 20px; /* Thumb height */
-            background: transparent; /* Make thumb invisible */
-            cursor: pointer;
-            visibility: hidden; /* Hide the thumb */
-        }}
-        .stButton > button {{
-            display: inline-block;
-            margin: 5px; /* Margin between buttons */
-            padding: 0.5em 2em; /* Padding adjustment for buttons */
-            border-radius: 12px; /* Rounded border */
-            background-color: #f0f0f0; /* Initial background color */
-            color: black;
-            border: 1px solid #ccc;
-            font-size: 16px; /* Text size */
-            cursor: pointer;
-        }}
-        .stButton > button:focus {{
-            outline: none;
-            background-color: #ddd; /* Color when selected */
-        }}
-        .stException {{
-            display: none;  /* Nascondi errori */
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
 
     st.markdown(instruction_text)
 
@@ -315,6 +200,8 @@ def main():
         st.session_state.widget_key_counter = 0
     if "show_retry_popup" not in st.session_state:
         st.session_state.show_retry_popup = False
+    if "consent_checked" not in st.session_state:
+        st.session_state.consent_checked = False
 
     st.sidebar.title("Menu")
     start_button = st.sidebar.button(
@@ -491,29 +378,33 @@ def main():
         red_car_speed = st.session_state.car_pos / total_time
         green_car_speed = st.session_state.car2_pos / total_time
 
-        # Display consent checkbox
-        consent_checkbox = st.checkbox(consent_text)
-        if consent_checkbox:
-            # Save race data to Google Sheets if consent is given
-            race_data = [
-                "Italian" if st.session_state.language == "Italiano" else "English",
-                st.session_state.player_choice,
-                st.session_state.car_pos,
-                st.session_state.car2_pos,
-                winner,
-                total_time,
-                st.session_state.api_key != "",
-                st.session_state.move_multiplier,  # Save the movement multiplier value
-                red_car_0s,
-                red_car_1s,
-                green_car_0s,
-                green_car_1s,
-                st.session_state.car1_moves,  # Number of moves by red car
-                st.session_state.car2_moves,  # Number of moves by green car
-                red_car_speed,  # Speed of the red car
-                green_car_speed  # Speed of the green car
-            ]
-            save_race_data(sheet1, race_data)
+        # Ask the user if they want to save the race data
+        st.write(consent_text)
+        consent_checked = st.checkbox("", key="consent_checkbox")
+
+        if consent_checked:
+            sheet1 = configure_google_sheets("test")
+            if sheet1:
+                # Save race data to Google Sheets
+                race_data = [
+                    "Italian" if st.session_state.language == "Italiano" else "English",
+                    st.session_state.player_choice,
+                    st.session_state.car_pos,
+                    st.session_state.car2_pos,
+                    winner,
+                    total_time,
+                    st.session_state.api_key != "",
+                    st.session_state.move_multiplier,  # Save the movement multiplier value
+                    red_car_0s,
+                    red_car_1s,
+                    green_car_0s,
+                    green_car_1s,
+                    st.session_state.car1_moves,  # Number of moves by red car
+                    st.session_state.car2_moves,  # Number of moves by green car
+                    red_car_speed,  # Speed of the red car
+                    green_car_speed  # Speed of the green car
+                ]
+                save_race_data(sheet1, race_data)
 
     def reset_game():
         """Reset the game state."""
@@ -531,6 +422,7 @@ def main():
         st.session_state.player_choice = None
         st.session_state.running = False
         st.session_state.show_retry_popup = False
+        st.session_state.consent_checked = False
         st.write(reset_game_message)
         display_cars()
 
@@ -542,9 +434,6 @@ def main():
                     reset_game()
             except Exception:
                 pass  # Silence the duplicate widget key exception
-
-    # Connect to Google Sheets
-    sheet1 = configure_google_sheets("test")
 
     if start_button and st.session_state.player_choice is not None:
         st.session_state.running = True
@@ -635,7 +524,7 @@ def main():
             show_retry_popup()
 
     except Exception as e:
-        pass  # Silence any other errors
+        st.error(f"An error occurred: {e}")
 
     if download_button:
         # Create DataFrame with "Green Car" and "Red Car" columns and include the chosen bits
@@ -667,3 +556,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
