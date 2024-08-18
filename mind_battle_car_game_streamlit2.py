@@ -98,15 +98,12 @@ def main():
     if "consent_given" not in st.session_state:
         st.session_state.consent_given = False
 
-    # Function to change language
-    def toggle_language():
-        if st.session_state.language == "Italiano":
-            st.session_state.language = "English"
-        else:
-            st.session_state.language = "Italiano"
-
-    # Button to change language
-    st.sidebar.button("Change Language", on_click=toggle_language)
+    # Pulsanti per cambiare lingua
+    col1, col2 = st.sidebar.columns(2)
+    if col1.button("Italiano"):
+        st.session_state.language = "Italiano"
+    if col2.button("English"):
+        st.session_state.language = "English"
 
     if st.session_state.language == "Italiano":
         title_text = "Car Mind Race"
@@ -129,8 +126,7 @@ def main():
         reset_game_message = "Gioco resettato!"
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
-        consent_text = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy. Clicca per acconsentire e inviare i dati."
-        move_multiplier_text = "Moltiplicatore di Movimento"
+        consent_text = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy. Clicca per acconsentire l'informativa e inviare i dati."
         email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
         api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
     else:
@@ -154,8 +150,7 @@ def main():
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
-        consent_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws. Click to consent and submit your data."
-        move_multiplier_text = "Movement Multiplier"
+        consent_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws. Click to consent to the data collection and send the data."
         email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
 
@@ -487,10 +482,9 @@ def main():
         red_car_speed = st.session_state.car_pos / total_time
         green_car_speed = st.session_state.car2_pos / total_time
 
-        # Checkbox for consent
-        consent_checkbox = st.checkbox(consent_text)
-
-        if consent_checkbox:
+        # Ask the user if they want to save the race data
+        save_data = st.checkbox(consent_text)
+        if save_data:
             # Save race data to Google Sheets
             race_data = [
                 "Italian" if st.session_state.language == "Italiano" else "English",
@@ -535,7 +529,7 @@ def main():
         """Show popup asking if the user wants to retry."""
         if st.session_state.show_retry_popup:
             try:
-                if st.button(reset_game_text, key=f"retry_button_{st.session_state.widget_key_counter}"):
+                if st.button("Voglio riprovare" if st.session_state.language == "Italiano" else "I want to retry", key=f"retry_button_{st.session_state.widget_key_counter}"):
                     reset_game()
             except Exception:
                 pass  # Silence the duplicate widget key exception
