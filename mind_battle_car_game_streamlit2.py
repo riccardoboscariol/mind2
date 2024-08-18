@@ -311,7 +311,7 @@ def main():
     if "show_retry_popup" not in st.session_state:
         st.session_state.show_retry_popup = False
     if "consent_answer" not in st.session_state:
-        st.session_state.consent_answer = "Sì"  # Default to "Sì"
+        st.session_state.consent_answer = "Sì"  # Default to "Sì" to ensure data is saved initially
 
     st.sidebar.title("Menu")
     start_button = st.sidebar.button(
@@ -490,10 +490,10 @@ def main():
 
         # Display consent radio buttons and privacy info
         st.markdown(privacy_info_text)
-        consent_answer = st.radio(consent_text, ("Sì", "No"), index=0)
+        consent_answer = st.radio(consent_text, ("Sì", "No"))
 
-        # Show "Invia i dati" button only if the answer is "Sì"
-        if st.button("Invia i dati"):
+        if consent_answer:
+            # Save race data to Google Sheets if consent is given
             race_data = [
                 "Italian" if st.session_state.language == "Italiano" else "English",
                 st.session_state.player_choice,
