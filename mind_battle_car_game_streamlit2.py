@@ -86,7 +86,6 @@ def save_race_data(sheet, race_data):
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
 
-    # Initialize session state variables if they do not exist
     if "language" not in st.session_state:
         st.session_state.language = "Italiano"
 
@@ -98,39 +97,6 @@ def main():
 
     if "consent_given" not in st.session_state:
         st.session_state.consent_given = False
-
-    if "player_choice" not in st.session_state:
-        st.session_state.player_choice = None
-    if "car_pos" not in st.session_state:
-        st.session_state.car_pos = 50
-    if "car2_pos" not in st.session_state:
-        st.session_state.car2_pos = 50
-    if "car1_moves" not in st.session_state:
-        st.session_state.car1_moves = 0
-    if "car2_moves" not in st.session_state:
-        st.session_state.car2_moves = 0
-    if "random_numbers_1" not in st.session_state:
-        st.session_state.random_numbers_1 = []
-    if "random_numbers_2" not in st.session_state:
-        st.session_state.random_numbers_2 = []
-    if "data_for_excel_1" not in st.session_state:
-        st.session_state.data_for_excel_1 = []
-    if "data_for_excel_2" not in st.session_state:
-        st.session_state.data_for_excel_2 = []
-    if "data_for_condition_1" not in st.session_state:
-        st.session_state.data_for_condition_1 = []
-    if "data_for_condition_2" not in st.session_state:
-        st.session_state.data_for_condition_2 = []
-    if "car_start_time" not in st.session_state:
-        st.session_state.car_start_time = None
-    if "best_time" not in st.session_state:
-        st.session_state.best_time = None
-    if "running" not in st.session_state:
-        st.session_state.running = False
-    if "widget_key_counter" not in st.session_state:
-        st.session_state.widget_key_counter = 0
-    if "show_retry_popup" not in st.session_state:
-        st.session_state.show_retry_popup = False
 
     # Language buttons
     col1, col2 = st.sidebar.columns(2)
@@ -309,6 +275,69 @@ def main():
     )
 
     st.markdown(instruction_text)
+
+    if "player_choice" not in st.session_state:
+        st.session_state.player_choice = None
+    if "car_pos" not in st.session_state:
+        st.session_state.car_pos = 50
+    if "car2_pos" not in st.session_state:
+        st.session_state.car2_pos = 50
+    if "car1_moves" not in st.session_state:
+        st.session_state.car1_moves = 0
+    if "car2_moves" not in st.session_state:
+        st.session_state.car2_moves = 0
+    if "random_numbers_1" not in st.session_state:
+        st.session_state.random_numbers_1 = []
+    if "random_numbers_2" not in st.session_state:
+        st.session_state.random_numbers_2 = []
+    if "data_for_excel_1" not in st.session_state:
+        st.session_state.data_for_excel_1 = []
+    if "data_for_excel_2" not in st.session_state:
+        st.session_state.data_for_excel_2 = []
+    if "data_for_condition_1" not in st.session_state:
+        st.session_state.data_for_condition_1 = []
+    if "data_for_condition_2" not in st.session_state:
+        st.session_state.data_for_condition_2 = []
+    if "car_start_time" not in st.session_state:
+        st.session_state.car_start_time = None
+    if "best_time" not in st.session_state:
+        st.session_state.best_time = None
+    if "running" not in st.session_state:
+        st.session_state.running = False
+    if "widget_key_counter" not in st.session_state:
+        st.session_state.widget_key_counter = 0
+    if "show_retry_popup" not in st.session_state:
+        st.session_state.show_retry_popup = False
+
+    st.sidebar.title("Menu")
+    start_button = st.sidebar.button(
+        start_race_text, key="start_button", disabled=st.session_state.player_choice is None or st.session_state.running
+    )
+    stop_button = st.sidebar.button(stop_race_text, key="stop_button")
+
+    # Persist API key in session state
+    st.session_state.api_key = st.sidebar.text_input(
+        api_key_text, key="api_key_input", value=st.session_state.api_key, type="password"
+    )
+
+    client = None
+    if st.session_state.api_key:
+        client = configure_random_org(st.session_state.api_key)
+
+    st.sidebar.markdown(api_description_text)
+
+    download_menu = st.sidebar.expander("Download")
+    with download_menu:
+        download_button = st.button(download_data_text, key="download_button")
+    reset_button = st.sidebar.button(reset_game_text, key="reset_button")
+
+    # Default move multiplier set to 50 instead of 20
+    move_multiplier = st.sidebar.slider(
+        move_multiplier_text, min_value=1, max_value=100, value=50, key="move_multiplier"
+    )
+
+    # Add email reference at the bottom of the sidebar
+    st.sidebar.markdown(f"### {email_ref_text}")
 
     image_dir = os.path.abspath(os.path.dirname(__file__))
     car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Red car
@@ -599,7 +628,7 @@ def main():
             show_retry_popup()
 
     except Exception as e:
-        st.error(f"Unexpected error: {e}")
+        pass  # Silence any other errors
 
     if download_button:
         # Create DataFrame with "Green Car" and "Red Car" columns and include the chosen bits
