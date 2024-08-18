@@ -170,121 +170,6 @@ def main():
     # Mantieni il titolo con dimensioni maggiori
     st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
 
-    # Generate a unique query string to prevent caching
-    unique_query_string = f"?v={int(time.time())}"
-
-    st.markdown(
-        f"""
-        <style>
-        .stSlider > div > div > div > div {{
-            background: white;
-        }}
-        .stSlider > div > div > div {{
-            background: #f0f0f0; /* Lighter color for the slider track */
-        }}
-        .stSlider > div > div > div > div > div {{
-            background: transparent; /* Make slider thumb invisible */
-            border-radius: 50%;
-            height: 0px;  /* Reduce slider thumb height */
-            width: 0px;  /* Reduce slider thumb width */
-            position: relative;
-            top: 0px; /* Correct slider thumb position */
-        }}
-        .slider-container {{
-            position: relative;
-            height: 250px; /* Height to fit sliders and cars */
-            margin-bottom: 50px;
-        }}
-        .slider-container.first {{
-            margin-top: 50px;
-            margin-bottom: 40px;
-        }}
-        .car-image {{
-            position: absolute;
-            top: 50px;  /* Move car 3px higher */
-            left: 0px;
-            width: 150px;  /* Width of the car image */
-            z-index: 20;  /* Ensure cars are above numbers */
-        }}
-        .number-image {{
-            position: absolute;
-            top: calc(28px - 1px);  /* Adjust position: 1px lower */
-            left: calc(80px - 7px); /* Adjust position: 7px to the left */
-            transform: translateX(-50%); /* Center horizontally */
-            width: calc(110px + 10px);  /* Width of the number images slightly larger */
-            z-index: 10;  /* Ensure numbers are below cars */
-            display: none; /* Initially hide numbers */
-        }}
-        .flag-image {{
-            position: absolute;
-            top: 25px;  /* Position for flag */
-            width: 150px;
-            left: 93%;  /* Move flag 3px left */
-        }}
-        .slider-container input[type=range] {{
-            -webkit-appearance: none;
-            width: 100%;
-            position: absolute;
-            top: 138px;  /* Slider 22px higher */
-            background: #f0f0f0; /* Slider track color */
-        }}
-        .slider-container input[type=range]:focus {{
-            outline: none;
-        }}
-        .slider-container input[type=range]::-webkit-slider-runnable-track {{
-            width: 100%;
-            height: 8px;
-            background: #f0f0f0; /* Track color */
-            border-radius: 5px;
-            cursor: pointer;
-        }}
-        .slider-container input[type=range]::-webkit-slider-thumb {{
-            -webkit-appearance: none;
-            appearance: none;
-            width: 10px; /* Thumb width */
-            height: 20px; /* Thumb height */
-            background: transparent; /* Make thumb invisible */
-            cursor: pointer;
-            margin-top: -6px; /* Adjust thumb position to align with the track */
-            visibility: hidden; /* Hide the thumb */
-        }}
-        .slider-container input[type=range]::-moz-range-thumb {{
-            width: 10px; /* Thumb width */
-            height: 20px; /* Thumb height */
-            background: transparent; /* Make thumb invisible */
-            cursor: pointer;
-            visibility: hidden; /* Hide the thumb */
-        }}
-        .slider-container input[type=range]::-ms-thumb {{
-            width: 10px; /* Thumb width */
-            height: 20px; /* Thumb height */
-            background: transparent; /* Make thumb invisible */
-            cursor: pointer;
-            visibility: hidden; /* Hide the thumb */
-        }}
-        .stButton > button {{
-            display: inline-block;
-            margin: 5px; /* Margin between buttons */
-            padding: 0.5em 2em; /* Padding adjustment for buttons */
-            border-radius: 12px; /* Rounded border */
-            background-color: #f0f0f0; /* Initial background color */
-            color: black;
-            border: 1px solid #ccc;
-            font-size: 16px; /* Text size */
-            cursor: pointer;
-        }}
-        .stButton > button:focus {{
-            outline: none;
-            background-color: #ddd; /* Color when selected */
-        }}
-        .stException {{
-            display: none;  /* Nascondi errori */
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
     st.markdown(instruction_text)
 
     if "player_choice" not in st.session_state:
@@ -496,7 +381,7 @@ def main():
         green_car_speed = st.session_state.car2_pos / total_time
 
         # Ask the user if they want to save the race data
-        save_data = st.radio(save_data_text, (no_option, yes_option), index=0)
+        save_data = st.radio(save_data_text, (yes_option, no_option), index=-1)
         st.write(save_data_info)
 
         if save_data == yes_option:
