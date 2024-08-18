@@ -98,12 +98,17 @@ def main():
     if "consent_given" not in st.session_state:
         st.session_state.consent_given = False
 
-    # Buttons to change language
+    # Function to change language
+    def toggle_language():
+        if st.session_state.language == "Italiano":
+            st.session_state.language = "English"
+        else:
+            st.session_state.language = "Italiano"
+
+    # Language buttons
     col1, col2 = st.sidebar.columns(2)
-    if col1.button("Italiano"):
-        st.session_state.language = "Italiano"
-    if col2.button("English"):
-        st.session_state.language = "English"
+    col1.button("Italiano", on_click=lambda: st.session_state.update({"language": "Italiano"}))
+    col2.button("English", on_click=lambda: st.session_state.update({"language": "English"}))
 
     if st.session_state.language == "Italiano":
         title_text = "Car Mind Race"
@@ -153,7 +158,7 @@ def main():
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
-        consent_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws. Click to consent to the policy and submit your data."
+        consent_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws. Click to consent and submit your data."
         move_multiplier_text = "Movement Multiplier"
         email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
@@ -486,9 +491,10 @@ def main():
         red_car_speed = st.session_state.car_pos / total_time
         green_car_speed = st.session_state.car2_pos / total_time
 
-        # Ask the user to consent to data saving
-        if st.checkbox(consent_text):
-            # Save race data to Google Sheets
+        # Display consent checkbox
+        consent_checkbox = st.checkbox(consent_text)
+        if consent_checkbox:
+            # Save race data to Google Sheets if consent is given
             race_data = [
                 "Italian" if st.session_state.language == "Italiano" else "English",
                 st.session_state.player_choice,
