@@ -127,6 +127,9 @@ def main():
         win_message = "Vince l'auto {}, complimenti!"
         consent_text = "Vuoi salvare i dati?"
         privacy_info_text = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy."
+        move_multiplier_text = "Moltiplicatore di Movimento"
+        email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
+        api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
         submit_button_text = "Invia i dati"
     else:
         title_text = "Car Mind Race"
@@ -152,6 +155,9 @@ def main():
         win_message = "The {} car wins, congratulations!"
         consent_text = "Do you want to save the data?"
         privacy_info_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws."
+        move_multiplier_text = "Movement Multiplier"
+        email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
+        api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
         submit_button_text = "Submit Data"
 
     st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
@@ -482,9 +488,9 @@ def main():
 
         # Display consent radio buttons and privacy info
         st.markdown(privacy_info_text)
-        consent_answer = st.radio(consent_text, ("Sì", "No"), index=-1)
+        st.session_state.consent_answer = st.radio(consent_text, ("Sì", "No"), index=-1)
 
-        if consent_answer:
+        if st.session_state.consent_answer:
             # Show the submit button if a selection is made
             if st.button(submit_button_text):
                 # Save race data to Google Sheets if consent is given
@@ -505,7 +511,7 @@ def main():
                     st.session_state.car2_moves,  # Number of moves by green car
                     red_car_speed,  # Speed of the red car
                     green_car_speed,  # Speed of the green car
-                    consent_answer  # Save "Sì" or "No" based on consent answer
+                    st.session_state.consent_answer  # Save "Sì" or "No" based on consent answer
                 ]
                 save_race_data(sheet1, race_data)
 
