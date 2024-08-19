@@ -98,6 +98,9 @@ def main():
     if "consent_answer" not in st.session_state:
         st.session_state.consent_answer = None
 
+    if "race_finished" not in st.session_state:
+        st.session_state.race_finished = False
+
     # Language buttons
     col1, col2 = st.sidebar.columns(2)
     col1.button("Italiano", on_click=lambda: st.session_state.update({"language": "Italiano"}))
@@ -127,6 +130,9 @@ def main():
         win_message = "Vince l'auto {}, complimenti!"
         consent_text = "Vuoi salvare i dati?"
         privacy_info_text = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy."
+        move_multiplier_text = "Moltiplicatore di Movimento"
+        email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
+        api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
         submit_button_text = "Invia i dati"
     else:
         title_text = "Car Mind Race"
@@ -152,6 +158,9 @@ def main():
         win_message = "The {} car wins, congratulations!"
         consent_text = "Do you want to save the data?"
         privacy_info_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws."
+        move_multiplier_text = "Movement Multiplier"
+        email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
+        api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
         submit_button_text = "Submit Data"
 
     st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
@@ -304,14 +313,13 @@ def main():
         st.session_state.show_retry_popup = False
     if "consent_answer" not in st.session_state:
         st.session_state.consent_answer = None
-    if "race_finished" not in st.session_state:
-        st.session_state.race_finished = False
 
     st.sidebar.title("Menu")
     start_button = st.sidebar.button(
         start_race_text, key="start_button", disabled=st.session_state.player_choice is None or st.session_state.running
     )
-    stop_button = st.sidebar.button(stop_race_text, key="stop_button")
+    stop_button = st.sidebar.button(stop_race_text, key="stop_button", disabled=not st.session_state.running)
+    reset_button = st.sidebar.button(reset_game_text, key="reset_button")
 
     # Persist API key in session state
     st.session_state.api_key = st.sidebar.text_input(
@@ -327,7 +335,6 @@ def main():
     download_menu = st.sidebar.expander("Download")
     with download_menu:
         download_button = st.button(download_data_text, key="download_button")
-    reset_button = st.sidebar.button(reset_game_text, key="reset_button")
 
     # Default move multiplier set to 50 instead of 20
     move_multiplier = st.sidebar.slider(
@@ -468,9 +475,49 @@ def main():
         """End the race and show the winner."""
         st.session_state.running = False
         st.session_state.show_retry_popup = True
-        st.session_state.race_finished = True  # Mark the race as finished
         st.success(win_message.format(winner))
         show_retry_popup()
+
+        # Calculate the sums for red and green car
+        red_car_0s = st.session_state.random_numbers_1.count(0)
+        red_car_1s = st.session_state.random_numbers_1.count(1)
+        green_car_0s = st.session_state.random_numbers_2.count(0)
+        green_car_1s = st.session_state.random_numbers_2.count(1)
+
+        # Calculate the total race time and car speeds
+        total_time = time.time() - st.session_state.car_start_time
+        red_car_speed = st.session_state.car_pos / total_time
+        green_car_speed = st.session_state.car2_pos / total_time
+
+        # Display consent radio buttons and privacy info
+        st.markdown(privacy_info_text)
+        consent_answer = st.radio(consent_text, ("Sì", "No"), index=-1)
+
+        if consent_answer == "Sì":
+            if st.button(submit_button_text):
+                # Save race data to Google Sheets if consent is given
+                race_data = [
+                    "Italian" if st.session_state.language == "Italiano" else "English",
+                    st.session_state.player_choice,
+                    st.session_state.car_pos,
+                    st.session_state.car2_pos,
+                    winner,
+                    total_time,
+                    st.session_state.api_key != "",
+                    st.session_state.move_multiplier,  # Save the movement multiplier value
+                    red_car_0s,
+                    red_car_1s,
+                    green_car_0s,
+                    green_car_1s,
+                    st.session_state.car1_moves,  # Number of moves by red car
+                    st.session_state.car2_moves,  # Number of moves by green car
+                    red_car_speed,  # Speed of the red car
+                    green_car_speed,  # Speed of the green car
+                    consent_answer  # Save "Sì" or "No" based on consent answer
+                ]
+                save_race_data(sheet1, race_data)
+        elif consent_answer == "No":
+            st.write("I dati non sono stati inviati.")
 
     def reset_game():
         """Reset the game state."""
@@ -488,7 +535,7 @@ def main():
         st.session_state.player_choice = None
         st.session_state.running = False
         st.session_state.show_retry_popup = False
-        st.session_state.race_finished = False  # Reset race finished state
+        st.session_state.consent_answer = None
         st.write(reset_game_message)
         display_cars()
 
@@ -594,36 +641,6 @@ def main():
 
     except Exception as e:
         pass  # Silence any other errors
-
-    if st.session_state.race_finished and not st.session_state.consent_answer:
-        # Ask for consent after the race has finished
-        st.markdown(privacy_info_text)
-        consent_answer = st.radio(consent_text, ("Sì", "No"), index=-1)
-
-        if consent_answer:
-            st.session_state.consent_answer = consent_answer  # Save consent answer
-
-            # Show the submit button if a selection is made
-            if st.button(submit_button_text):
-                winner = check_winner()
-                # Save race data to Google Sheets if consent is given
-                race_data = [
-                    "Italian" if st.session_state.language == "Italiano" else "English",
-                    st.session_state.player_choice,
-                    st.session_state.car_pos,
-                    st.session_state.car2_pos,
-                    winner,
-                    st.session_state.api_key != "",
-                    st.session_state.move_multiplier,  # Save the movement multiplier value
-                    st.session_state.random_numbers_1.count(0),
-                    st.session_state.random_numbers_1.count(1),
-                    st.session_state.random_numbers_2.count(0),
-                    st.session_state.random_numbers_2.count(1),
-                    st.session_state.car1_moves,  # Number of moves by red car
-                    st.session_state.car2_moves,  # Number of moves by green car
-                    st.session_state.consent_answer  # Save "Sì" or "No" based on consent answer
-                ]
-                save_race_data(sheet1, race_data)
 
     if download_button:
         # Create DataFrame with "Green Car" and "Red Car" columns and include the chosen bits
