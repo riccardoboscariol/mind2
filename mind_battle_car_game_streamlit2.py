@@ -98,9 +98,6 @@ def main():
     if "consent_answer" not in st.session_state:
         st.session_state.consent_answer = None
 
-    if "race_finished" not in st.session_state:
-        st.session_state.race_finished = False
-
     # Language buttons
     col1, col2 = st.sidebar.columns(2)
     col1.button("Italiano", on_click=lambda: st.session_state.update({"language": "Italiano"}))
@@ -318,8 +315,7 @@ def main():
     start_button = st.sidebar.button(
         start_race_text, key="start_button", disabled=st.session_state.player_choice is None or st.session_state.running
     )
-    stop_button = st.sidebar.button(stop_race_text, key="stop_button", disabled=not st.session_state.running)
-    reset_button = st.sidebar.button(reset_game_text, key="reset_button")
+    stop_button = st.sidebar.button(stop_race_text, key="stop_button")
 
     # Persist API key in session state
     st.session_state.api_key = st.sidebar.text_input(
@@ -335,6 +331,7 @@ def main():
     download_menu = st.sidebar.expander("Download")
     with download_menu:
         download_button = st.button(download_data_text, key="download_button")
+    reset_button = st.sidebar.button(reset_game_text, key="reset_button")
 
     # Default move multiplier set to 50 instead of 20
     move_multiplier = st.sidebar.slider(
@@ -494,6 +491,7 @@ def main():
         consent_answer = st.radio(consent_text, ("Sì", "No"), index=-1)
 
         if consent_answer == "Sì":
+            # Show the submit button if consent is given
             if st.button(submit_button_text):
                 # Save race data to Google Sheets if consent is given
                 race_data = [
@@ -517,7 +515,7 @@ def main():
                 ]
                 save_race_data(sheet1, race_data)
         elif consent_answer == "No":
-            st.write("I dati non sono stati inviati.")
+            st.warning("Dati non inviati.")
 
     def reset_game():
         """Reset the game state."""
@@ -535,7 +533,6 @@ def main():
         st.session_state.player_choice = None
         st.session_state.running = False
         st.session_state.show_retry_popup = False
-        st.session_state.consent_answer = None
         st.write(reset_game_message)
         display_cars()
 
