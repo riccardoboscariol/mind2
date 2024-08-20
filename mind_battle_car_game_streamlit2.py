@@ -470,7 +470,7 @@ def main():
             return "Verde" if st.session_state.language == "Italiano" else "Green"
         return None
 
-    def end_race(winner):
+    def end_race(winner, sheet):
         """End the race and show the winner."""
         st.session_state.running = False
         st.session_state.show_retry_popup = True
@@ -479,8 +479,12 @@ def main():
         # Display privacy info and consent button
         st.markdown(privacy_info_text)
         
-        # Pulsante per salvare i dati
         if st.button("Vuoi salvare i dati?"):
+            st.session_state.consent_answer = True
+        else:
+            st.session_state.consent_answer = False
+        
+        if st.session_state.consent_answer:
             try:
                 st.write("Tentativo di salvataggio dei dati...")
                 
@@ -516,10 +520,8 @@ def main():
                     "Sì"  # Esplicitamente registrare il consenso come "Sì"
                 ]
         
-                # Verifica dell'oggetto sheet1
-                st.write(f"Sheet1: {sheet1}")
-                if sheet1:
-                    save_race_data(sheet1, race_data)
+                if sheet:
+                    save_race_data(sheet, race_data)
                     st.success("Dati salvati con successo.")
                 else:
                     st.error("Errore: Oggetto 'sheet1' non valido.")
