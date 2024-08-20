@@ -476,227 +476,144 @@ def main():
         st.session_state.show_retry_popup = True
         st.success(win_message.format(winner))
         
-    def show_retry_popup(sheet):
-        """Show popup asking if the user wants to retry."""
-        if st.session_state.show_retry_popup:
-            st.markdown(privacy_info_text)
-            
-            if st.button("Vuoi salvare i dati?"):
-                st.session_state.consent_answer = True
-            else:
-                st.session_state.consent_answer = False
-    
-            if st.session_state.consent_answer:
-                try:
-                    st.write("Tentativo di salvataggio dei dati...")
-    
-                    # Calcolo delle somme per le auto rosse e verdi
-                    red_car_0s = st.session_state.random_numbers_1.count(0)
-                    red_car_1s = st.session_state.random_numbers_1.count(1)
-                    green_car_0s = st.session_state.random_numbers_2.count(0)
-                    green_car_1s = st.session_state.random_numbers_2.count(1)
-    
-                    # Calcolo del tempo totale della gara e delle velocità delle auto
-                    total_time = time.time() - st.session_state.car_start_time
-                    red_car_speed = st.session_state.car_pos / total_time
-                    green_car_speed = st.session_state.car2_pos / total_time
-    
-                    # Dati della gara da salvare
-                    race_data = [
-                        "Italian" if st.session_state.language == "Italiano" else "English",
-                        st.session_state.player_choice,
-                        st.session_state.car_pos,
-                        st.session_state.car2_pos,
-                        winner,
-                        total_time,
-                        st.session_state.api_key != "",
-                        st.session_state.move_multiplier,  # Salva il valore del moltiplicatore di movimento
-                        red_car_0s,
-                        red_car_1s,
-                        green_car_0s,
-                        green_car_1s,
-                        st.session_state.car1_moves,  # Numero di mosse dell'auto rossa
-                        st.session_state.car2_moves,  # Numero di mosse dell'auto verde
-                        red_car_speed,  # Velocità dell'auto rossa
-                        green_car_speed,  # Velocità dell'auto verde
-                        "Sì"  # Esplicitamente registrare il consenso come "Sì"
-                    ]
-    
-                    if sheet:
-                        save_race_data(sheet, race_data)
-                        st.success("Dati salvati con successo.")
-                    else:
-                        st.error("Errore: Oggetto 'sheet1' non valido.")
-                except Exception as e:
-                    st.error(f"Errore durante il salvataggio dei dati: {e}")
-            else:
-                st.warning("Dati non inviati.")
-    
-            if st.button(retry_text, key=f"retry_button_{st.session_state.widget_key_counter}"):
-                reset_game()
-    
-    # Inserisci qui la chiamata a show_retry_popup sempre quando necessario:
-    if st.session_state.show_retry_popup:
-        show_retry_popup(sheet1)
-    
-    # Resto del tuo codice...
-
-
-
-
-
-
-
-
-    def reset_game():
-        """Reset the game state."""
-        st.session_state.car_pos = 50
-        st.session_state.car2_pos = 50
-        st.session_state.car1_moves = 0
-        st.session_state.car2_moves = 0
-        st.session_state.data_for_excel_1 = []
-        st.session_state.data_for_excel_2 = []
-        st.session_state.data_for_condition_1 = []
-        st.session_state.data_for_condition_2 = []
-        st.session_state.random_numbers_1 = []
-        st.session_state.random_numbers_2 = []
-        st.session_state.widget_key_counter += 1
-        st.session_state.player_choice = None
-        st.session_state.running = False
-        st.session_state.show_retry_popup = False
-        st.write(reset_game_message)
-        display_cars()
-
-    def show_retry_popup():
-        """Show popup asking if the user wants to retry."""
-        if st.session_state.show_retry_popup:
+        # Display privacy info and consent button
+        st.markdown(privacy_info_text)
+        
+        # Show the save data button
+        if st.button("Vuoi salvare i dati?"):
             try:
-                if st.button(retry_text, key=f"retry_button_{st.session_state.widget_key_counter}"):
-                    reset_game()
-            except Exception:
-                pass  # Silence the duplicate widget key exception
-
-    # Connect to Google Sheets
-    sheet1 = configure_google_sheets("test")
-
-    if start_button and st.session_state.player_choice is not None:
-        st.session_state.running = True
-        st.session_state.car_start_time = time.time()
-        st.session_state.show_retry_popup = False
-
-    if stop_button:
-        st.session_state.running = False
-
-    try:
-        while st.session_state.running:
-            start_time = time.time()
-
-            # Get random numbers from random.org
-            random_bits_1, random_org_success_1 = get_random_bits_from_random_org(
-                1000, client
-            )
-            random_bits_2, random_org_success_2 = get_random_bits_from_random_org(
-                1000, client
-            )
-
-            if not random_org_success_1 and not random_org_success_2:
-                # Only show warning once if random.org fails
-                if not st.session_state.warned_random_org:
-                    st.session_state.warned_random_org = True
-
-            st.session_state.random_numbers_1.extend(random_bits_1)
-            st.session_state.random_numbers_2.extend(random_bits_2)
-
-            st.session_state.data_for_excel_1.append(random_bits_1)
-            st.session_state.data_for_excel_2.append(random_bits_2)
-
-            entropy_score_1 = calculate_entropy(random_bits_1)
-            entropy_score_2 = calculate_entropy(random_bits_2)
-
-            st.session_state.data_for_condition_1.append(entropy_score_1)
-            st.session_state.data_for_condition_2.append(entropy_score_2)
-
-            percentile_5_1 = np.percentile(st.session_state.data_for_condition_1, 5)
-            percentile_5_2 = np.percentile(st.session_state.data_for_condition_2, 5)
-
-            count_1 = sum(random_bits_1)
-            count_0 = len(random_bits_1) - count_1
-
-            if entropy_score_1 < percentile_5_1:
-                if st.session_state.player_choice == 1 and count_1 > count_0:
-                    st.session_state.car2_pos = move_car(
-                        st.session_state.car2_pos,
-                        st.session_state.move_multiplier
-                        * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)),
-                    )
-                    st.session_state.car1_moves += 1
-                elif st.session_state.player_choice == 0 and count_0 > count_1:
-                    st.session_state.car2_pos = move_car(
-                        st.session_state.car2_pos,
-                        st.session_state.move_multiplier
-                        * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)),
-                    )
-                    st.session_state.car1_moves += 1
-
-            if entropy_score_2 < percentile_5_2:
-                if st.session_state.player_choice == 1 and count_0 > count_1:
-                    st.session_state.car_pos = move_car(
-                        st.session_state.car_pos,
-                        st.session_state.move_multiplier
-                        * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)),
-                    )
-                    st.session_state.car2_moves += 1
-                elif st.session_state.player_choice == 0 and count_1 > count_0:
-                    st.session_state.car_pos = move_car(
-                        st.session_state.car_pos,
-                        st.session_state.move_multiplier
-                        * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)),
-                    )
-                    st.session_state.car2_moves += 1
-
-            display_cars()
-
-            winner = check_winner()
-            if winner:
-                end_race(winner)
-                break
-
-            time_elapsed = time.time() - start_time
-            time.sleep(max(REQUEST_INTERVAL - time_elapsed, 0))
-
-        if st.session_state.show_retry_popup:
-            show_retry_popup()
-
-    except Exception as e:
-        pass  # Silence any other errors
-
-    if download_button:
-        # Create DataFrame with "Green Car" and "Red Car" columns and include the chosen bits
-        df = pd.DataFrame(
-            {
-                "Green Car": [
-                    "".join(map(str, row))
-                    for row in st.session_state.data_for_excel_2
-                ],
-                "Red Car": [
-                    "".join(map(str, row))
-                    for row in st.session_state.data_for_excel_1
-                ],
-                "Green Car Bit Chosen": [st.session_state.player_choice] * len(st.session_state.data_for_excel_2),
-                "Red Car Bit Chosen": [1 - st.session_state.player_choice] * len(st.session_state.data_for_excel_1)
-            }
-        )
-        df.to_excel("random_numbers.xlsx", index=False)
-        with open("random_numbers.xlsx", "rb") as file:
-            st.download_button(
-                label=download_data_text,
-                data=file,
-                file_name="random_numbers.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            )
-
-    if reset_button:
-        reset_game()
-
-if __name__ == "__main__":
-    main()
+                # Calculate the sums for red and green car
+                red_car_0s = st.session_state.random_numbers_1.count(0)
+                red_car_1s = st.session_state.random_numbers_1.count(1)
+                green_car_0s = st.session_state.random_numbers_2.count(0)
+                green_car_1s = st.session_state.random_numbers_2.count(1)
+    
+                # Calculate the total race time and car speeds
+                total_time = time.time() - st.session_state.car_start_time
+                red_car_speed = st.session_state.car_pos / total_time
+                green_car_speed = st.session_state.car2_pos / total_time
+    
+                # Prepare the data to save
+                race_data = [
+                    "Italian" if st.session_state.language == "Italiano" else "English",
+                    st.session_state.player_choice,
+                    st.session_state.car_pos,
+                    st.session_state.car2_pos,
+                    winner,
+                    total_time,
+                    st.session_state.api_key != "",
+                    st.session_state.move_multiplier,  # Save the movement multiplier value
+                    red_car_0s,
+                    red_car_1s,
+                    green_car_0s,
+                    green_car_1s,
+                    st.session_state.car1_moves,  # Number of moves by red car
+                    st.session_state.car2_moves,  # Number of moves by green car
+                    red_car_speed,  # Speed of the red car
+                    green_car_speed,  # Speed of the green car
+                    "Sì"  # Explicitly record consent as "Sì"
+                ]
+    
+                # Attempt to save the data
+                if sheet:
+                    save_race_data(sheet, race_data)
+                    st.success("Dati salvati con successo.")
+                else:
+                    st.error("Errore: Oggetto 'sheet1' non valido.")
+            except Exception as e:
+                st.error(f"Errore durante il salvataggio dei dati: {e}")
+        else:
+            st.warning("Dati non inviati.")
+    
+        # Display retry button after saving
+        if st.button(retry_text, key=f"retry_button_{st.session_state.widget_key_counter}"):
+            reset_game()
+    
+    def main():
+        # Connect to Google Sheets
+        sheet1 = configure_google_sheets("test")
+    
+        if start_button and st.session_state.player_choice is not None:
+            st.session_state.running = True
+            st.session_state.car_start_time = time.time()
+            st.session_state.show_retry_popup = False
+    
+        if stop_button:
+            st.session_state.running = False
+    
+        try:
+            while st.session_state.running:
+                start_time = time.time()
+    
+                # Get random numbers from random.org
+                random_bits_1, random_org_success_1 = get_random_bits_from_random_org(1000, client)
+                random_bits_2, random_org_success_2 = get_random_bits_from_random_org(1000, client)
+    
+                if not random_org_success_1 and not random_org_success_2:
+                    if not st.session_state.warned_random_org:
+                        st.session_state.warned_random_org = True
+    
+                st.session_state.random_numbers_1.extend(random_bits_1)
+                st.session_state.random_numbers_2.extend(random_bits_2)
+    
+                st.session_state.data_for_excel_1.append(random_bits_1)
+                st.session_state.data_for_excel_2.append(random_bits_2)
+    
+                entropy_score_1 = calculate_entropy(random_bits_1)
+                entropy_score_2 = calculate_entropy(random_bits_2)
+    
+                st.session_state.data_for_condition_1.append(entropy_score_1)
+                st.session_state.data_for_condition_2.append(entropy_score_2)
+    
+                percentile_5_1 = np.percentile(st.session_state.data_for_condition_1, 5)
+                percentile_5_2 = np.percentile(st.session_state.data_for_condition_2, 5)
+    
+                count_1 = sum(random_bits_1)
+                count_0 = len(random_bits_1) - count_1
+    
+                if entropy_score_1 < percentile_5_1:
+                    if st.session_state.player_choice == 1 and count_1 > count_0:
+                        st.session_state.car2_pos = move_car(
+                            st.session_state.car2_pos,
+                            st.session_state.move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)),
+                        )
+                        st.session_state.car1_moves += 1
+                    elif st.session_state.player_choice == 0 and count_0 > count_1:
+                        st.session_state.car2_pos = move_car(
+                            st.session_state.car2_pos,
+                            st.session_state.move_multiplier * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)),
+                        )
+                        st.session_state.car1_moves += 1
+    
+                if entropy_score_2 < percentile_5_2:
+                    if st.session_state.player_choice == 1 and count_0 > count_1:
+                        st.session_state.car_pos = move_car(
+                            st.session_state.car_pos,
+                            st.session_state.move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)),
+                        )
+                        st.session_state.car2_moves += 1
+                    elif st.session_state.player_choice == 0 and count_1 > count_0:
+                        st.session_state.car_pos = move_car(
+                            st.session_state.car_pos,
+                            st.session_state.move_multiplier * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)),
+                        )
+                        st.session_state.car2_moves += 1
+    
+                display_cars()
+    
+                winner = check_winner()
+                if winner:
+                    end_race(winner, sheet1)
+                    break
+    
+                time_elapsed = time.time() - start_time
+                time.sleep(max(REQUEST_INTERVAL - time_elapsed, 0))
+    
+        except Exception as e:
+            st.error(f"Errore durante l'esecuzione: {e}")
+    
+        if reset_button:
+            reset_game()
+    
+    if __name__ == "__main__":
+        main()
