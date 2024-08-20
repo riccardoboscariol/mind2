@@ -475,24 +475,26 @@ def main():
         st.session_state.running = False
         st.session_state.show_retry_popup = True
         st.success(win_message.format(winner))
-    
+        
         # Display privacy info and consent button
         st.markdown(privacy_info_text)
-    
+        
         # Pulsante per salvare i dati
         if st.button("Vuoi salvare i dati?"):
             try:
+                st.write("Tentativo di salvataggio dei dati...")
+                
                 # Calcolo delle somme per le auto rosse e verdi
                 red_car_0s = st.session_state.random_numbers_1.count(0)
                 red_car_1s = st.session_state.random_numbers_1.count(1)
                 green_car_0s = st.session_state.random_numbers_2.count(0)
                 green_car_1s = st.session_state.random_numbers_2.count(1)
-    
+        
                 # Calcolo del tempo totale della gara e delle velocità delle auto
                 total_time = time.time() - st.session_state.car_start_time
                 red_car_speed = st.session_state.car_pos / total_time
                 green_car_speed = st.session_state.car2_pos / total_time
-    
+        
                 # Dati della gara da salvare
                 race_data = [
                     "Italian" if st.session_state.language == "Italiano" else "English",
@@ -513,16 +515,21 @@ def main():
                     green_car_speed,  # Velocità dell'auto verde
                     "Sì"  # Esplicitamente registrare il consenso come "Sì"
                 ]
-    
-                # Prova a salvare i dati
-                save_race_data(sheet1, race_data)
-                st.success("Dati salvati con successo.")
+        
+                # Verifica dell'oggetto sheet1
+                st.write(f"Sheet1: {sheet1}")
+                if sheet1:
+                    save_race_data(sheet1, race_data)
+                    st.success("Dati salvati con successo.")
+                else:
+                    st.error("Errore: Oggetto 'sheet1' non valido.")
             except Exception as e:
                 st.error(f"Errore durante il salvataggio dei dati: {e}")
         else:
             st.warning("Dati non inviati.")
-    
+        
         show_retry_popup()
+
 
 
 
