@@ -95,8 +95,8 @@ def main():
     if "warned_random_org" not in st.session_state:
         st.session_state.warned_random_org = False
 
-    if "consent_given" not in st.session_state:
-        st.session_state.consent_given = False
+    if "consent_choice" not in st.session_state:
+        st.session_state.consent_choice = "No"
 
     # Language buttons
     col1, col2 = st.sidebar.columns(2)
@@ -125,7 +125,7 @@ def main():
         reset_game_message = "Gioco resettato!"
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
-        consent_text = "Vuoi salvare i dati?"
+        consent_text = "Vuoi inviare i dati?"
         privacy_info_text = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy."
         move_multiplier_text = "Moltiplicatore di Movimento"
         email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
@@ -152,7 +152,7 @@ def main():
         reset_game_message = "Game reset!"
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
-        consent_text = "Do you want to save the data?"
+        consent_text = "Do you want to send the data?"
         privacy_info_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws."
         move_multiplier_text = "Movement Multiplier"
         email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
@@ -310,8 +310,6 @@ def main():
         st.session_state.widget_key_counter = 0
     if "show_retry_popup" not in st.session_state:
         st.session_state.show_retry_popup = False
-    if "consent_answer" not in st.session_state:
-        st.session_state.consent_answer = None
 
     st.sidebar.title("Menu")
     start_button = st.sidebar.button(
@@ -476,48 +474,39 @@ def main():
         st.session_state.show_retry_popup = True
         st.success(win_message.format(winner))
         
-        # Display consent question and privacy info
-        st.markdown(privacy_info_text)
-        st.write(consent_text)
+        # Save race data based on consent choice
+        # Calculate the sums for red and green car
+        red_car_0s = st.session_state.random_numbers_1.count(0)
+        red_car_1s = st.session_state.random_numbers_1.count(1)
+        green_car_0s = st.session_state.random_numbers_2.count(0)
+        green_car_1s = st.session_state.random_numbers_2.count(1)
 
-        # Show the save data button
-        if st.button("Salva i dati"):
-            try:
-                # Calculate the sums for red and green car
-                red_car_0s = st.session_state.random_numbers_1.count(0)
-                red_car_1s = st.session_state.random_numbers_1.count(1)
-                green_car_0s = st.session_state.random_numbers_2.count(0)
-                green_car_1s = st.session_state.random_numbers_2.count(1)
+        # Calculate the total race time and car speeds
+        total_time = time.time() - st.session_state.car_start_time
+        red_car_speed = st.session_state.car_pos / total_time
+        green_car_speed = st.session_state.car2_pos / total_time
 
-                # Calculate the total race time and car speeds
-                total_time = time.time() - st.session_state.car_start_time
-                red_car_speed = st.session_state.car_pos / total_time
-                green_car_speed = st.session_state.car2_pos / total_time
-
-                # Save race data to Google Sheets
-                race_data = [
-                    "Italian" if st.session_state.language == "Italiano" else "English",
-                    st.session_state.player_choice,
-                    st.session_state.car_pos,
-                    st.session_state.car2_pos,
-                    winner,
-                    total_time,
-                    st.session_state.api_key != "",
-                    st.session_state.move_multiplier,  # Save the movement multiplier value
-                    red_car_0s,
-                    red_car_1s,
-                    green_car_0s,
-                    green_car_1s,
-                    st.session_state.car1_moves,  # Number of moves by red car
-                    st.session_state.car2_moves,  # Number of moves by green car
-                    red_car_speed,  # Speed of the red car
-                    green_car_speed,  # Speed of the green car
-                    "Sì"  # Esplicitamente registrare il consenso come "Sì"
-                ]
-                save_race_data(sheet1, race_data)
-                st.success("Dati salvati con successo.")
-            except Exception as e:
-                st.error(f"Errore durante il salvataggio dei dati: {e}")
+        # Save race data to Google Sheets
+        race_data = [
+            "Italian" if st.session_state.language == "Italiano" else "English",
+            st.session_state.player_choice,
+            st.session_state.car_pos,
+            st.session_state.car2_pos,
+            winner,
+            total_time,
+            st.session_state.api_key != "",
+            st.session_state.move_multiplier,  # Save the movement multiplier value
+            red_car_0s,
+            red_car_1s,
+            green_car_0s,
+            green_car_1s,
+            st.session_state.car1_moves,  # Number of moves by red car
+            st.session_state.car2_moves,  # Number of moves by green car
+            red_car_speed,  # Speed of the red car
+            green_car_speed,  # Speed of the green car
+            st.session_state.consent_choice  # Save "Sì" or "No" based on consent choice
+        ]
+        save_race_data(sheet1, race_data)
 
         show_retry_popup()
 
@@ -548,6 +537,10 @@ def main():
                     reset_game()
             except Exception:
                 pass  # Silence the duplicate widget key exception
+
+    # Display consent request during the race
+    st.markdown(privacy_info_text)
+    st.session_state.consent_choice = st.radio(consent_text, ["Sì", "No"], index=1)
 
     # Connect to Google Sheets
     sheet1 = configure_google_sheets("test")
@@ -673,4 +666,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
