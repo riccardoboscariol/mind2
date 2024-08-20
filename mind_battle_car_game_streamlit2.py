@@ -96,7 +96,7 @@ def main():
         st.session_state.warned_random_org = False
 
     if "consent_choice" not in st.session_state:
-        st.session_state.consent_choice = None
+        st.session_state.consent_choice = "No"
 
     # Language buttons
     col1, col2 = st.sidebar.columns(2)
@@ -126,6 +126,7 @@ def main():
         error_message = "Errore nella generazione dei bit casuali. Fermato il gioco."
         win_message = "Vince l'auto {}, complimenti!"
         consent_text = "Vuoi inviare i dati?"
+        email_input_text = "Inserisci la tua email (opzionale):"
         privacy_info_text = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy."
         move_multiplier_text = "Moltiplicatore di Movimento"
         email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
@@ -153,6 +154,7 @@ def main():
         error_message = "Error generating random bits. Game stopped."
         win_message = "The {} car wins, congratulations!"
         consent_text = "Do you want to send the data?"
+        email_input_text = "Enter your email (optional):"
         privacy_info_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws."
         move_multiplier_text = "Movement Multiplier"
         email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
@@ -309,9 +311,11 @@ def main():
         st.session_state.show_retry_popup = False
 
     # Richiesta del consenso e dell'email all'inizio del gioco
-    email = st.text_input("Inserisci la tua email (opzionale):")
-    st.markdown(privacy_info_text)
-    st.session_state.consent_choice = st.radio(consent_text, ["Sì", "No"], index=None)
+    st.session_state.consent_choice = st.radio(consent_text, ["Sì", "No"])
+    email = st.text_input(email_input_text)
+
+    # Inserisci la frase sulla privacy sotto il campo email
+    st.markdown(f"<small>{privacy_info_text}</small>", unsafe_allow_html=True)
 
     st.sidebar.title("Menu")
     start_button = st.sidebar.button(
@@ -509,12 +513,20 @@ def main():
         red_car_speed = st.session_state.car_pos / total_time
         green_car_speed = st.session_state.car2_pos / total_time
 
+        # Display the speed of the winning car
+        if winner == "Rossa":
+            st.info(f"Velocità dell'auto vincente: {red_car_speed:.2f}")
+        else:
+            st.info(f"Velocità dell'auto vincente: {green_car_speed:.2f}")
+        
         # Save race data based on consent choice
+        # Calculate the sums for red and green car
         red_car_0s = st.session_state.random_numbers_1.count(0)
         red_car_1s = st.session_state.random_numbers_1.count(1)
         green_car_0s = st.session_state.random_numbers_2.count(0)
         green_car_1s = st.session_state.random_numbers_2.count(1)
 
+        # Save race data to Google Sheets
         race_data = [
             "Italian" if st.session_state.language == "Italiano" else "English",
             st.session_state.player_choice,
@@ -532,14 +544,10 @@ def main():
             st.session_state.car2_moves,  # Number of moves by green car
             red_car_speed,  # Speed of the red car
             green_car_speed,  # Speed of the green car
-            st.session_state.consent_choice,  # Save "Sì" or "No" based on consent choice
+            st.session_state.consent_choice if st.session_state.consent_choice else "",  # Save "Sì" or "No" or blank
             email  # Save the email if provided
         ]
         save_race_data(sheet1, race_data)
-
-        # Display car speed
-        winning_car_speed = red_car_speed if winner == "Rossa" else green_car_speed
-        st.write(f"La velocità della macchina vincente è stata di {winning_car_speed:.2f} unità/secondo")
 
         show_retry_popup()
 
