@@ -519,8 +519,8 @@ def main():
                 ]
                 save_race_data(sheet1, race_data)
                 st.success("Dati salvati con successo.")
-            else:
-                st.warning("Dati non inviati.")
+        else:
+        st.warning("Dati non inviati.")
         
         show_retry_popup()
 
