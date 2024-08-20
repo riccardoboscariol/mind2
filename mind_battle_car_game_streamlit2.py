@@ -471,54 +471,54 @@ def main():
         return None
 
     def end_race(winner):
-    """End the race and show the winner."""
-    st.session_state.running = False
-    st.session_state.show_retry_popup = True
-    st.success(win_message.format(winner))
+        """End the race and show the winner."""
+        st.session_state.running = False
+        st.session_state.show_retry_popup = True
+        st.success(win_message.format(winner))
+        
+        # Display consent radio buttons and privacy info
+        st.markdown(privacy_info_text)
+        consent_answer = st.radio(consent_text, ("Sì", "No"), key="consent_answer")
     
-    # Display consent radio buttons and privacy info
-    st.markdown(privacy_info_text)
-    consent_answer = st.radio(consent_text, ("Sì", "No"), key="consent_answer")
-
-    if st.button('Consent'):
-        if consent_answer == "Sì":
-            # Calculate the sums for red and green car
-            red_car_0s = st.session_state.random_numbers_1.count(0)
-            red_car_1s = st.session_state.random_numbers_1.count(1)
-            green_car_0s = st.session_state.random_numbers_2.count(0)
-            green_car_1s = st.session_state.random_numbers_2.count(1)
-
-            # Calculate the total race time and car speeds
-            total_time = time.time() - st.session_state.car_start_time
-            red_car_speed = st.session_state.car_pos / total_time
-            green_car_speed = st.session_state.car2_pos / total_time
-
-            # Save race data to Google Sheets if consent is given
-            race_data = [
-                "Italian" if st.session_state.language == "Italiano" else "English",
-                st.session_state.player_choice,
-                st.session_state.car_pos,
-                st.session_state.car2_pos,
-                winner,
-                total_time,
-                st.session_state.api_key != "",
-                st.session_state.move_multiplier,  # Save the movement multiplier value
-                red_car_0s,
-                red_car_1s,
-                green_car_0s,
-                green_car_1s,
-                st.session_state.car1_moves,  # Number of moves by red car
-                st.session_state.car2_moves,  # Number of moves by green car
-                red_car_speed,  # Speed of the red car
-                green_car_speed,  # Speed of the green car
-                consent_answer  # Save "Sì" or "No" based on consent answer
-            ]
-            save_race_data(sheet1, race_data)
-            st.success("Dati salvati con successo.")
-        else:
-            st.warning("Dati non inviati.")
-
-    show_retry_popup()
+        if st.button('Consent'):
+            if consent_answer == "Sì":
+                # Calculate the sums for red and green car
+                red_car_0s = st.session_state.random_numbers_1.count(0)
+                red_car_1s = st.session_state.random_numbers_1.count(1)
+                green_car_0s = st.session_state.random_numbers_2.count(0)
+                green_car_1s = st.session_state.random_numbers_2.count(1)
+    
+                # Calculate the total race time and car speeds
+                total_time = time.time() - st.session_state.car_start_time
+                red_car_speed = st.session_state.car_pos / total_time
+                green_car_speed = st.session_state.car2_pos / total_time
+    
+                # Save race data to Google Sheets if consent is given
+                race_data = [
+                    "Italian" if st.session_state.language == "Italiano" else "English",
+                    st.session_state.player_choice,
+                    st.session_state.car_pos,
+                    st.session_state.car2_pos,
+                    winner,
+                    total_time,
+                    st.session_state.api_key != "",
+                    st.session_state.move_multiplier,  # Save the movement multiplier value
+                    red_car_0s,
+                    red_car_1s,
+                    green_car_0s,
+                    green_car_1s,
+                    st.session_state.car1_moves,  # Number of moves by red car
+                    st.session_state.car2_moves,  # Number of moves by green car
+                    red_car_speed,  # Speed of the red car
+                    green_car_speed,  # Speed of the green car
+                    consent_answer  # Save "Sì" or "No" based on consent answer
+                ]
+                save_race_data(sheet1, race_data)
+                st.success("Dati salvati con successo.")
+            else:
+                st.warning("Dati non inviati.")
+    
+        show_retry_popup()
 
 
     def reset_game():
