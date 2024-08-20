@@ -476,61 +476,71 @@ def main():
         st.session_state.show_retry_popup = True
         st.success(win_message.format(winner))
         
-        # Display privacy info and consent button
-        st.markdown(privacy_info_text)
-        
-        if st.button("Vuoi salvare i dati?"):
-            st.session_state.consent_answer = True
-        else:
-            st.session_state.consent_answer = False
-        
-        if st.session_state.consent_answer:
-            try:
-                st.write("Tentativo di salvataggio dei dati...")
-                
-                # Calcolo delle somme per le auto rosse e verdi
-                red_car_0s = st.session_state.random_numbers_1.count(0)
-                red_car_1s = st.session_state.random_numbers_1.count(1)
-                green_car_0s = st.session_state.random_numbers_2.count(0)
-                green_car_1s = st.session_state.random_numbers_2.count(1)
-        
-                # Calcolo del tempo totale della gara e delle velocità delle auto
-                total_time = time.time() - st.session_state.car_start_time
-                red_car_speed = st.session_state.car_pos / total_time
-                green_car_speed = st.session_state.car2_pos / total_time
-        
-                # Dati della gara da salvare
-                race_data = [
-                    "Italian" if st.session_state.language == "Italiano" else "English",
-                    st.session_state.player_choice,
-                    st.session_state.car_pos,
-                    st.session_state.car2_pos,
-                    winner,
-                    total_time,
-                    st.session_state.api_key != "",
-                    st.session_state.move_multiplier,  # Salva il valore del moltiplicatore di movimento
-                    red_car_0s,
-                    red_car_1s,
-                    green_car_0s,
-                    green_car_1s,
-                    st.session_state.car1_moves,  # Numero di mosse dell'auto rossa
-                    st.session_state.car2_moves,  # Numero di mosse dell'auto verde
-                    red_car_speed,  # Velocità dell'auto rossa
-                    green_car_speed,  # Velocità dell'auto verde
-                    "Sì"  # Esplicitamente registrare il consenso come "Sì"
-                ]
-        
-                if sheet:
-                    save_race_data(sheet, race_data)
-                    st.success("Dati salvati con successo.")
-                else:
-                    st.error("Errore: Oggetto 'sheet1' non valido.")
-            except Exception as e:
-                st.error(f"Errore durante il salvataggio dei dati: {e}")
-        else:
-            st.warning("Dati non inviati.")
-        
-        show_retry_popup()
+    def show_retry_popup(sheet):
+        """Show popup asking if the user wants to retry."""
+        if st.session_state.show_retry_popup:
+            st.markdown(privacy_info_text)
+            
+            if st.button("Vuoi salvare i dati?"):
+                st.session_state.consent_answer = True
+            else:
+                st.session_state.consent_answer = False
+    
+            if st.session_state.consent_answer:
+                try:
+                    st.write("Tentativo di salvataggio dei dati...")
+    
+                    # Calcolo delle somme per le auto rosse e verdi
+                    red_car_0s = st.session_state.random_numbers_1.count(0)
+                    red_car_1s = st.session_state.random_numbers_1.count(1)
+                    green_car_0s = st.session_state.random_numbers_2.count(0)
+                    green_car_1s = st.session_state.random_numbers_2.count(1)
+    
+                    # Calcolo del tempo totale della gara e delle velocità delle auto
+                    total_time = time.time() - st.session_state.car_start_time
+                    red_car_speed = st.session_state.car_pos / total_time
+                    green_car_speed = st.session_state.car2_pos / total_time
+    
+                    # Dati della gara da salvare
+                    race_data = [
+                        "Italian" if st.session_state.language == "Italiano" else "English",
+                        st.session_state.player_choice,
+                        st.session_state.car_pos,
+                        st.session_state.car2_pos,
+                        winner,
+                        total_time,
+                        st.session_state.api_key != "",
+                        st.session_state.move_multiplier,  # Salva il valore del moltiplicatore di movimento
+                        red_car_0s,
+                        red_car_1s,
+                        green_car_0s,
+                        green_car_1s,
+                        st.session_state.car1_moves,  # Numero di mosse dell'auto rossa
+                        st.session_state.car2_moves,  # Numero di mosse dell'auto verde
+                        red_car_speed,  # Velocità dell'auto rossa
+                        green_car_speed,  # Velocità dell'auto verde
+                        "Sì"  # Esplicitamente registrare il consenso come "Sì"
+                    ]
+    
+                    if sheet:
+                        save_race_data(sheet, race_data)
+                        st.success("Dati salvati con successo.")
+                    else:
+                        st.error("Errore: Oggetto 'sheet1' non valido.")
+                except Exception as e:
+                    st.error(f"Errore durante il salvataggio dei dati: {e}")
+            else:
+                st.warning("Dati non inviati.")
+    
+            if st.button(retry_text, key=f"retry_button_{st.session_state.widget_key_counter}"):
+                reset_game()
+    
+    # Inserisci qui la chiamata a show_retry_popup sempre quando necessario:
+    if st.session_state.show_retry_popup:
+        show_retry_popup(sheet1)
+    
+    # Resto del tuo codice...
+
 
 
 
