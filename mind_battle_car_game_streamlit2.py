@@ -478,9 +478,10 @@ def main():
         
         # Display consent radio buttons and privacy info
         st.markdown(privacy_info_text)
-        consent_answer = st.radio(consent_text, ("Sì", "No"))
+        st.markdown(consent_text)
+        #consent_answer = st.radio(consent_text, ("Sì", "No"))
 
-        if consent_answer:
+        if st.button('Consent'):
             # Calculate the sums for red and green car
             red_car_0s = st.session_state.random_numbers_1.count(0)
             red_car_1s = st.session_state.random_numbers_1.count(1)
