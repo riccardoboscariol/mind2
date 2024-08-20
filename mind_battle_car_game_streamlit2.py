@@ -11,41 +11,38 @@ import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-MAX_BATCH_SIZE = 1000  # Maximum batch size for requests to random.org
-RETRY_LIMIT = 3  # Number of retry attempts for random.org requests
-REQUEST_INTERVAL = 0.5  # Interval between requests (in seconds)
+MAX_BATCH_SIZE = 1000  # Dimensione massima del lotto per richieste a random.org
+RETRY_LIMIT = 3  # Numero di tentativi di ripetizione per le richieste a random.org
+REQUEST_INTERVAL = 0.5  # Intervallo tra le richieste (in secondi)
 
 def configure_random_org(api_key):
-    """Configure the RANDOM.ORG client if the API key is valid."""
+    """Configura il client RANDOM.ORG se la chiave API è valida."""
     try:
         client = RandomOrgClient(api_key)
         return client
     except Exception as e:
-        st.error(f"Error configuring the random.org client: {e}")
+        st.error(f"Errore nella configurazione del client random.org: {e}")
         return None
 
 def get_random_bits_from_random_org(num_bits, client=None):
-    """Get random bits from random.org or use a local pseudorandom generator."""
+    """Ottieni bit casuali da random.org o utilizza un generatore pseudocasuale locale."""
     try:
         if client:
-            # Use RANDOM.ORG
             random_bits = client.generate_integers(num_bits, 0, 1)
             return random_bits, True
         else:
-            # Use a local pseudorandom generator
             random_bits = get_local_random_bits(num_bits)
             return random_bits, False
     except Exception:
-        # In case of error, use a local pseudorandom generator
         random_bits = get_local_random_bits(num_bits)
         return random_bits, False
 
 def get_local_random_bits(num_bits):
-    """Generate pseudorandom bits locally."""
+    """Genera bit pseudocasuali localmente."""
     return list(np.random.randint(0, 2, size=num_bits))
 
 def calculate_entropy(bits):
-    """Calculate entropy using Shannon's formula."""
+    """Calcola l'entropia usando la formula di Shannon."""
     n = len(bits)
     counts = np.bincount(bits, minlength=2)
     p = counts / n
@@ -54,34 +51,34 @@ def calculate_entropy(bits):
     return entropy
 
 def move_car(car_pos, distance):
-    """Move the car a certain distance."""
+    """Muovi la macchina di una certa distanza."""
     car_pos += distance
-    if car_pos > 900:  # Shorten the track to leave room for the flag
+    if car_pos > 900:  # Accorcia la pista per lasciare spazio alla bandiera
         car_pos = 900
     return car_pos
 
 def image_to_base64(image):
-    """Convert an image to base64."""
+    """Converti un'immagine in base64."""
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
 
 def configure_google_sheets(sheet_name):
-    """Configure Google Sheets using credentials from Streamlit Secrets."""
+    """Configura Google Sheets utilizzando le credenziali da Streamlit Secrets."""
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     credentials_info = json.loads(st.secrets["google_sheets"]["credentials_json"])
     credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_info, scope)
     client = gspread.authorize(credentials)
     sheet = client.open(sheet_name)
-    sheet1 = sheet.sheet1  # First sheet
+    sheet1 = sheet.sheet1  # Primo foglio
     return sheet1
 
 def save_race_data(sheet, race_data):
-    """Save race data to Google Sheets."""
+    """Salva i dati della gara su Google Sheets."""
     try:
         sheet.append_row(race_data)
     except Exception as e:
-        st.error(f"Error saving data to Google Sheets: {e}")
+        st.error(f"Errore nel salvataggio dei dati su Google Sheets: {e}")
 
 def main():
     st.set_page_config(page_title="Car Mind Race", layout="wide")
@@ -98,7 +95,7 @@ def main():
     if "consent_answer" not in st.session_state:
         st.session_state.consent_answer = None
 
-    # Language buttons
+    # Pulsanti per la lingua
     col1, col2 = st.sidebar.columns(2)
     col1.button("Italiano", on_click=lambda: st.session_state.update({"language": "Italiano"}))
     col2.button("English", on_click=lambda: st.session_state.update({"language": "English"}))
@@ -157,7 +154,6 @@ def main():
         privacy_info_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws."
         move_multiplier_text = "Movement Multiplier"
         email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
-        api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
         submit_button_text = "Submit Data"
 
     st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
@@ -317,7 +313,7 @@ def main():
     )
     stop_button = st.sidebar.button(stop_race_text, key="stop_button")
 
-    # Persist API key in session state
+    # Persistenza della chiave API nello stato della sessione
     st.session_state.api_key = st.sidebar.text_input(
         api_key_text, key="api_key_input", value=st.session_state.api_key, type="password"
     )
@@ -333,42 +329,42 @@ def main():
         download_button = st.button(download_data_text, key="download_button")
     reset_button = st.sidebar.button(reset_game_text, key="reset_button")
 
-    # Default move multiplier set to 50 instead of 20
+    # Moltiplicatore di movimento impostato a 50 di default
     move_multiplier = st.sidebar.slider(
         move_multiplier_text, min_value=1, max_value=100, value=50, key="move_multiplier"
     )
 
-    # Add email reference at the bottom of the sidebar
+    # Aggiungi riferimento email in fondo alla sidebar
     st.sidebar.markdown(f"### {email_ref_text}")
 
     image_dir = os.path.abspath(os.path.dirname(__file__))
-    car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Red car
-    car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Green car
+    car_image = Image.open(os.path.join(image_dir, "car.png")).resize((150, 150))  # Auto rossa
+    car2_image = Image.open(os.path.join(image_dir, "car2.png")).resize((150, 150))  # Auto verde
     flag_image = Image.open(os.path.join(image_dir, "bandierina.png")).resize(
         (150, 150)
-    )  # Flag of the same size as the cars
+    )  # Bandiera della stessa dimensione delle auto
 
-    # Load images for numbers and resize further to 120x120 pixels
+    # Carica le immagini per i numeri e ridimensionali ulteriormente a 120x120 pixel
     number_0_green_image = Image.open(os.path.join(image_dir, "0green.png")).resize(
         (120, 120)
-    )  # Slightly larger
+    )  # Leggermente più grande
     number_1_green_image = Image.open(os.path.join(image_dir, "1green.png")).resize(
         (120, 120)
-    )  # Slightly larger
+    )  # Leggermente più grande
     number_0_red_image = Image.open(os.path.join(image_dir, "0red.png")).resize(
         (120, 120)
-    )  # Slightly larger
+    )  # Leggermente più grande
     number_1_red_image = Image.open(os.path.join(image_dir, "1red.png")).resize(
         (120, 120)
-    )  # Slightly larger
+    )  # Leggermente più grande
 
     st.write(choose_bit_text)
 
-    # Initialize number images with default values
+    # Inizializza le immagini dei numeri con valori predefiniti
     green_car_number_image = number_0_green_image
     red_car_number_image = number_1_red_image
 
-    # Determine which number image to display for each car
+    # Determina quale immagine numerica visualizzare per ciascuna auto
     col1, col2 = st.columns([1, 1])
     with col1:
         button1 = st.button(
@@ -399,12 +395,12 @@ def main():
         st.session_state.button0_active = True
         st.session_state.button1_active = False
 
-    # Assign the chosen images if a choice has been made
+    # Assegna le immagini scelte se è stata effettuata una scelta
     if st.session_state.player_choice is not None:
         green_car_number_image = st.session_state.green_car_number_image
         red_car_number_image = st.session_state.red_car_number_image
 
-    # Active button style
+    # Stile del pulsante attivo
     active_button_style = """
     <style>
     div.stButton > button[title="Scegli il bit 1"] { background-color: #90EE90; }
@@ -427,13 +423,13 @@ def main():
     car2_placeholder = st.empty()
 
     def display_cars():
-        """Display the cars and the images of the selected numbers."""
+        """Mostra le auto e le immagini dei numeri selezionati."""
         car_placeholder.markdown(
             f"""
             <div class="slider-container first">
-                <!-- Car image and position -->
+                <!-- Immagine e posizione della macchina -->
                 <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car_pos / 10}%)">
-                <!-- Red car number image -->
+                <!-- Immagine del numero della macchina rossa -->
                 <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
                      style="left:calc(-43px + {st.session_state.car_pos / 10}%); top: 34px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
@@ -446,9 +442,9 @@ def main():
         car2_placeholder.markdown(
             f"""
             <div class="slider-container">
-                <!-- Green car image and position -->
+                <!-- Immagine e posizione della macchina verde -->
                 <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car2_pos / 10}%)">
-                <!-- Green car number image -->
+                <!-- Immagine del numero della macchina verde -->
                 <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
                      style="left:calc(-43px + {st.session_state.car2_pos / 10}%); top: 34px; z-index: 10;">
                 <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
@@ -461,39 +457,39 @@ def main():
     display_cars()
 
     def check_winner():
-        """Check if there is a winner."""
-        if st.session_state.car_pos >= 900:  # Shorten the track to leave room for the flag
+        """Verifica se c'è un vincitore."""
+        if st.session_state.car_pos >= 900:  # Accorcia la pista per lasciare spazio alla bandiera
             return "Rossa" if st.session_state.language == "Italiano" else "Red"
-        elif st.session_state.car2_pos >= 900:  # Shorten the track to leave room for the flag
+        elif st.session_state.car2_pos >= 900:  # Accorcia la pista per lasciare spazio alla bandiera
             return "Verde" if st.session_state.language == "Italiano" else "Green"
         return None
 
     def end_race(winner):
-        """End the race and show the winner."""
+        """Termina la gara e mostra il vincitore."""
         st.session_state.running = False
         st.session_state.show_retry_popup = True
         st.success(win_message.format(winner))
         show_retry_popup()
 
-        # Calculate the sums for red and green car
+        # Calcola le somme per l'auto rossa e verde
         red_car_0s = st.session_state.random_numbers_1.count(0)
         red_car_1s = st.session_state.random_numbers_1.count(1)
         green_car_0s = st.session_state.random_numbers_2.count(0)
         green_car_1s = st.session_state.random_numbers_2.count(1)
 
-        # Calculate the total race time and car speeds
+        # Calcola il tempo totale di gara e le velocità delle auto
         total_time = time.time() - st.session_state.car_start_time
         red_car_speed = st.session_state.car_pos / total_time
         green_car_speed = st.session_state.car2_pos / total_time
 
-        # Display consent radio buttons and privacy info
+        # Mostra i pulsanti di consenso e informazioni sulla privacy
         st.markdown(privacy_info_text)
         consent_answer = st.radio(consent_text, ("Sì", "No"), index=-1)
 
         if consent_answer == "Sì":
-            # Show the submit button if consent is given
+            # Mostra il pulsante di invio se viene dato il consenso
             if st.button(submit_button_text):
-                # Save race data to Google Sheets if consent is given
+                # Salva i dati della gara su Google Sheets se viene dato il consenso
                 race_data = [
                     "Italian" if st.session_state.language == "Italiano" else "English",
                     st.session_state.player_choice,
@@ -502,23 +498,23 @@ def main():
                     winner,
                     total_time,
                     st.session_state.api_key != "",
-                    st.session_state.move_multiplier,  # Save the movement multiplier value
+                    st.session_state.move_multiplier,  # Salva il valore del moltiplicatore di movimento
                     red_car_0s,
                     red_car_1s,
                     green_car_0s,
                     green_car_1s,
-                    st.session_state.car1_moves,  # Number of moves by red car
-                    st.session_state.car2_moves,  # Number of moves by green car
-                    red_car_speed,  # Speed of the red car
-                    green_car_speed,  # Speed of the green car
-                    consent_answer  # Save "Sì" or "No" based on consent answer
+                    st.session_state.car1_moves,  # Numero di movimenti della macchina rossa
+                    st.session_state.car2_moves,  # Numero di movimenti della macchina verde
+                    red_car_speed,  # Velocità della macchina rossa
+                    green_car_speed,  # Velocità della macchina verde
+                    consent_answer  # Salva "Sì" o "No" in base alla risposta del consenso
                 ]
                 save_race_data(sheet1, race_data)
         elif consent_answer == "No":
             st.warning("Dati non inviati.")
 
     def reset_game():
-        """Reset the game state."""
+        """Reimposta lo stato del gioco."""
         st.session_state.car_pos = 50
         st.session_state.car2_pos = 50
         st.session_state.car1_moves = 0
@@ -537,15 +533,15 @@ def main():
         display_cars()
 
     def show_retry_popup():
-        """Show popup asking if the user wants to retry."""
+        """Mostra il popup chiedendo se l'utente vuole riprovare."""
         if st.session_state.show_retry_popup:
             try:
                 if st.button(retry_text, key=f"retry_button_{st.session_state.widget_key_counter}"):
                     reset_game()
             except Exception:
-                pass  # Silence the duplicate widget key exception
+                pass  # Silenzia l'eccezione del duplicato widget key
 
-    # Connect to Google Sheets
+    # Connessione a Google Sheets
     sheet1 = configure_google_sheets("test")
 
     if start_button and st.session_state.player_choice is not None:
@@ -560,7 +556,7 @@ def main():
         while st.session_state.running:
             start_time = time.time()
 
-            # Get random numbers from random.org
+            # Ottieni numeri casuali da random.org
             random_bits_1, random_org_success_1 = get_random_bits_from_random_org(
                 1000, client
             )
@@ -569,7 +565,7 @@ def main():
             )
 
             if not random_org_success_1 and not random_org_success_2:
-                # Only show warning once if random.org fails
+                # Mostra l'avviso una sola volta se random.org fallisce
                 if not st.session_state.warned_random_org:
                     st.session_state.warned_random_org = True
 
@@ -637,10 +633,10 @@ def main():
             show_retry_popup()
 
     except Exception as e:
-        pass  # Silence any other errors
+        pass  # Silenzia eventuali altri errori
 
     if download_button:
-        # Create DataFrame with "Green Car" and "Red Car" columns and include the chosen bits
+        # Crea DataFrame con colonne "Green Car" e "Red Car" e includi i bit scelti
         df = pd.DataFrame(
             {
                 "Green Car": [
