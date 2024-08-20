@@ -96,7 +96,7 @@ def main():
         st.session_state.warned_random_org = False
 
     if "consent_choice" not in st.session_state:
-        st.session_state.consent_choice = "No"
+        st.session_state.consent_choice = None
 
     # Language buttons
     col1, col2 = st.sidebar.columns(2)
@@ -158,7 +158,6 @@ def main():
         email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
 
-    # Mantieni il titolo con dimensioni maggiori
     st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
 
     st.markdown(
@@ -168,19 +167,19 @@ def main():
             background: white;
         }}
         .stSlider > div > div > div {{
-            background: #f0f0f0; /* Lighter color for the slider track */
+            background: #f0f0f0; 
         }}
         .stSlider > div > div > div > div > div {{
-            background: transparent; /* Make slider thumb invisible */
+            background: transparent; 
             border-radius: 50%;
-            height: 0px;  /* Reduce slider thumb height */
-            width: 0px;  /* Reduce slider thumb width */
+            height: 0px; 
+            width: 0px;  
             position: relative;
-            top: 0px; /* Correct slider thumb position */
+            top: 0px; 
         }}
         .slider-container {{
             position: relative;
-            height: 250px; /* Height to fit sliders and cars */
+            height: 250px;
             margin-bottom: 50px;
         }}
         .slider-container.first {{
@@ -189,32 +188,32 @@ def main():
         }}
         .car-image {{
             position: absolute;
-            top: 50px;  /* Move car 3px higher */
+            top: 50px;
             left: 0px;
-            width: 150px;  /* Width of the car image */
-            z-index: 20;  /* Ensure cars are above numbers */
+            width: 150px; 
+            z-index: 20; 
         }}
         .number-image {{
             position: absolute;
-            top: calc(28px - 1px);  /* Adjust position: 1px lower */
-            left: calc(80px - 7px); /* Adjust position: 7px to the left */
-            transform: translateX(-50%); /* Center horizontally */
-            width: calc(110px + 10px);  /* Width of the number images slightly larger */
-            z-index: 10;  /* Ensure numbers are below cars */
-            display: none; /* Initially hide numbers */
+            top: calc(28px - 1px);
+            left: calc(80px - 7px); 
+            transform: translateX(-50%);
+            width: calc(110px + 10px);
+            z-index: 10; 
+            display: none; 
         }}
         .flag-image {{
             position: absolute;
-            top: 25px;  /* Position for flag */
+            top: 25px;  
             width: 150px;
-            left: 93%;  /* Move flag 3px left */
+            left: 93%; 
         }}
         .slider-container input[type=range] {{
             -webkit-appearance: none;
             width: 100%;
             position: absolute;
-            top: 138px;  /* Slider 22px higher */
-            background: #f0f0f0; /* Slider track color */
+            top: 138px; 
+            background: #f0f0f0;
         }}
         .slider-container input[type=range]:focus {{
             outline: none;
@@ -222,51 +221,51 @@ def main():
         .slider-container input[type=range]::-webkit-slider-runnable-track {{
             width: 100%;
             height: 8px;
-            background: #f0f0f0; /* Track color */
+            background: #f0f0f0; 
             border-radius: 5px;
             cursor: pointer;
         }}
         .slider-container input[type=range]::-webkit-slider-thumb {{
             -webkit-appearance: none;
             appearance: none;
-            width: 10px; /* Thumb width */
-            height: 20px; /* Thumb height */
-            background: transparent; /* Make thumb invisible */
+            width: 10px; 
+            height: 20px; 
+            background: transparent; 
             cursor: pointer;
-            margin-top: -6px; /* Adjust thumb position to align with the track */
-            visibility: hidden; /* Hide the thumb */
+            margin-top: -6px; 
+            visibility: hidden; 
         }}
         .slider-container input[type=range]::-moz-range-thumb {{
-            width: 10px; /* Thumb width */
-            height: 20px; /* Thumb height */
-            background: transparent; /* Make thumb invisible */
+            width: 10px; 
+            height: 20px; 
+            background: transparent; 
             cursor: pointer;
-            visibility: hidden; /* Hide the thumb */
+            visibility: hidden; 
         }}
         .slider-container input[type=range]::-ms-thumb {{
-            width: 10px; /* Thumb width */
-            height: 20px; /* Thumb height */
-            background: transparent; /* Make thumb invisible */
+            width: 10px; 
+            height: 20px; 
+            background: transparent; 
             cursor: pointer;
-            visibility: hidden; /* Hide the thumb */
+            visibility: hidden; 
         }}
         .stButton > button {{
             display: inline-block;
-            margin: 5px; /* Margin between buttons */
-            padding: 0.5em 2em; /* Padding adjustment for buttons */
-            border-radius: 12px; /* Rounded border */
-            background-color: #f0f0f0; /* Initial background color */
+            margin: 5px;
+            padding: 0.5em 2em;
+            border-radius: 12px;
+            background-color: #f0f0f0; 
             color: black;
             border: 1px solid #ccc;
-            font-size: 16px; /* Text size */
+            font-size: 16px;
             cursor: pointer;
         }}
         .stButton > button:focus {{
             outline: none;
-            background-color: #ddd; /* Color when selected */
+            background-color: #ddd; 
         }}
         .stException {{
-            display: none;  /* Nascondi errori */
+            display: none; 
         }}
         </style>
         """,
@@ -310,7 +309,7 @@ def main():
 
     # Richiesta del consenso e dell'email all'inizio del gioco
     st.markdown(privacy_info_text)
-    st.session_state.consent_choice = st.radio(consent_text, ["Sì", "No"], index=1)
+    st.session_state.consent_choice = st.radio(consent_text, ["Sì", "No"])
     email = st.text_input("Inserisci la tua email (opzionale):")
 
     st.sidebar.title("Menu")
@@ -534,7 +533,7 @@ def main():
             st.session_state.car2_moves,  # Number of moves by green car
             red_car_speed,  # Speed of the red car
             green_car_speed,  # Speed of the green car
-            st.session_state.consent_choice,  # Save "Sì" or "No" based on consent choice
+            st.session_state.consent_choice if st.session_state.consent_choice else "",  # Save "Sì" or "No" based on consent choice
             email  # Save the email if provided
         ]
         save_race_data(sheet1, race_data)
@@ -568,10 +567,6 @@ def main():
                     reset_game()
             except Exception:
                 pass  # Silence the duplicate widget key exception
-
-    # Display consent request during the race
-    st.markdown(privacy_info_text)
-    st.session_state.consent_choice = st.radio(consent_text, ["Sì", "No"], index=1)
 
     # Connect to Google Sheets
     sheet1 = configure_google_sheets("test")
@@ -697,4 +692,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
