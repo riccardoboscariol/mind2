@@ -479,53 +479,58 @@ def main():
         # Display privacy info and consent button
         st.markdown(privacy_info_text)
         
+        # Aggiungiamo un messaggio di debug per verificare se la funzione viene chiamata correttamente
+        st.write("Funzione end_race chiamata con successo.")
+        
+        # Usa un pulsante per il consenso
         if st.button("Vuoi salvare i dati?"):
+            st.write("Pulsante premuto, inizio salvataggio dei dati...")  # Debug
+            
+            # Calcolo dei risultati della gara
+            red_car_0s = st.session_state.random_numbers_1.count(0)
+            red_car_1s = st.session_state.random_numbers_1.count(1)
+            green_car_0s = st.session_state.random_numbers_2.count(0)
+            green_car_1s = st.session_state.random_numbers_2.count(1)
+            total_time = time.time() - st.session_state.car_start_time
+            red_car_speed = st.session_state.car_pos / total_time
+            green_car_speed = st.session_state.car2_pos / total_time
+            
+            # Preparazione dei dati da salvare
+            race_data = [
+                "Italian" if st.session_state.language == "Italiano" else "English",
+                st.session_state.player_choice,
+                st.session_state.car_pos,
+                st.session_state.car2_pos,
+                winner,
+                total_time,
+                st.session_state.api_key != "",
+                st.session_state.move_multiplier,
+                red_car_0s,
+                red_car_1s,
+                green_car_0s,
+                green_car_1s,
+                st.session_state.car1_moves,
+                st.session_state.car2_moves,
+                red_car_speed,
+                green_car_speed,
+                "Sì"
+            ]
+            
+            # Stampa dei dati per il debug
+            st.write("Dati da salvare:", race_data)
+    
             try:
-                # Calculate the sums for red and green car
-                red_car_0s = st.session_state.random_numbers_1.count(0)
-                red_car_1s = st.session_state.random_numbers_1.count(1)
-                green_car_0s = st.session_state.random_numbers_2.count(0)
-                green_car_1s = st.session_state.random_numbers_2.count(1)
-    
-                # Calculate the total race time and car speeds
-                total_time = time.time() - st.session_state.car_start_time
-                red_car_speed = st.session_state.car_pos / total_time
-                green_car_speed = st.session_state.car2_pos / total_time
-    
-                # Save race data to Google Sheets
-                race_data = [
-                    "Italian" if st.session_state.language == "Italiano" else "English",
-                    st.session_state.player_choice,
-                    st.session_state.car_pos,
-                    st.session_state.car2_pos,
-                    winner,
-                    total_time,
-                    st.session_state.api_key != "",
-                    st.session_state.move_multiplier,  # Save the movement multiplier value
-                    red_car_0s,
-                    red_car_1s,
-                    green_car_0s,
-                    green_car_1s,
-                    st.session_state.car1_moves,  # Number of moves by red car
-                    st.session_state.car2_moves,  # Number of moves by green car
-                    red_car_speed,  # Speed of the red car
-                    green_car_speed,  # Speed of the green car
-                    "Sì"  # Explicitly record the consent as "Sì"
-                ]
-    
-                # Debug: Verifica i dati che verranno salvati
-                st.write("Dati da salvare:", race_data)
-    
+                # Salvataggio dei dati su Google Sheets
                 save_race_data(sheet1, race_data)
                 st.success("Dati salvati con successo.")
-                st.session_state.consent_given = True  # Aggiorna lo stato di consenso
             except Exception as e:
-                st.error(f"Errore nel salvataggio dei dati: {e}")
-                st.session_state.consent_given = False
+                st.error(f"Errore durante il salvataggio dei dati: {e}")
         else:
             st.warning("Dati non inviati.")
         
         show_retry_popup()
+
+
 
 
 
