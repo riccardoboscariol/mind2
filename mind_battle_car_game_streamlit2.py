@@ -161,9 +161,6 @@ def main():
     # Mantieni il titolo con dimensioni maggiori
     st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
 
-    # Generate a unique query string to prevent caching
-    unique_query_string = f"?v={int(time.time())}"
-
     st.markdown(
         f"""
         <style>
@@ -310,6 +307,15 @@ def main():
         st.session_state.widget_key_counter = 0
     if "show_retry_popup" not in st.session_state:
         st.session_state.show_retry_popup = False
+
+    # Richiesta del consenso e dell'email all'inizio del gioco
+    st.markdown(privacy_info_text)
+    st.session_state.consent_choice = st.radio(consent_text, ["Sì", "No"], index=1)
+    email = st.text_input("Inserisci la tua email (opzionale):")
+
+    if st.session_state.consent_choice == "No":
+        st.warning("Devi rispondere alla domanda e dare il consenso per iniziare il gioco.")
+        return
 
     st.sidebar.title("Menu")
     start_button = st.sidebar.button(
@@ -504,7 +510,8 @@ def main():
             st.session_state.car2_moves,  # Number of moves by green car
             red_car_speed,  # Speed of the red car
             green_car_speed,  # Speed of the green car
-            st.session_state.consent_choice  # Save "Sì" or "No" based on consent choice
+            st.session_state.consent_choice,  # Save "Sì" or "No" based on consent choice
+            email  # Save the email if provided
         ]
         save_race_data(sheet1, race_data)
 
