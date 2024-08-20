@@ -484,9 +484,11 @@ def main():
 
         # Mostra i pulsanti di consenso e informazioni sulla privacy
         st.markdown(privacy_info_text)
-        consent_answer = st.radio(consent_text, ("Sì", "No"), index=-1)
+        st.markdown(consent_text)
+        
+        #consent_answer = st.radio(consent_text, ("Sì", "No"), index=-1)
 
-        if consent_answer == "Sì":
+        if st.button('Consent'):
             # Mostra il pulsante di invio se viene dato il consenso
             if st.button(submit_button_text):
                 # Salva i dati della gara su Google Sheets se viene dato il consenso
