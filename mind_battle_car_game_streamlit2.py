@@ -484,9 +484,8 @@ def main():
         
         # Radio button for consent
         st.session_state.consent_answer = st.radio(consent_text, ("Sì", "No"), index=0 if st.session_state.consent_answer == "Sì" else 1)
-    
-        if st.button('Invia i dati'):
-            if st.session_state.consent_answer == "Sì":
+        
+        if st.session_state.consent_answer == "Sì":
                 # Calculate the sums for red and green car
                 red_car_0s = st.session_state.random_numbers_1.count(0)
                 red_car_1s = st.session_state.random_numbers_1.count(1)
