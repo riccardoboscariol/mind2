@@ -129,7 +129,6 @@ def main():
         privacy_info_text = "I dati saranno utilizzati solo per scopi di ricerca scientifica nel rispetto delle leggi vigenti sulla privacy."
         move_multiplier_text = "Moltiplicatore di Movimento"
         email_ref_text = "Riferimento Email: riccardoboscariol97@gmail.com"
-        email_input_text = "Inserisci la tua email (opzionale):"
         api_description_text = "Per garantire il corretto utilizzo, è consigliabile acquistare un piano per l'inserimento della chiave API da questo sito: [https://api.random.org/pricing](https://api.random.org/pricing)."
     else:
         title_text = "Car Mind Race"
@@ -157,16 +156,122 @@ def main():
         privacy_info_text = "The data will be used solely for scientific research purposes in compliance with applicable privacy laws."
         move_multiplier_text = "Movement Multiplier"
         email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
-        email_input_text = "Enter your email (optional):"
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
 
     # Mantieni il titolo con dimensioni maggiori
     st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
 
-    # Display consent request before the race
-    st.markdown(privacy_info_text)
-    email = st.text_input(email_input_text)
-    st.session_state.consent_choice = st.radio(consent_text, ["Sì", "No"], index=1)
+    st.markdown(
+        f"""
+        <style>
+        .stSlider > div > div > div > div {{
+            background: white;
+        }}
+        .stSlider > div > div > div {{
+            background: #f0f0f0; /* Lighter color for the slider track */
+        }}
+        .stSlider > div > div > div > div > div {{
+            background: transparent; /* Make slider thumb invisible */
+            border-radius: 50%;
+            height: 0px;  /* Reduce slider thumb height */
+            width: 0px;  /* Reduce slider thumb width */
+            position: relative;
+            top: 0px; /* Correct slider thumb position */
+        }}
+        .slider-container {{
+            position: relative;
+            height: 250px; /* Height to fit sliders and cars */
+            margin-bottom: 50px;
+        }}
+        .slider-container.first {{
+            margin-top: 50px;
+            margin-bottom: 40px;
+        }}
+        .car-image {{
+            position: absolute;
+            top: 50px;  /* Move car 3px higher */
+            left: 0px;
+            width: 150px;  /* Width of the car image */
+            z-index: 20;  /* Ensure cars are above numbers */
+        }}
+        .number-image {{
+            position: absolute;
+            top: calc(28px - 1px);  /* Adjust position: 1px lower */
+            left: calc(80px - 7px); /* Adjust position: 7px to the left */
+            transform: translateX(-50%); /* Center horizontally */
+            width: calc(110px + 10px);  /* Width of the number images slightly larger */
+            z-index: 10;  /* Ensure numbers are below cars */
+            display: none; /* Initially hide numbers */
+        }}
+        .flag-image {{
+            position: absolute;
+            top: 25px;  /* Position for flag */
+            width: 150px;
+            left: 93%;  /* Move flag 3px left */
+        }}
+        .slider-container input[type=range] {{
+            -webkit-appearance: none;
+            width: 100%;
+            position: absolute;
+            top: 138px;  /* Slider 22px higher */
+            background: #f0f0f0; /* Slider track color */
+        }}
+        .slider-container input[type=range]:focus {{
+            outline: none;
+        }}
+        .slider-container input[type=range]::-webkit-slider-runnable-track {{
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0; /* Track color */
+            border-radius: 5px;
+            cursor: pointer;
+        }}
+        .slider-container input[type=range]::-webkit-slider-thumb {{
+            -webkit-appearance: none;
+            appearance: none;
+            width: 10px; /* Thumb width */
+            height: 20px; /* Thumb height */
+            background: transparent; /* Make thumb invisible */
+            cursor: pointer;
+            margin-top: -6px; /* Adjust thumb position to align with the track */
+            visibility: hidden; /* Hide the thumb */
+        }}
+        .slider-container input[type=range]::-moz-range-thumb {{
+            width: 10px; /* Thumb width */
+            height: 20px; /* Thumb height */
+            background: transparent; /* Make thumb invisible */
+            cursor: pointer;
+            visibility: hidden; /* Hide the thumb */
+        }}
+        .slider-container input[type=range]::-ms-thumb {{
+            width: 10px; /* Thumb width */
+            height: 20px; /* Thumb height */
+            background: transparent; /* Make thumb invisible */
+            cursor: pointer;
+            visibility: hidden; /* Hide the thumb */
+        }}
+        .stButton > button {{
+            display: inline-block;
+            margin: 5px; /* Margin between buttons */
+            padding: 0.5em 2em; /* Padding adjustment for buttons */
+            border-radius: 12px; /* Rounded border */
+            background-color: #f0f0f0; /* Initial background color */
+            color: black;
+            border: 1px solid #ccc;
+            font-size: 16px; /* Text size */
+            cursor: pointer;
+        }}
+        .stButton > button:focus {{
+            outline: none;
+            background-color: #ddd; /* Color when selected */
+        }}
+        .stException {{
+            display: none;  /* Nascondi errori */
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
     st.markdown(instruction_text)
 
@@ -202,6 +307,11 @@ def main():
         st.session_state.widget_key_counter = 0
     if "show_retry_popup" not in st.session_state:
         st.session_state.show_retry_popup = False
+
+    # Richiesta del consenso e dell'email all'inizio del gioco
+    st.markdown(privacy_info_text)
+    st.session_state.consent_choice = st.radio(consent_text, ["Sì", "No"], index=1)
+    email = st.text_input("Inserisci la tua email (opzionale):")
 
     st.sidebar.title("Menu")
     start_button = st.sidebar.button(
@@ -350,6 +460,34 @@ def main():
             unsafe_allow_html=True,
         )
 
+    def update_car_positions():
+        """Update the positions of the cars on the screen."""
+        car_placeholder.markdown(
+            f"""
+            <div class="slider-container first">
+                <img src="data:image/png;base64,{car_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car_pos / 10}%)">
+                <img src="data:image/png;base64,{red_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
+                     style="left:calc(-43px + {st.session_state.car_pos / 10}%); top: 34px; z-index: 10;">
+                <input type="range" min="0" max="1000" value="{st.session_state.car_pos}" disabled>
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        car2_placeholder.markdown(
+            f"""
+            <div class="slider-container">
+                <img src="data:image/png;base64,{car2_image_base64}" class="car-image" style="left:calc(-71px + {st.session_state.car2_pos / 10}%)">
+                <img src="data:image/png;base64,{green_car_number_base64}" class="number-image {'show' if st.session_state.player_choice is not None else ''}" 
+                     style="left:calc(-43px + {st.session_state.car2_pos / 10}%); top: 34px; z-index: 10;">
+                <input type="range" min="0" max="1000" value="{st.session_state.car2_pos}" disabled>
+                <img src="data:image/png;base64,{flag_image_base64}" class="flag-image">
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
     display_cars()
 
     def check_winner():
@@ -366,28 +504,40 @@ def main():
         st.session_state.show_retry_popup = True
         st.success(win_message.format(winner))
         
-        if st.session_state.consent_choice == "Sì":
-            # Save race data to Google Sheets
-            race_data = [
-                "Italian" if st.session_state.language == "Italiano" else "English",
-                st.session_state.player_choice,
-                st.session_state.car_pos,
-                st.session_state.car2_pos,
-                winner,
-                time.time() - st.session_state.car_start_time,
-                st.session_state.api_key != "",
-                st.session_state.move_multiplier,
-                st.session_state.random_numbers_1.count(0),
-                st.session_state.random_numbers_1.count(1),
-                st.session_state.random_numbers_2.count(0),
-                st.session_state.random_numbers_2.count(1),
-                st.session_state.car1_moves,
-                st.session_state.car2_moves,
-                st.session_state.car_pos / (time.time() - st.session_state.car_start_time),
-                st.session_state.car2_pos / (time.time() - st.session_state.car_start_time),
-                email
-            ]
-            save_race_data(sheet1, race_data)
+        # Save race data based on consent choice
+        # Calculate the sums for red and green car
+        red_car_0s = st.session_state.random_numbers_1.count(0)
+        red_car_1s = st.session_state.random_numbers_1.count(1)
+        green_car_0s = st.session_state.random_numbers_2.count(0)
+        green_car_1s = st.session_state.random_numbers_2.count(1)
+
+        # Calculate the total race time and car speeds
+        total_time = time.time() - st.session_state.car_start_time
+        red_car_speed = st.session_state.car_pos / total_time
+        green_car_speed = st.session_state.car2_pos / total_time
+
+        # Save race data to Google Sheets
+        race_data = [
+            "Italian" if st.session_state.language == "Italiano" else "English",
+            st.session_state.player_choice,
+            st.session_state.car_pos,
+            st.session_state.car2_pos,
+            winner,
+            total_time,
+            st.session_state.api_key != "",
+            st.session_state.move_multiplier,  # Save the movement multiplier value
+            red_car_0s,
+            red_car_1s,
+            green_car_0s,
+            green_car_1s,
+            st.session_state.car1_moves,  # Number of moves by red car
+            st.session_state.car2_moves,  # Number of moves by green car
+            red_car_speed,  # Speed of the red car
+            green_car_speed,  # Speed of the green car
+            st.session_state.consent_choice,  # Save "Sì" or "No" based on consent choice
+            email  # Save the email if provided
+        ]
+        save_race_data(sheet1, race_data)
 
         show_retry_popup()
 
@@ -418,6 +568,10 @@ def main():
                     reset_game()
             except Exception:
                 pass  # Silence the duplicate widget key exception
+
+    # Display consent request during the race
+    st.markdown(privacy_info_text)
+    st.session_state.consent_choice = st.radio(consent_text, ["Sì", "No"], index=1)
 
     # Connect to Google Sheets
     sheet1 = configure_google_sheets("test")
@@ -472,14 +626,14 @@ def main():
                         st.session_state.move_multiplier
                         * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)),
                     )
-                    st.session_state.car1_moves += 1
+                    st.session_state.car2_moves += 1
                 elif st.session_state.player_choice == 0 and count_0 > count_1:
                     st.session_state.car2_pos = move_car(
                         st.session_state.car2_pos,
                         st.session_state.move_multiplier
                         * (1 + ((percentile_5_1 - entropy_score_1) / percentile_5_1)),
                     )
-                    st.session_state.car1_moves += 1
+                    st.session_state.car2_moves += 1
 
             if entropy_score_2 < percentile_5_2:
                 if st.session_state.player_choice == 1 and count_0 > count_1:
@@ -488,16 +642,16 @@ def main():
                         st.session_state.move_multiplier
                         * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)),
                     )
-                    st.session_state.car2_moves += 1
+                    st.session_state.car1_moves += 1
                 elif st.session_state.player_choice == 0 and count_1 > count_0:
                     st.session_state.car_pos = move_car(
                         st.session_state.car_pos,
                         st.session_state.move_multiplier
                         * (1 + ((percentile_5_2 - entropy_score_2) / percentile_5_2)),
                     )
-                    st.session_state.car2_moves += 1
+                    st.session_state.car1_moves += 1
 
-            display_cars()
+            update_car_positions()
 
             winner = check_winner()
             if winner:
@@ -511,7 +665,7 @@ def main():
             show_retry_popup()
 
     except Exception as e:
-        pass  # Silence any other errors
+        st.error(str(e))  # Mostra l'errore se c'è un problema
 
     if download_button:
         # Create DataFrame with "Green Car" and "Red Car" columns and include the chosen bits
