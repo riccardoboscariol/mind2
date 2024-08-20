@@ -158,6 +158,7 @@ def main():
         email_ref_text = "Email Referee: riccardoboscariol97@gmail.com"
         api_description_text = "To ensure proper use, it is advisable to purchase a plan for entering the API key from this site: [https://api.random.org/pricing](https://api.random.org/pricing)."
 
+    # Mantieni il titolo con dimensioni maggiori
     st.markdown(f"<h1 style='font-size: 48px;'>{title_text}</h1>", unsafe_allow_html=True)
 
     st.markdown(
@@ -167,19 +168,19 @@ def main():
             background: white;
         }}
         .stSlider > div > div > div {{
-            background: #f0f0f0; 
+            background: #f0f0f0; /* Lighter color for the slider track */
         }}
         .stSlider > div > div > div > div > div {{
-            background: transparent; 
+            background: transparent; /* Make slider thumb invisible */
             border-radius: 50%;
-            height: 0px; 
-            width: 0px;  
+            height: 0px;  /* Reduce slider thumb height */
+            width: 0px;  /* Reduce slider thumb width */
             position: relative;
-            top: 0px; 
+            top: 0px; /* Correct slider thumb position */
         }}
         .slider-container {{
             position: relative;
-            height: 250px;
+            height: 250px; /* Height to fit sliders and cars */
             margin-bottom: 50px;
         }}
         .slider-container.first {{
@@ -188,32 +189,32 @@ def main():
         }}
         .car-image {{
             position: absolute;
-            top: 50px;
+            top: 50px;  /* Move car 3px higher */
             left: 0px;
-            width: 150px; 
-            z-index: 20; 
+            width: 150px;  /* Width of the car image */
+            z-index: 20;  /* Ensure cars are above numbers */
         }}
         .number-image {{
             position: absolute;
-            top: calc(28px - 1px);
-            left: calc(80px - 7px); 
-            transform: translateX(-50%);
-            width: calc(110px + 10px);
-            z-index: 10; 
-            display: none; 
+            top: calc(28px - 1px);  /* Adjust position: 1px lower */
+            left: calc(80px - 7px); /* Adjust position: 7px to the left */
+            transform: translateX(-50%); /* Center horizontally */
+            width: calc(110px + 10px);  /* Width of the number images slightly larger */
+            z-index: 10;  /* Ensure numbers are below cars */
+            display: none; /* Initially hide numbers */
         }}
         .flag-image {{
             position: absolute;
-            top: 25px;  
+            top: 25px;  /* Position for flag */
             width: 150px;
-            left: 93%; 
+            left: 93%;  /* Move flag 3px left */
         }}
         .slider-container input[type=range] {{
             -webkit-appearance: none;
             width: 100%;
             position: absolute;
-            top: 138px; 
-            background: #f0f0f0;
+            top: 138px;  /* Slider 22px higher */
+            background: #f0f0f0; /* Slider track color */
         }}
         .slider-container input[type=range]:focus {{
             outline: none;
@@ -221,51 +222,51 @@ def main():
         .slider-container input[type=range]::-webkit-slider-runnable-track {{
             width: 100%;
             height: 8px;
-            background: #f0f0f0; 
+            background: #f0f0f0; /* Track color */
             border-radius: 5px;
             cursor: pointer;
         }}
         .slider-container input[type=range]::-webkit-slider-thumb {{
             -webkit-appearance: none;
             appearance: none;
-            width: 10px; 
-            height: 20px; 
-            background: transparent; 
+            width: 10px; /* Thumb width */
+            height: 20px; /* Thumb height */
+            background: transparent; /* Make thumb invisible */
             cursor: pointer;
-            margin-top: -6px; 
-            visibility: hidden; 
+            margin-top: -6px; /* Adjust thumb position to align with the track */
+            visibility: hidden; /* Hide the thumb */
         }}
         .slider-container input[type=range]::-moz-range-thumb {{
-            width: 10px; 
-            height: 20px; 
-            background: transparent; 
+            width: 10px; /* Thumb width */
+            height: 20px; /* Thumb height */
+            background: transparent; /* Make thumb invisible */
             cursor: pointer;
-            visibility: hidden; 
+            visibility: hidden; /* Hide the thumb */
         }}
         .slider-container input[type=range]::-ms-thumb {{
-            width: 10px; 
-            height: 20px; 
-            background: transparent; 
+            width: 10px; /* Thumb width */
+            height: 20px; /* Thumb height */
+            background: transparent; /* Make thumb invisible */
             cursor: pointer;
-            visibility: hidden; 
+            visibility: hidden; /* Hide the thumb */
         }}
         .stButton > button {{
             display: inline-block;
-            margin: 5px;
-            padding: 0.5em 2em;
-            border-radius: 12px;
-            background-color: #f0f0f0; 
+            margin: 5px; /* Margin between buttons */
+            padding: 0.5em 2em; /* Padding adjustment for buttons */
+            border-radius: 12px; /* Rounded border */
+            background-color: #f0f0f0; /* Initial background color */
             color: black;
             border: 1px solid #ccc;
-            font-size: 16px;
+            font-size: 16px; /* Text size */
             cursor: pointer;
         }}
         .stButton > button:focus {{
             outline: none;
-            background-color: #ddd; 
+            background-color: #ddd; /* Color when selected */
         }}
         .stException {{
-            display: none; 
+            display: none;  /* Nascondi errori */
         }}
         </style>
         """,
@@ -308,9 +309,9 @@ def main():
         st.session_state.show_retry_popup = False
 
     # Richiesta del consenso e dell'email all'inizio del gioco
-    st.markdown(privacy_info_text)
-    st.session_state.consent_choice = st.radio(consent_text, ["Sì", "No"])
     email = st.text_input("Inserisci la tua email (opzionale):")
+    st.markdown(privacy_info_text)
+    st.session_state.consent_choice = st.radio(consent_text, ["Sì", "No"], index=None)
 
     st.sidebar.title("Menu")
     start_button = st.sidebar.button(
@@ -502,20 +503,18 @@ def main():
         st.session_state.running = False
         st.session_state.show_retry_popup = True
         st.success(win_message.format(winner))
-        
-        # Save race data based on consent choice
-        # Calculate the sums for red and green car
-        red_car_0s = st.session_state.random_numbers_1.count(0)
-        red_car_1s = st.session_state.random_numbers_1.count(1)
-        green_car_0s = st.session_state.random_numbers_2.count(0)
-        green_car_1s = st.session_state.random_numbers_2.count(1)
 
         # Calculate the total race time and car speeds
         total_time = time.time() - st.session_state.car_start_time
         red_car_speed = st.session_state.car_pos / total_time
         green_car_speed = st.session_state.car2_pos / total_time
 
-        # Save race data to Google Sheets
+        # Save race data based on consent choice
+        red_car_0s = st.session_state.random_numbers_1.count(0)
+        red_car_1s = st.session_state.random_numbers_1.count(1)
+        green_car_0s = st.session_state.random_numbers_2.count(0)
+        green_car_1s = st.session_state.random_numbers_2.count(1)
+
         race_data = [
             "Italian" if st.session_state.language == "Italiano" else "English",
             st.session_state.player_choice,
@@ -533,10 +532,14 @@ def main():
             st.session_state.car2_moves,  # Number of moves by green car
             red_car_speed,  # Speed of the red car
             green_car_speed,  # Speed of the green car
-            st.session_state.consent_choice if st.session_state.consent_choice else "",  # Save "Sì" or "No" based on consent choice
+            st.session_state.consent_choice,  # Save "Sì" or "No" based on consent choice
             email  # Save the email if provided
         ]
         save_race_data(sheet1, race_data)
+
+        # Display car speed
+        winning_car_speed = red_car_speed if winner == "Rossa" else green_car_speed
+        st.write(f"La velocità della macchina vincente è stata di {winning_car_speed:.2f} unità/secondo")
 
         show_retry_popup()
 
