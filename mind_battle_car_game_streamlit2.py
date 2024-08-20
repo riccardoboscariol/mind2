@@ -478,10 +478,15 @@ def main():
         
         # Display consent radio buttons and privacy info
         st.markdown(privacy_info_text)
-        consent_answer = st.radio(consent_text, ("Sì", "No"), key="consent_answer")
+        
+        if "consent_answer" not in st.session_state:
+            st.session_state.consent_answer = None
+        
+        # Radio button for consent
+        st.session_state.consent_answer = st.radio(consent_text, ("Sì", "No"), index=0 if st.session_state.consent_answer == "Sì" else 1)
     
-        if st.button('Consent'):
-            if consent_answer == "Sì":
+        if st.button('Invia i dati'):
+            if st.session_state.consent_answer == "Sì":
                 # Calculate the sums for red and green car
                 red_car_0s = st.session_state.random_numbers_1.count(0)
                 red_car_1s = st.session_state.random_numbers_1.count(1)
@@ -511,14 +516,15 @@ def main():
                     st.session_state.car2_moves,  # Number of moves by green car
                     red_car_speed,  # Speed of the red car
                     green_car_speed,  # Speed of the green car
-                    consent_answer  # Save "Sì" or "No" based on consent answer
+                    st.session_state.consent_answer  # Save "Sì" or "No" based on consent answer
                 ]
                 save_race_data(sheet1, race_data)
                 st.success("Dati salvati con successo.")
             else:
                 st.warning("Dati non inviati.")
-    
+        
         show_retry_popup()
+
 
 
     def reset_game():
