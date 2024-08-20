@@ -471,17 +471,17 @@ def main():
         return None
 
     def end_race(winner):
-        """End the race and show the winner."""
-        st.session_state.running = False
-        st.session_state.show_retry_popup = True
-        st.success(win_message.format(winner))
-        
-        # Display consent radio buttons and privacy info
-        st.markdown(privacy_info_text)
-        st.markdown(consent_text)
-        #consent_answer = st.radio(consent_text, ("Sì", "No"))
+    """End the race and show the winner."""
+    st.session_state.running = False
+    st.session_state.show_retry_popup = True
+    st.success(win_message.format(winner))
+    
+    # Display consent radio buttons and privacy info
+    st.markdown(privacy_info_text)
+    consent_answer = st.radio(consent_text, ("Sì", "No"), key="consent_answer")
 
-        if st.button('Consent'):
+    if st.button('Consent'):
+        if consent_answer == "Sì":
             # Calculate the sums for red and green car
             red_car_0s = st.session_state.random_numbers_1.count(0)
             red_car_1s = st.session_state.random_numbers_1.count(1)
@@ -514,8 +514,12 @@ def main():
                 consent_answer  # Save "Sì" or "No" based on consent answer
             ]
             save_race_data(sheet1, race_data)
+            st.success("Dati salvati con successo.")
+        else:
+            st.warning("Dati non inviati.")
 
-        show_retry_popup()
+    show_retry_popup()
+
 
     def reset_game():
         """Reset the game state."""
