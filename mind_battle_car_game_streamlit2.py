@@ -692,7 +692,7 @@ def main():
         
         # Salva il DataFrame in un buffer in memoria
         buffer = io.BytesIO()
-        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             df.to_excel(writer, index=False)
 
         # Imposta la posizione del buffer all'inizio
