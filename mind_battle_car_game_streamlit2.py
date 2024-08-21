@@ -689,19 +689,25 @@ def main():
                 "Red Car Bit Chosen": [1 - st.session_state.player_choice] * len(st.session_state.data_for_excel_1)
             }
         )
-        df.to_excel("random_numbers.xlsx", index=False)
-        with open("random_numbers.xlsx", "rb") as file:
-            st.download_button(
-                label=download_data_text,
-                data=file,
-                file_name="random_numbers.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            )
+        
+        # Salva il DataFrame in un buffer in memoria
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False)
+
+        # Imposta la posizione del buffer all'inizio
+        buffer.seek(0)
+
+        # Genera il bottone per il download
+        st.download_button(
+            label=download_data_text,
+            data=buffer,
+            file_name="random_numbers.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
 
     if reset_button:
         reset_game()
 
 if __name__ == "__main__":
     main()
-
-
