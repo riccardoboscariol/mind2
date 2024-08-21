@@ -12,3 +12,4 @@ rdoclient
 gspread
 oauth2client
 rdoclient
+xlsxwriter
