@@ -277,6 +277,12 @@ def main():
 
     st.markdown(instruction_text)
 
+    # Aggiungi il link al tutorial alla fine della descrizione, condizionato per lingua
+    if st.session_state.language == "Italiano":
+        st.markdown("[Clicca qui per guardare il Tutorial](https://drive.google.com/file/d/1g1yCsjQBlmrgxkhuwrbUQ3tdQZPdfW2N/view?usp=sharing)")
+    else:
+        st.markdown("[Click here to watch the Tutorial](https://drive.google.com/file/d/1g1yCsjQBlmrgxkhuwrbUQ3tdQZPdfW2N/view?usp=sharing)")
+
     if "player_choice" not in st.session_state:
         st.session_state.player_choice = None
     if "car_pos" not in st.session_state:
